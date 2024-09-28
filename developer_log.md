@@ -1,7 +1,7 @@
-Developer Log
+# Developer Log
 
-Instructions for use:
-As you work on the Synthetic Errands Scheduler v2, use this file to keep 
+## Instructions for use:
+As you work on the Synthetic Errands Scheduler v3, use this file to keep 
 a diary of your development process. For each significant task or milestone 
 you complete, add an entry to this log. Include the date, a brief description 
 of what you accomplished, any challenges you faced, and any decisions you made.
@@ -20,327 +20,308 @@ for onboarding other developers to the project.
 
 Remember to commit this file along with your code changes regularly.
 
-Start your entries below this line:
---------------------------------------------------------------------------------
+## Project History Summary
 
-[2023-09-26] Task: Implement Modular Structure
-- Accomplished:
-  - Restructured the project into separate directories: models, utils, and algorithms
-  - Created initial_scheduler.py in the algorithms directory
-  - Updated main.py to use the new modular structure
-  - Updated readme.md and project_scope.md to reflect the modular approach
-- Challenges:
-  - Ensuring proper imports across modules
-  - Maintaining consistency in coding style across different files
-- Decisions:
-  - Decided to keep the initial scheduling algorithm separate from the main file for better organization
-  - Chose to update existing documentation files rather than creating new ones to maintain project history
-- Next steps:
-  - Implement the basic optimization algorithm in a separate module
-  - Develop unit tests for each module
-  - Implement the visualization component
-  - Update main.py to include all implemented features
-  - Review and refine documentation in each module
+- Implemented modular structure with separate directories for models, utils, and algorithms
+- Developed basic optimization algorithm and visualization component
+- Implemented unit tests for all major components
+- Set up test runner and updated README with comprehensive project information
+- Implemented GUI with scrolling functionality and Manhattan distance visualization
+- Updated travel time calculation to use road-based routing
+- Fixed initial scheduler to account for actual errand and travel times
+- Adjusted errand prices to ensure reasonable profitability
+- Implemented new errand types and characteristics
+- Integrated Google OR-Tools for advanced optimization
+- Updated project documentation to reflect recent changes
+- Implemented centralized constants and capped same-day incentives
 
-[2023-09-26] Task: Implement Basic Optimization Algorithm
-- Accomplished:
-  - Created algorithms/optimizer.py with a simple hill-climbing optimization algorithm
-  - Implemented is_valid_schedule function to ensure schedule validity during optimization
-  - Updated main.py to use the new optimization function
-  - Added profit calculation and comparison between initial and optimized schedules
-- Challenges:
-  - Ensuring the optimization algorithm respects all constraints (working hours, travel times)
-  - Balancing between optimization effectiveness and runtime performance
-- Decisions:
-  - Used a simple hill-climbing approach for initial optimization
-  - Decided to perform 1000 iterations in the optimization process (can be adjusted later)
-- Next steps:
-  - Implement unit tests for the optimization algorithm
-  - Add more sophisticated optimization techniques if needed
-  - Implement the visualization component to show the difference between initial and optimized schedules
-  - Add more detailed output or logging of the optimization process
-  - Consider parallelizing the optimization process for better performance
-
-[2023-09-26] Task: Implement Unit Tests for Optimizer
-- Accomplished:
-  - Created tests/test_optimizer.py with unit tests for the optimization algorithm
-  - Implemented tests for is_valid_schedule function
-  - Implemented tests for optimize_schedule function
-- Challenges:
-  - Creating a representative test case that covers various scenarios
-  - Ensuring the tests are robust enough to catch potential issues
-- Decisions:
-  - Used a simplified problem instance for testing
-  - Focused on testing the core functionality and constraints
-- Next steps:
-  - Implement unit tests for other modules (initial_scheduler, models, utils)
-  - Expand test coverage for edge cases and more complex scenarios
-  - Set up a CI/CD pipeline for automated testing
-  - Implement the visualization component
-  - Review and refine documentation for all modules
-
-[2023-09-26] Task: Implement Visualization Component
-- Accomplished:
-  - Created utils/visualization.py with functions to visualize and print schedules
-  - Implemented visualize_schedule function to create a graphical representation of the schedule
-  - Implemented print_schedule function to provide a detailed text output of the schedule
-  - Updated main.py to use the new visualization functions for both initial and optimized schedules
-- Challenges:
-  - Designing an effective visual representation of the schedule and city layout
-  - Balancing between providing detailed information and maintaining clarity in the visualization
-- Decisions:
-  - Used matplotlib for creating the graphical visualization
-  - Decided to generate separate visualizations for initial and optimized schedules for easy comparison
-  - Included both graphical and text-based representations for comprehensive output
-- Next steps:
-  - Implement unit tests for the visualization functions
-  - Enhance the visualization with more details (e.g., time information, profit per errand)
-  - Add options for customizing the visualization (e.g., color schemes, level of detail)
-  - Implement a simple user interface for interacting with the scheduler and viewing results
-  - Review and refine the entire codebase, ensuring consistency and adherence to best practices
-
-[2023-09-26] Task: Implement Unit Tests for Initial Scheduler
-- Accomplished:
-  - Created tests/test_initial_scheduler.py with unit tests for the initial scheduling algorithm
-  - Implemented tests for schedule creation, validity, and contractor assignment
-  - Ensured that the initial scheduler respects working hours and other constraints
-- Challenges:
-  - Designing tests that cover various aspects of the initial scheduling process
-  - Balancing between thorough testing and keeping tests simple and maintainable
-- Decisions:
-  - Used a small, controlled set of customers and contractors for testing
-  - Focused on testing key aspects: schedule creation, validity, and fair contractor assignment
-- Next steps:
-  - Implement unit tests for remaining modules (models, utils)
-  - Enhance existing tests with more edge cases and complex scenarios
-  - Set up a test runner to easily execute all tests
-  - Implement integration tests to ensure all components work well together
-  - Review and refine the entire test suite, ensuring comprehensive coverage
-
-[2023-09-26] Task: Implement Unit Tests for Models and Utils
-- Accomplished:
-  - Created tests/test_models.py with unit tests for Customer, Contractor, Errand, and Schedule classes
-  - Created tests/test_utils.py with unit tests for city_map and travel_time functions
-  - Implemented tests for all major functionalities of these modules
-- Challenges:
-  - Ensuring comprehensive coverage of all class methods and edge cases
-  - Designing tests that are both thorough and maintainable
-- Decisions:
-  - Used a combination of simple and complex test cases to cover various scenarios
-  - Focused on testing both normal operations and edge cases for each module
-- Next steps:
-  - Implement unit tests for the visualization functions
-  - Set up a test runner to easily execute all tests in the project
-  - Implement integration tests to ensure all components work well together
-  - Review and refine the entire test suite, ensuring comprehensive coverage
-  - Update the README with instructions on how to run the tests
-  - Consider implementing continuous integration to automatically run tests on code changes
-
-[2023-09-26] Task: Implement Unit Tests for Visualization Functions
-- Accomplished:
-  - Created tests/test_visualization.py with unit tests for visualization functions
-  - Implemented tests for visualize_schedule and print_schedule functions
-  - Ensured that the visualization functions produce expected output
-- Challenges:
-  - Testing graphical output (PNG file creation) in a unit test environment
-  - Capturing and verifying console output for the print_schedule function
-- Decisions:
-  - Used file existence and size checks for the visualize_schedule function test
-  - Used StringIO to capture and verify console output for the print_schedule function test
-- Next steps:
-  - Set up a test runner to easily execute all tests in the project
-  - Implement integration tests to ensure all components work well together
-  - Review and refine the entire test suite, ensuring comprehensive coverage
-  - Update the README with instructions on how to run the tests
-  - Consider implementing continuous integration to automatically run tests on code changes
-  - Enhance the visualization with more details and customization options
-
-[2023-09-26] Task: Set Up Test Runner and Update README
-- Accomplished:
-  - Created run_tests.py script to discover and run all unit tests
-  - Updated README.md with comprehensive project information, including:
-    - Project structure
-    - Key features
-    - Instructions for getting started
-    - Instructions for running tests
-    - Information about visualization outputs
-    - Future improvement ideas
-- Challenges:
-  - Ensuring the test runner works correctly with the project structure
-  - Balancing between providing enough information in the README and keeping it concise
-- Decisions:
-  - Used unittest's test discovery feature for flexibility
-  - Included a detailed project structure in the README for clarity
-- Next steps:
-  - Implement integration tests
-  - Set up continuous integration (e.g., GitHub Actions, Travis CI)
-  - Enhance visualization with more detailed information
-  - Consider implementing a simple GUI for easier interaction
-  - Explore more advanced optimization algorithms
-  - Implement error handling and logging throughout the application
-
-[2023-09-27] Task: Fix Visualization Error in GUI
-- Accomplished:
-  - Updated utils/visualization.py to accept an optional 'ax' parameter in the visualize_schedule function
-  - Modified the visualize_schedule function to use the provided 'ax' for plotting if given
-  - Updated gui/visualization_tab.py to handle axes creation and clearing more efficiently
-  - Added error handling for schedule generation and optimization process in the UpdateContent method
-- Challenges:
-  - Ensuring compatibility between the standalone visualization function and its use in the GUI
-  - Balancing between providing a flexible visualization function and maintaining its simplicity
-- Decisions:
-  - Made the 'ax' parameter optional to maintain backwards compatibility with existing code
-  - Removed plt.savefig and plt.close calls from visualize_schedule to allow displaying the plot in the GUI
-- Next steps:
-  - Test the GUI thoroughly to ensure the visualization works correctly in all scenarios
-  - Update the unit tests for the visualization functions to cover the new 'ax' parameter
-  - Consider adding more customization options for the visualization (e.g., color schemes, plot styles)
-  - Review other parts of the GUI for potential improvements or error handling needs
-  - Update the project documentation to reflect the changes in the visualization component
-
-[2023-09-27] Task: Implement Scrolling Functionality and Manhattan Distance Visualization
-- Accomplished:
-  - Updated all tab files (generated_problem_tab.py, greedy_solution_tab.py, optimized_solution_tab.py, and visualization_tab.py) to include proper scrolling functionality
-  - Modified the base class of all tabs to wx.lib.scrolledpanel.ScrolledPanel
-  - Implemented SetupScrolling with specific parameters for each tab
-  - Set minimum sizes for panels to ensure proper scrolling
-  - Updated the UpdateContent methods to refresh scrolling after adding content
-  - Added OnSize event handlers to ensure proper scrolling when the window is resized
-  - Implemented Manhattan distance visualization for contractor routes in the Visualization tab
-- Challenges:
-  - Ensuring consistent scrolling behavior across all tabs
-  - Integrating scrolling functionality with the existing matplotlib figure in the Visualization tab
-  - Balancing between providing detailed information and maintaining clarity in the visualization
-- Decisions:
-  - Used wx.lib.scrolledpanel.ScrolledPanel as the base class for all tabs to ensure consistent scrolling behavior
-  - Kept the matplotlib figure integration in the Visualization tab while adding scrolling functionality
-  - Implemented Manhattan distance routes by drawing separate horizontal and vertical lines for each route segment
-- Next steps:
-  - Thoroughly test the GUI to ensure scrolling works correctly in all scenarios and tabs
-  - Update unit tests to cover the new scrolling functionality and Manhattan distance visualization
-  - Consider adding more customization options for the visualization (e.g., toggling between Manhattan and direct routes)
-  - Review and optimize the performance of the GUI, especially for large problem instances
-  - Update the project documentation to reflect the changes in the GUI and visualization components
-  - Consider implementing additional features such as zooming or panning in the Visualization tab
-
-[2023-09-27] Task: Update Travel Time Calculation to Use Road-Based Routing
-- Accomplished:
-  - Modified utils/travel_time.py to implement road-based travel routing
-  - Updated calculate_road_travel_time function to handle non-road start and end points
-  - Implemented logic to connect non-road locations to the nearest road by a straight traversal
-  - Updated test_utils.py to reflect the new road-based routing behavior
-- Challenges:
-  - Ensuring the new routing logic works correctly for all possible start and end point combinations
-  - Balancing between accurate road-based routing and maintaining reasonable travel times
-- Decisions:
-  - Decided to keep the Manhattan distance calculation for overall travel time, but use road-based routing for the actual path
-  - Chose to connect non-road points to the nearest road point rather than the nearest intersection
-- Next steps:
-  - Thoroughly test the new travel time calculation with various scenarios
-  - Update the visualization component to accurately display the new road-based routes
-  - Review and update other components (scheduler, optimizer) to ensure they work correctly with the new routing system
-  - Consider optimizing the route calculation for better performance in large-scale scenarios
-  - Update project documentation to reflect the changes in the travel time calculation
-
-[2023-09-28] Task: Fix Initial Scheduler to Account for Actual Errand and Travel Times
-- Accomplished:
-  - Updated algorithms/initial_scheduler.py to properly account for errand service times and travel times
-  - Removed the fixed 30-minute scheduling interval
-  - Implemented dynamic start time calculation based on previous errand completion and travel time
-- Challenges:
-  - Ensuring the new scheduling logic respects working hours and doesn't overbook contractors
-  - Maintaining efficiency while calculating more accurate schedules
-- Decisions:
-  - Kept the overall structure of the initial scheduler but modified the time calculation logic
-  - Continued to use the existing travel time calculation function for consistency
-- Next steps:
-  - Update unit tests for the initial scheduler to reflect the new scheduling logic
-  - Review and potentially update the optimization algorithm to work with the new scheduling approach
-  - Test the entire system to ensure the changes don't negatively impact other components
-  - Update visualization to accurately represent the new, more dynamic schedule
-  - Consider implementing more sophisticated scheduling algorithms to further improve efficiency
-
-[2023-09-28] Task: Debugging and Fixing Failing Tests
-- Accomplished:
-  - Identified issues with travel time calculation and initial scheduling
-  - Updated utils/travel_time.py to fix route calculation for edge cases
-  - Modified algorithms/initial_scheduler.py to correctly handle travel times between errands
-- Challenges:
-  - Resolving discrepancies between expected and actual travel times
-  - Ensuring the initial scheduler produces valid schedules that pass all tests
-  - Balancing between accurate scheduling and maintaining reasonable computation times
-- Decisions:
-  - Decided to keep the road-based routing system but refined its implementation
-  - Chose to update test cases to reflect the more accurate travel time calculations
-- Next steps:
-  - Continue debugging and fixing remaining failing tests
-  - Review and update the optimizer to ensure it works correctly with the new scheduling logic
-  - Conduct thorough testing of the entire system to ensure all components work together seamlessly
-  - Update project documentation to reflect recent changes and current status
-  - Consider implementing additional optimizations to improve overall system performance
-
-[2023-09-29] Task: Adjust Errand Prices to Ensure Reasonable Profitability
-- Accomplished:
-  - Analyzed the current errand prices and their impact on profitability
-  - Calculated new prices for each errand type to ensure a 10-20% profit margin
-  - Updated the ERRAND_TYPES list in main.py with the new prices
-  - Ensured that the GUI (problem_definition_tab.py) will automatically reflect these changes
-- Challenges:
-  - Balancing between ensuring profitability and keeping prices reasonable for customers
-  - Considering the impact of travel times on overall profitability
-- Decisions:
-  - Set prices to achieve a 15% profit margin (middle of the 10-20% range) before accounting for travel time
-  - Rounded up prices to the nearest dollar for simplicity
-  - Kept the existing service times unchanged
-- Next steps:
-  - Test the system with the new prices to verify improved profitability
-  - Monitor the impact of these changes on the optimization process
-  - Consider implementing dynamic pricing based on factors like distance or time of day
-  - Update documentation to reflect the new pricing structure
-  - Gather feedback on the new prices and adjust if necessary
+## Recent Development Log
 
 [2023-09-30] Task: Implement New Errand Types and Characteristics
 - Accomplished:
-  - Updated main.py to include the new errand types: Delivery, Dog Walk, Cut Grass, Detail Car, Outing, and Moving
-  - Modified the Errand class in models/errand.py to handle new properties like incentives and disincentives
-  - Updated the initial_scheduler.py to account for specific requirements of each errand type
-  - Modified the optimizer.py to consider incentives and disincentives during optimization
-  - Updated the GUI (problem_definition_tab.py) to display the new errand types and their characteristics
+  - Updated main.py to include new errand types: Delivery, Dog Walk, Cut Grass, Detail Car, Outing, and Moving
+  - Modified Errand class to handle new properties like incentives and disincentives
+  - Updated initial_scheduler.py and optimizer.py to account for specific requirements of each errand type
+  - Updated GUI to display new errand types and their characteristics
 - Challenges:
-  - Ensuring that the new errand types are correctly integrated into the existing system
-  - Balancing the complexity of different errand types with the need for a unified scheduling approach
-  - Implementing the various incentives and disincentives while maintaining system performance
+  - Integrating new errand types into the existing system
+  - Balancing complexity of different errand types with a unified scheduling approach
+  - Implementing incentives and disincentives while maintaining system performance
 - Decisions:
-  - Implemented a flexible structure for errand types to allow for easy addition of new types in the future
-  - Chose to handle errand-specific logic in the Errand class to keep the scheduler and optimizer more generic
-  - Decided to use a dictionary structure for disincentives to accommodate both percentage and fixed-value penalties
+  - Implemented flexible structure for errand types to allow easy addition of new types
+  - Handled errand-specific logic in the Errand class to keep scheduler and optimizer more generic
+  - Used dictionary structure for disincentives to accommodate percentage and fixed-value penalties
 - Next steps:
-  - Thoroughly test the system with the new errand types to ensure correct behavior
-  - Update all relevant unit tests to cover the new errand types and their characteristics
-  - Refine the optimization algorithm to better handle the diverse errand types
-  - Update the visualization component to clearly display different errand types
-  - Consider implementing more sophisticated scheduling strategies for complex errand types like Moving
-  - Update project documentation to reflect the new errand types and their impact on the system
+  - Thoroughly test the system with new errand types
+  - Update unit tests to cover new errand types and characteristics
+  - Refine optimization algorithm for diverse errand types
+  - Update visualization component to clearly display different errand types
+  - Consider implementing more sophisticated scheduling strategies for complex errand types
+  - Update project documentation
 
 [2023-10-01] Task: Resolve Circular Import and Fix Visualization Error
 - Accomplished:
-  - Identified and resolved a circular import issue between models/schedule.py and algorithms/initial_scheduler.py
-  - Created a new file utils/errand_utils.py to house the calculate_errand_time function
-  - Updated models/schedule.py and algorithms/initial_scheduler.py to import calculate_errand_time from utils/errand_utils.py
-  - Modified utils/visualization.py to handle both axes objects and filenames in the visualize_schedule function
-  - Updated main.py to use the new visualize_schedule function signature
+  - Resolved circular import issue between models/schedule.py and algorithms/initial_scheduler.py
+  - Created utils/errand_utils.py to house the calculate_errand_time function
+  - Updated models/schedule.py and algorithms/initial_scheduler.py to import from utils/errand_utils.py
+  - Modified utils/visualization.py to handle both axes objects and filenames in visualize_schedule function
+  - Updated main.py to use new visualize_schedule function signature
 - Challenges:
-  - Identifying the root cause of the circular import issue
-  - Ensuring that the changes didn't introduce new issues in other parts of the codebase
-  - Balancing between maintaining backwards compatibility and improving the code structure
+  - Identifying root cause of circular import issue
+  - Ensuring changes didn't introduce new issues in other parts of the codebase
 - Decisions:
-  - Chose to create a new utility file for shared functions to break the circular dependency
-  - Decided to make the visualize_schedule function more flexible by accepting either an axes object or a filename
+  - Created new utility file for shared functions to break circular dependency
+  - Made visualize_schedule function more flexible by accepting either axes object or filename
 - Next steps:
-  - Thoroughly test the entire system to ensure the changes haven't introduced any new issues
-  - Update unit tests to cover the new utils/errand_utils.py file and the modified visualization function
-  - Review other parts of the codebase for potential circular imports or similar issues
-  - Update project documentation to reflect the recent changes in the code structure
-  - Consider implementing a more robust dependency management system to prevent future circular import issues
+  - Thoroughly test the entire system
+  - Update unit tests for new utils/errand_utils.py and modified visualization function
+  - Review codebase for potential circular imports or similar issues
+  - Update project documentation
+  - Consider implementing more robust dependency management system
+
+[2023-10-02] Task: Refactor Initial Scheduler and Update Test Suite
+- Accomplished:
+  - Modified algorithms/initial_scheduler.py to implement a strictly greedy algorithm
+  - Removed considerations for travel time between errands in initial scheduling process
+  - Updated tests/test_initial_scheduler.py to align with new greedy approach
+  - Removed tests checking for travel time and dynamic scheduling
+  - Added new test to ensure customer order preservation in schedule
+- Challenges:
+  - Balancing between implementing strictly greedy algorithm and maintaining schedule efficiency
+  - Ensuring removal of travel time considerations doesn't negatively impact overall system
+  - Updating tests to reflect new greedy approach while maintaining comprehensive coverage
+- Decisions:
+  - Prioritized order of customers in input list over factors like travel time or contractor availability
+  - Kept working hours constraint (8:00 AM to 5:00 PM) in initial scheduler
+  - Moved more complex scheduling logic to optimization phase
+- Next steps:
+  - Thoroughly test new initial scheduler with various input scenarios
+  - Update optimizer to handle potentially less efficient initial schedules
+  - Review and update visualization component to accurately represent new scheduling approach
+  - Update project documentation to reflect changes in initial scheduling algorithm
+  - Consider implementing separate "smart" initial scheduler for comparison purposes
+
+[2023-10-03] Task: Implement Strictly Greedy Initial Scheduler
+- Accomplished:
+  - Modified algorithms/initial_scheduler.py to implement a strictly greedy approach
+  - Updated the initial_schedule function to schedule errands in the order they appear in the customers list
+  - Removed all considerations of travel time and contractor location from the initial scheduling process
+  - Updated tests/test_initial_scheduler.py to align with the new strictly greedy approach
+  - Added a new test to verify that errands are scheduled at the earliest possible time for each contractor
+- Challenges:
+  - Ensuring the new approach maintains the working hours constraint (8:00 AM to 5:00 PM)
+  - Balancing simplicity of the greedy approach with the need for a functional initial schedule
+  - Updating test cases to properly validate the new scheduling behavior
+- Decisions:
+  - Removed all optimization logic from the initial scheduler, focusing solely on order-based assignment
+  - Kept the working hours constraint to ensure schedules remain within operational bounds
+  - Updated test suite to focus on order preservation and earliest possible scheduling
+- Next steps:
+  - Thoroughly test the new initial scheduler with various input scenarios
+  - Update the optimizer to handle potentially less efficient initial schedules
+  - Review and update the visualization component to accurately represent the new scheduling approach
+  - Update project documentation to reflect changes in the initial scheduling algorithm
+  - Consider implementing a separate "smart" initial scheduler for comparison purposes
+  - Evaluate the impact of the strictly greedy approach on overall system performance and optimization potential
+
+[2023-10-04] Task: Integrate Google OR-Tools for Advanced Optimization
+- Accomplished:
+  - Integrated Google OR-Tools library into the project for advanced optimization
+  - Refactored algorithms/optimizer.py to use OR-Tools for schedule optimization
+  - Updated the optimize_schedule function to create and solve a constraint programming model
+  - Modified the Schedule class to work with the new optimization approach
+  - Updated readme.md to include OR-Tools as a project dependency
+- Challenges:
+  - Learning and implementing OR-Tools effectively within the existing project structure
+  - Translating the scheduling problem into a constraint programming model
+  - Ensuring the new optimization approach respects all existing constraints and objectives
+- Decisions:
+  - Kept the initial greedy scheduler as a starting point for the OR-Tools optimizer
+  - Implemented a basic constraint model with room for future refinement and complexity
+  - Updated project documentation to reflect the integration of OR-Tools
+- Next steps:
+  - Thoroughly test the new optimization approach with various problem instances
+  - Fine-tune the OR-Tools model parameters for better performance
+  - Update unit tests to cover the new optimization logic
+  - Evaluate the improvement in schedule quality and profit compared to the previous approach
+  - Consider implementing more complex constraints and objectives in the OR-Tools model
+  - Update the GUI to reflect any new information or options related to the advanced optimization
+
+[2023-10-05] Task: Update Project Documentation and Refine OR-Tools Integration
+- Accomplished:
+  - Updated readme.md to reflect the current state of the project, including OR-Tools integration
+  - Revised project_scope.md to include new features and adjust project constraints
+  - Updated ux_overview.md to describe the new GUI functionality and CLI options
+  - Refined the OR-Tools optimization model in algorithms/optimizer.py
+  - Updated test cases in tests/test_optimizer.py to cover new optimization scenarios
+- Challenges:
+  - Ensuring all documentation accurately reflects the current state of the project
+  - Balancing the complexity of the OR-Tools model with the need for efficient solving times
+  - Designing test cases that effectively validate the new optimization approach
+- Decisions:
+  - Kept both GUI and CLI modes in the project scope to cater to different user needs
+  - Implemented a more detailed constraint model in the OR-Tools optimizer, focusing on time windows and travel times
+  - Updated the project's future improvements section to reflect new possibilities with OR-Tools
+- Next steps:
+  - Conduct comprehensive testing of the entire system, including edge cases
+  - Gather user feedback on the new GUI and optimization results
+  - Explore additional OR-Tools features that could further improve scheduling efficiency
+  - Consider implementing a benchmark system to compare different optimization approaches
+  - Investigate potential performance optimizations for larger problem instances
+
+[2023-10-06] Task: Implement Centralized Constants and Cap Same-Day Incentives
+- Accomplished:
+  - Created a new constants.py file to store centralized constants for errand types, incentives, and other configuration parameters
+  - Updated main.py to use the centralized constants for errand types and incentives
+  - Modified models/errand.py to cap same-day incentives at 1.5x the base rate
+  - Updated gui/problem_definition_tab.py to display capped incentives in the GUI
+  - Revised project_scope.md, ux_overview.md, and developer_log.md to reflect these changes
+- Challenges:
+  - Ensuring consistency across the application when implementing centralized constants
+  - Balancing between flexibility and maintainability in constant definitions
+  - Updating the GUI to accurately display the capped incentives
+- Decisions:
+  - Created a separate constants.py file for better organization and easier future modifications
+  - Implemented a MAX_INCENTIVE_MULTIPLIER constant to enforce the 1.5x cap consistently
+  - Updated the GUI to display both the original incentive and the capped value for clarity
+- Next steps:
+  - Thoroughly test the system to ensure the capped incentives are correctly applied in all scenarios
+  - Update unit tests to cover the new capped incentive logic
+  - Review the entire codebase to ensure consistent use of centralized constants
+  - Consider implementing a configuration file for easy adjustment of constants without code changes
+  - Evaluate the impact of capped incentives on overall system profitability and optimization
+
+[2023-10-07] Task: Improve Maintainability by Integrating New Constants
+- Accomplished:
+  - Updated constants.py with new constants for errand rates, additional time for specific errand types, working hours, default problem generation parameters, and scheduling period
+  - Modified models/errand.py to use ERRAND_RATES and SCHEDULING_DAYS constants
+  - Updated utils/errand_utils.py to use DELIVERY_ADDITIONAL_TIME constant
+  - Refactored algorithms/initial_scheduler.py and algorithms/optimizer.py to use SCHEDULING_DAYS, WORK_START_TIME, and WORK_END_TIME constants
+  - Updated main.py to use DEFAULT_NUM_CUSTOMERS, DEFAULT_NUM_CONTRACTORS, SCHEDULING_DAYS, WORK_START_TIME, and WORK_END_TIME constants
+- Challenges:
+  - Ensuring all relevant parts of the codebase were updated to use the new constants
+  - Maintaining consistency across different modules while introducing centralized constants
+  - Balancing between hardcoding values and using constants for better readability and maintainability
+- Decisions:
+  - Centralized all major configuration values in constants.py for easier maintenance and future modifications
+  - Used descriptive names for constants to improve code readability
+  - Kept some minor, context-specific values as local variables where appropriate
+- Next steps:
+  - Thoroughly test the entire system to ensure the new constants are correctly applied and don't introduce any bugs
+  - Update unit tests to reflect the use of new constants
+  - Review the codebase for any remaining hardcoded values that could be replaced with constants
+  - Consider implementing a configuration file or environment variables for dynamic constant setting
+  - Update project documentation to reflect the new centralized constants approach
+
+[2023-10-08] Task: Update Test Files to Use New Constants
+- Accomplished:
+  - Updated tests/test_models.py to use constants for errand types, working hours, and incentive multipliers
+  - Modified tests/test_utils.py to incorporate new constants and added a test for calculate_errand_time function
+  - Refactored tests/test_initial_scheduler.py to use constants for scheduling days, working hours, and errand types
+  - Updated tests/test_optimizer.py to use constants for problem generation and scheduling parameters
+- Challenges:
+  - Ensuring test cases still cover all necessary scenarios while using centralized constants
+  - Maintaining the integrity of existing tests while updating them to use new constants
+  - Balancing between using constants and keeping tests readable and easy to understand
+- Decisions:
+  - Used constants for all major parameters in test cases to ensure consistency with the main codebase
+  - Added new test cases where necessary to cover scenarios related to the newly introduced constants
+  - Kept some hard-coded values in tests where they serve as specific test inputs or expected outputs
+- Next steps:
+  - Run the entire test suite to ensure all tests pass with the new changes
+  - Review test coverage to identify any gaps introduced by the recent changes
+  - Update test documentation to reflect the use of centralized constants
+  - Consider adding more edge case tests related to the constants (e.g., boundary conditions for working hours)
+  - Evaluate the need for additional integration tests to ensure different components work correctly with the new constants
+
+[2023-10-09] Task: Update Project Documentation and Finalize Constant Integration
+- Accomplished:
+  - Updated readme.md to include information about centralized constants and their benefits
+  - Revised project_scope.md to emphasize the use of centralized constants for improved maintainability
+  - Updated ux_overview.md to reflect how centralized constants affect the user experience and system consistency
+  - Reviewed and updated all major components to ensure consistent use of centralized constants
+  - Added a new section in the developer documentation about working with and modifying constants
+- Challenges:
+  - Ensuring all documentation accurately reflects the current state of the project after constant integration
+  - Balancing between providing detailed information and maintaining readability in documentation
+  - Identifying all areas in the documentation that needed updates related to constant usage
+- Decisions:
+  - Added a dedicated section about centralized constants in readme.md to highlight their importance
+  - Updated the project scope to include maintainability through centralized constants as a key feature
+  - Emphasized the benefits of centralized constants for both users and developers in ux_overview.md
+  - Created a new developer guide section specifically for working with constants
+- Next steps:
+  - Conduct a final review of all project files to ensure consistent use of centralized constants
+  - Consider creating a separate configuration file for easy modification of constants in production
+  - Plan for potential future enhancements, such as allowing certain constants to be user-configurable
+  - Gather feedback from team members on the new constant-based approach and documentation updates
+  - Prepare for the next phase of development, potentially focusing on performance optimizations or new features
+
+[2023-10-10] Task: Fix Visualization Issue in GUI
+- Accomplished:
+  - Identified and resolved the visualization error in the GUI's visualization tab
+  - Updated gui/visualization_tab.py to use the correct parameter name when calling visualize_schedule function
+  - Changed 'ax' parameter to 'ax_or_filename' in the visualize_schedule function call
+- Challenges:
+  - Identifying the root cause of the visualization error
+  - Ensuring the fix doesn't introduce new issues in other parts of the application
+- Decisions:
+  - Kept the flexible design of the visualize_schedule function, allowing it to accept either an axes object or a filename
+  - Updated only the necessary part of the code to minimize potential side effects
+- Next steps:
+  - Thoroughly test the visualization functionality in both GUI and CLI modes
+  - Update any relevant documentation or comments related to the visualization function
+  - Review other parts of the codebase that might be calling the visualize_schedule function to ensure consistency
+  - Consider adding more robust error handling and user feedback in the GUI for visualization-related issues
+
+[2023-10-11] Task: Improve Visibility of Routes in Visualization
+- Accomplished:
+  - Updated utils/visualization.py to enhance the visibility of routes in the schedule visualization
+  - Increased the line width of the routes from 2 to 3
+  - Increased the opacity of the routes to 1 (fully opaque)
+  - Added a slight offset (0.15) to the routes to prevent them from aligning perfectly with grid lines
+  - Reduced the opacity of the city grid from 0.3 to 0.2
+  - Increased the size of customer and contractor markers for better visibility
+  - Updated the color scheme to use plt.cm.Set1 for better contrast between different contractors
+- Challenges:
+  - Balancing the visibility of routes with the clarity of other elements in the visualization
+  - Ensuring the changes don't negatively impact the overall aesthetics of the visualization
+  - Maintaining compatibility with both GUI and CLI visualization outputs
+- Decisions:
+  - Used a combination of color, opacity, and line width adjustments to improve route visibility
+  - Implemented a small offset for routes to prevent them from being hidden by grid lines
+  - Kept the city grid visible but with reduced opacity to maintain context while emphasizing routes
+- Next steps:
+  - Test the updated visualization with various schedule scenarios to ensure consistent improvement
+  - Gather user feedback on the new visualization style
+  - Consider adding a legend or color coding for different contractors' routes
+  - Explore options for interactive visualization features in the GUI (e.g., hover information, zooming)
+  - Update relevant documentation to reflect the changes in the visualization component
+
+[2023-10-14] Task: Improve Scheduling Algorithms and Add Detailed Logging
+- Accomplished:
+  - Updated algorithms/initial_scheduler.py to include travel time considerations and more accurate profit calculations
+  - Modified algorithms/optimizer.py to improve the OR-Tools model, including better handling of travel times and more accurate profit calculations in the objective function
+  - Implemented detailed logging in both initial_scheduler.py and optimizer.py to provide insights into scheduling decisions and profit calculations
+  - Added a schedule comparison feature in optimizer.py to allow side-by-side analysis of initial and optimized schedules
+  - Updated main.py to utilize the new logging and comparison features
+  - Modified constants.py to include additional parameters needed for the improved algorithms
+- Challenges:
+  - Balancing the complexity of the initial scheduler while maintaining its greedy nature
+  - Ensuring the OR-Tools model accurately represents all constraints and objectives
+  - Implementing detailed logging without significantly impacting performance
+  - Designing a clear and informative schedule comparison output
+- Decisions:
+  - Kept the initial scheduler greedy but included travel time considerations for more realistic scheduling
+  - Enhanced the OR-Tools model to include travel times between errands and more accurate profit calculations
+  - Implemented logging at key decision points in both scheduling algorithms
+  - Created a separate function for schedule comparison to keep the code organized
+- Next steps:
+  - Thoroughly test the updated algorithms with various problem instances to ensure correctness and performance
+  - Analyze the logs and comparison outputs to identify any remaining discrepancies between initial and optimized schedules
+  - Consider adding visualization improvements to better represent the differences between schedules
+  - Update unit tests to cover the new features and ensure they handle edge cases
+  - Gather user feedback on the new logging and comparison features
+  - Explore options for further optimizing the OR-Tools model, possibly by adjusting solver parameters or adding more sophisticated constraints
 
 # Add your log entries here as you work on the project

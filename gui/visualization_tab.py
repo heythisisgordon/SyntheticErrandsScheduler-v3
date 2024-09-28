@@ -35,7 +35,7 @@ class VisualizationTab(scrolled.ScrolledPanel):
             optimized_sched = optimize_schedule(initial_sched)
             
             # Create the visualization
-            visualize_schedule(optimized_sched, ax=ax)
+            visualize_schedule(optimized_sched, ax_or_filename=ax)
             
             # Adjust the plot
             ax.set_title("Optimized Schedule Visualization")

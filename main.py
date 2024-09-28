@@ -5,20 +5,11 @@ from models.contractor import Contractor
 from models.errand import Errand
 from utils.city_map import is_valid_road_location, GRID_SIZE
 from algorithms.initial_scheduler import initial_schedule
-from algorithms.optimizer import optimize_schedule
+from algorithms.optimizer import optimize_schedule, compare_schedules
 from utils.visualization import visualize_schedule, print_schedule
+from constants import ERRAND_TYPES, DEFAULT_NUM_CUSTOMERS, DEFAULT_NUM_CONTRACTORS, SCHEDULING_DAYS, WORK_START_TIME, WORK_END_TIME
 
-# Define errand types with their characteristics
-ERRAND_TYPES = [
-    ("Delivery", 10, 5, {"type": "percentage", "value": 25, "days": 14}),
-    ("Dog Walk", 20, 3, None),
-    ("Cut Grass", 10, 2, None),
-    ("Detail Car", 15, 2.5, {"type": "percentage", "value": 10, "days": 14}),
-    ("Outing", 15, 3, {"type": "percentage", "value": 10, "days": 14}),
-    ("Moving", 120, 2, {"type": "fixed", "value": 300, "days": 14})
-]
-
-def generate_problem(num_customers=10, num_contractors=2):
+def generate_problem(num_customers=DEFAULT_NUM_CUSTOMERS, num_contractors=DEFAULT_NUM_CONTRACTORS):
     customers = []
     contractors = []
 
@@ -35,8 +26,8 @@ def generate_problem(num_customers=10, num_contractors=2):
         errand_type, base_time, incentive, disincentive = random.choice(ERRAND_TYPES)
         errand = Errand(i, errand_type, base_time, incentive, disincentive)
 
-        # Generate random availability (simplified for now)
-        availability = {day: list(range(480, 1020, 30)) for day in range(14)}  # 8am to 5pm, 30-minute slots
+        # Generate random availability
+        availability = {day: list(range(WORK_START_TIME, WORK_END_TIME, 30)) for day in range(SCHEDULING_DAYS)}  # 30-minute slots
 
         customer = Customer(i, (x, y), errand, availability)
         customers.append(customer)
@@ -59,6 +50,14 @@ def cli_main():
     customers, contractors = generate_problem()
     print(f"Generated {len(customers)} customers and {len(contractors)} contractors")
 
+    print("\nCustomer Details:")
+    for customer in customers:
+        print(f"Customer {customer.id}: Location {customer.location}, Errand: {customer.desired_errand}")
+
+    print("\nContractor Details:")
+    for contractor in contractors:
+        print(f"Contractor {contractor.id}: Location {contractor.location}")
+
     initial_sched = initial_schedule(customers, contractors)
     print("\nInitial schedule created")
     print_schedule(initial_sched)
@@ -80,6 +79,9 @@ def cli_main():
 
     profit_improvement = optimized_profit - initial_profit
     print(f"Profit improvement: ${profit_improvement:.2f}")
+
+    # Compare the schedules
+    compare_schedules(initial_sched, optimized_sched)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--cli":

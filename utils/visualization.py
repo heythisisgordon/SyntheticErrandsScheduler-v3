@@ -18,38 +18,52 @@ def visualize_schedule(schedule: Schedule, ax_or_filename=None):
     else:
         ax = ax_or_filename
     
-    ax.imshow(city_grid, cmap='binary')
+    ax.imshow(city_grid, cmap='binary', alpha=0.2)  # Reduce the opacity of the city grid
     
-    # Plot customers
-    customer_locations = [customer.location for customer in schedule.customers]
-    ax.scatter([loc[0] for loc in customer_locations], [loc[1] for loc in customer_locations], 
-               color='blue', label='Customers', s=50)
+    # Plot customers with errand numbers
+    for i, customer in enumerate(schedule.customers):
+        ax.scatter(customer.location[0], customer.location[1], color='blue', s=100, zorder=3)
+        ax.annotate(f'{i+1}', (customer.location[0], customer.location[1]), xytext=(3, 3), 
+                    textcoords='offset points', color='black', fontsize=8, fontweight='bold')
     
     # Plot contractors
     contractor_locations = [contractor.location for contractor in schedule.contractors]
     ax.scatter([loc[0] for loc in contractor_locations], [loc[1] for loc in contractor_locations], 
-               color='red', label='Contractors', s=100, marker='s')
+               color='red', label='Contractors', s=150, marker='s', zorder=3)
     
     # Plot routes using the exact path from calculate_travel_time
-    colors = plt.cm.rainbow(np.linspace(0, 1, len(schedule.contractors)))
-    for day, assignments in schedule.assignments.items():
-        for i, (customer, contractor, _) in enumerate(assignments):
-            start = contractor.location if i == 0 else schedule.customers[assignments[i-1][0].id].location
-            end = customer.location
-            
-            _, route = calculate_travel_time(start, end)
-            
-            # Plot the route
-            route_x, route_y = zip(*route)
-            ax.plot(route_x, route_y, color=colors[contractor.id], alpha=0.5)
+    contractor_colors = plt.cm.Set1(np.linspace(0, 1, len(schedule.contractors)))
     
-    ax.set_title("Synthetic Errands Schedule Visualization")
-    ax.legend()
-    ax.grid(True)
+    for day, assignments in schedule.assignments.items():
+        for contractor in schedule.contractors:
+            contractor_assignments = [a for a in assignments if a[1].id == contractor.id]
+            if not contractor_assignments:
+                continue
+            
+            route = [contractor.location]
+            for customer, _, _ in contractor_assignments:
+                route.append(customer.location)
+            
+            for i in range(len(route) - 1):
+                start, end = route[i], route[i+1]
+                _, path = calculate_travel_time(start, end)
+                
+                path_x, path_y = zip(*path)
+                offset = 0.15  # Add a slight offset to make routes more visible
+                ax.plot([x + offset for x in path_x], [y + offset for y in path_y],
+                        color=contractor_colors[contractor.id], 
+                        alpha=1, linewidth=3, zorder=2,
+                        label=f'Contractor {contractor.id+1}, Day {day+1}' if i == 0 else "")
+    
+    ax.set_title("Optimized Schedule Visualization")
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    ax.grid(True, alpha=0.3)  # Reduce the opacity of the grid
     
     if isinstance(ax_or_filename, str):
-        plt.savefig(ax_or_filename)
+        plt.savefig(ax_or_filename, dpi=300, bbox_inches='tight')
         plt.close()
+    else:
+        ax.figure.tight_layout()
 
 def print_schedule(schedule: Schedule):
     """

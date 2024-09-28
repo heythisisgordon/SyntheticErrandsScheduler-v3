@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from constants import MAX_INCENTIVE_MULTIPLIER, ERRAND_RATES, SCHEDULING_DAYS
 
 class Errand:
     def __init__(self, id, type, base_time, incentive, disincentive):
@@ -10,21 +11,12 @@ class Errand:
         self.charge = self.calculate_base_charge()
 
     def calculate_base_charge(self):
-        # Different rates for different errand types
-        rates = {
-            "Delivery": 2,
-            "Dog Walk": 1.5,
-            "Cut Grass": 2,
-            "Detail Car": 2.5,
-            "Outing": 3,
-            "Moving": 3.5,
-            "Grocery Shopping": 1.5  # Added Grocery Shopping
-        }
-        return self.base_time * rates.get(self.type, 1)  # Default to $1 per minute if type not found
+        return self.base_time * ERRAND_RATES.get(self.type, 1)  # Default to $1 per minute if type not found
 
     def apply_incentive(self, scheduled_date, request_date):
         if scheduled_date == request_date.date():
-            return self.charge * self.incentive
+            incentive_charge = self.charge * self.incentive
+            return min(incentive_charge, self.charge * MAX_INCENTIVE_MULTIPLIER)
         return self.charge
 
     def apply_disincentive(self, scheduled_date, request_date):
@@ -32,10 +24,10 @@ class Errand:
             return self.charge
 
         days_difference = (scheduled_date - request_date.date()).days
-        if days_difference <= 14:
+        if days_difference <= SCHEDULING_DAYS:
             return self.charge
 
-        days_past = days_difference - 14
+        days_past = days_difference - SCHEDULING_DAYS
         if self.disincentive['type'] == 'percentage':
             reduction = min(self.disincentive['value'] * days_past / 100, 1)  # Cap at 100% reduction
             return max(0, self.charge * (1 - reduction))

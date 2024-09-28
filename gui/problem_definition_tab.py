@@ -1,6 +1,7 @@
 import wx
-from main import generate_problem, ERRAND_TYPES
+from main import generate_problem
 from models.schedule import Schedule
+from constants import ERRAND_TYPES, MAX_INCENTIVE_MULTIPLIER
 
 class ProblemDefinitionTab(wx.Panel):
     def __init__(self, parent):
@@ -52,7 +53,7 @@ class ProblemDefinitionTab(wx.Panel):
             vbox.Add(errand_type_info, flag=wx.LEFT|wx.TOP, border=10)
             
             details = f"  Base Time: {base_time} minutes\n"
-            details += f"  Incentive: {incentive}x same-day\n"
+            details += f"  Incentive: {min(incentive, MAX_INCENTIVE_MULTIPLIER):.1f}x same-day (capped at {MAX_INCENTIVE_MULTIPLIER:.1f}x)\n"
             if disincentive:
                 if disincentive['type'] == 'percentage':
                     details += f"  Disincentive: -{disincentive['value']}%/day past {disincentive['days']} days"
