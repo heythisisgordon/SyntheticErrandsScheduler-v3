@@ -29,15 +29,19 @@ def calculate_road_travel_time(start, end):
     end_road = get_nearest_road_point(end)
     
     # Add start road point if it's different from start
-    if start != start_road and start_road not in route:
+    if start != start_road:
         route.append(start_road)
     
-    # Add end road point if it's different from start road point
-    if end_road != start_road and end_road not in route:
+    # Add intermediate road points
+    if start_road != end_road:
+        route.append((end_road[0], start_road[1]))
+    
+    # Add end road point if it's different from end
+    if end_road not in route:
         route.append(end_road)
     
     # Add end point if it's different from end road point
-    if end != end_road and end not in route:
+    if end != end_road:
         route.append(end)
     
     # Calculate total travel time
