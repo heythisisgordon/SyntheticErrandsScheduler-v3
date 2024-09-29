@@ -1,19 +1,27 @@
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+from typing import Union, List, Tuple, Dict
+import numpy as np
 from models.schedule import Schedule
+from models.customer import Customer
+from models.contractor import Contractor
 from utils.city_map import GRID_SIZE, create_city_grid
 from utils.travel_time import calculate_travel_time
-import numpy as np
 
-def visualize_schedule(schedule: Schedule, ax_or_filename=None):
+def visualize_schedule(schedule: Schedule, ax_or_filename: Union[Axes, str, None] = None) -> None:
     """
     Visualize the schedule and city layout.
     
-    :param schedule: The schedule to visualize
-    :param ax_or_filename: Matplotlib axes to plot on or filename to save the visualization
+    Args:
+        schedule (Schedule): The schedule to visualize
+        ax_or_filename (Union[Axes, str, None]): Matplotlib axes to plot on or filename to save the visualization
     """
-    city_grid = create_city_grid()
+    city_grid: np.ndarray = create_city_grid()
     
     if ax_or_filename is None or isinstance(ax_or_filename, str):
+        fig: Figure
+        ax: Axes
         fig, ax = plt.subplots(figsize=(12, 12))
     else:
         ax = ax_or_filename
@@ -27,20 +35,20 @@ def visualize_schedule(schedule: Schedule, ax_or_filename=None):
                     textcoords='offset points', color='black', fontsize=8, fontweight='bold')
     
     # Plot contractors
-    contractor_locations = [contractor.location for contractor in schedule.contractors]
+    contractor_locations: List[Tuple[int, int]] = [contractor.location for contractor in schedule.contractors]
     ax.scatter([loc[0] for loc in contractor_locations], [loc[1] for loc in contractor_locations], 
                color='red', label='Contractors', s=150, marker='s', zorder=3)
     
     # Plot routes using the exact path from calculate_travel_time
-    contractor_colors = plt.cm.Set1(np.linspace(0, 1, len(schedule.contractors)))
+    contractor_colors: np.ndarray = plt.cm.Set1(np.linspace(0, 1, len(schedule.contractors)))
     
     for day, assignments in schedule.assignments.items():
         for contractor in schedule.contractors:
-            contractor_assignments = [a for a in assignments if a[1].id == contractor.id]
+            contractor_assignments: List[Tuple[Customer, Contractor, int]] = [a for a in assignments if a[1].id == contractor.id]
             if not contractor_assignments:
                 continue
             
-            route = [contractor.location]
+            route: List[Tuple[int, int]] = [contractor.location]
             for customer, _, _ in contractor_assignments:
                 route.append(customer.location)
             
@@ -49,7 +57,7 @@ def visualize_schedule(schedule: Schedule, ax_or_filename=None):
                 _, path = calculate_travel_time(start, end)
                 
                 path_x, path_y = zip(*path)
-                offset = 0.15  # Add a slight offset to make routes more visible
+                offset: float = 0.15  # Add a slight offset to make routes more visible
                 ax.plot([x + offset for x in path_x], [y + offset for y in path_y],
                         color=contractor_colors[contractor.id], 
                         alpha=1, linewidth=3, zorder=2,
@@ -65,11 +73,12 @@ def visualize_schedule(schedule: Schedule, ax_or_filename=None):
     else:
         ax.figure.tight_layout()
 
-def print_schedule(schedule: Schedule):
+def print_schedule(schedule: Schedule) -> None:
     """
     Print a detailed view of the schedule.
     
-    :param schedule: The schedule to print
+    Args:
+        schedule (Schedule): The schedule to print
     """
     print("Synthetic Errands Schedule:")
     print("===========================")
@@ -77,6 +86,8 @@ def print_schedule(schedule: Schedule):
     for day, assignments in schedule.assignments.items():
         print(f"\nDay {day + 1}:")
         for customer, contractor, start_time in assignments:
+            hours: int
+            minutes: int
             hours, minutes = divmod(start_time, 60)
             print(f"  Contractor {contractor.id + 1} - Customer {customer.id + 1}:")
             print(f"    Errand: {customer.desired_errand.type}")

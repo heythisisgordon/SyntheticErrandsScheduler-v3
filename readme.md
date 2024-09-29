@@ -12,6 +12,7 @@ SyntheticErrandsScheduler/
 ├── main.py                 # Main entry point of the application
 ├── run_tests.py            # Script to run all unit tests
 ├── constants.py            # Centralized constants for the project
+├── config.yaml             # Configuration file for the project
 │
 ├── models/                 # Data models
 │   ├── customer.py
@@ -23,7 +24,8 @@ SyntheticErrandsScheduler/
 │   ├── city_map.py
 │   ├── travel_time.py
 │   ├── errand_utils.py
-│   └── visualization.py
+│   ├── visualization.py
+│   └── config_manager.py   # Configuration management module
 │
 ├── algorithms/             # Scheduling algorithms
 │   ├── initial_scheduler.py
@@ -56,7 +58,18 @@ SyntheticErrandsScheduler/
 - Visualization of schedules and city layout
 - Comprehensive unit test suite
 - Graphical User Interface (GUI) for easy interaction
-- Centralized constants for improved maintainability
+- Centralized configuration management for improved maintainability
+- Type hints implemented throughout the codebase for improved readability and maintainability
+
+## Type Hinting
+
+The entire codebase has been updated with comprehensive type hints. This includes:
+
+- Type annotations for all function parameters and return values
+- Type hints for class attributes and local variables
+- Use of complex types from the `typing` module (e.g., List, Dict, Tuple, Optional) where appropriate
+
+These type hints improve code readability, catch potential type-related bugs earlier, and make the codebase more maintainable. They also provide better support for IDEs and static type checkers like mypy.
 
 ## Getting Started
 
@@ -64,10 +77,22 @@ SyntheticErrandsScheduler/
 2. Clone this repository
 3. Install required packages:
    ```
-   pip install numpy matplotlib ortools
+   pip install numpy matplotlib ortools pyyaml
    pip install -U wxPython
    ```
    Note: If you encounter issues installing wxPython, please refer to the official wxPython installation guide for your specific operating system: https://wxpython.org/pages/downloads/
+
+## Configuration
+
+The project now uses a centralized configuration system. The main configuration file is `config.yaml`. This file contains all the configurable parameters for the project, including:
+
+- Errand types and their characteristics
+- Working hours
+- Scheduling period
+- Default problem generation parameters
+- Optimization parameters
+
+To modify any of these settings, edit the `config.yaml` file. The changes will be automatically reflected in the application without needing to modify the code.
 
 ## Running the Application
 
@@ -117,21 +142,9 @@ The project uses Google OR-Tools for schedule optimization. This powerful librar
 - Consideration of travel time between errands
 - Improved profit calculation in the objective function
 
-## Centralized Constants
+## Logging
 
-To improve maintainability and consistency across the project, we've introduced a centralized constants file (constants.py). This file contains key configuration parameters such as:
-
-- Errand types and their characteristics
-- Working hours
-- Scheduling period
-- Default problem generation parameters
-- Incentive and disincentive rules
-
-By centralizing these constants, we've made it easier to modify key aspects of the system without having to change multiple files.
-
-## Schedule Comparison
-
-The program now includes a schedule comparison feature that provides a side-by-side view of the initial and optimized schedules. This helps in understanding the differences between the two schedules and the impact of optimization on profit.
+The application now uses Python's built-in logging module to provide detailed information about its operations. Log messages are displayed in the console and can be useful for debugging or understanding the application's behavior.
 
 ## Future Improvements
 
@@ -139,8 +152,13 @@ The program now includes a schedule comparison feature that provides a side-by-s
 - Implement more complex constraints and objectives in the optimization model
 - Add real-time updates and dynamic rescheduling
 - Enhance visualization with more detailed information
-- Implement error handling and logging throughout the application
-- Consider implementing a configuration file for easy adjustment of constants without code changes
+- Implement more comprehensive error handling
+- Add option to save logs to a file
 - Investigate and resolve any discrepancies between initial and optimized schedule profits
+- Implement static type checking using mypy as part of the development workflow
 
 For more details on the project scope and development process, please refer to `project_scope.md` and `developer_log.md`.
+
+## Contributing
+
+Contributions to this project are welcome. Please ensure that you update the `config.yaml` file if you add any new configurable parameters, and update the relevant documentation. Also, make sure to maintain the type hinting standards established in the project when making contributions.

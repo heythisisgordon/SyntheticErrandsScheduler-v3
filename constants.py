@@ -1,45 +1,100 @@
-# Same-day incentives for each errand type
-DELIVERY_INCENTIVE = 1.2
-DOG_WALK_INCENTIVE = 1.1
-CUT_GRASS_INCENTIVE = 1.3
-DETAIL_CAR_INCENTIVE = 1.2
-OUTING_INCENTIVE = 1.05
-MOVING_INCENTIVE = 1.5
+"""
+Constants for the Synthetic Errands Scheduler
+
+This module defines constants used throughout the application. It uses the
+ConfigManager to load values from the config.yaml file, ensuring that all
+constants are centralized and easily modifiable.
+
+Usage:
+    from constants import WORK_START_TIME, ErrandType, ERRAND_TYPES
+
+Note: This file should not be modified directly. To change any values,
+update the config.yaml file instead.
+"""
+
+from utils.config_manager import config
+from typing import List, Tuple, Dict, Union
+from enum import Enum, auto
+
+class ErrandType(Enum):
+    """
+    Enum representing different types of errands.
+    
+    This enum is used to ensure type safety when working with errand types
+    throughout the application.
+    """
+    DELIVERY = auto()
+    DOG_WALK = auto()
+    CUT_GRASS = auto()
+    DETAIL_CAR = auto()
+    OUTING = auto()
+    MOVING = auto()
+    GROCERY_SHOPPING = auto()
+
+    @classmethod
+    def from_string(cls, name: str) -> 'ErrandType':
+        """
+        Convert a string to an ErrandType enum value.
+        
+        Args:
+            name (str): The name of the errand type.
+        
+        Returns:
+            ErrandType: The corresponding ErrandType enum value.
+        
+        Raises:
+            ValueError: If the input string doesn't match any ErrandType.
+        """
+        try:
+            return cls[name.upper().replace(' ', '_')]
+        except KeyError:
+            raise ValueError(f"'{name}' is not a valid ErrandType")
 
 # Maximum incentive multiplier
-MAX_INCENTIVE_MULTIPLIER = 1.5
+# This caps the maximum incentive that can be applied for same-day service.
+MAX_INCENTIVE_MULTIPLIER: float = config.get('max_incentive_multiplier')
 
 # Errand types with their characteristics
-ERRAND_TYPES = [
-    ("Delivery", 10, DELIVERY_INCENTIVE, {"type": "percentage", "value": 25, "days": 14}),
-    ("Dog Walk", 20, DOG_WALK_INCENTIVE, None),
-    ("Cut Grass", 10, CUT_GRASS_INCENTIVE, None),
-    ("Detail Car", 15, DETAIL_CAR_INCENTIVE, {"type": "percentage", "value": 10, "days": 14}),
-    ("Outing", 15, OUTING_INCENTIVE, {"type": "percentage", "value": 10, "days": 14}),
-    ("Moving", 120, MOVING_INCENTIVE, {"type": "fixed", "value": 300, "days": 14})
+# Each tuple contains: (ErrandType, base_time, incentive, disincentive)
+ERRAND_TYPES: List[Tuple[ErrandType, int, float, Union[Dict[str, Union[str, int]], None]]] = [
+    (
+        ErrandType.from_string(errand['name']),
+        errand['base_time'],
+        errand['incentive'],
+        errand['disincentive']
+    )
+    for errand in config.get('errand_types')
 ]
 
 # Errand rates ($ per minute)
-ERRAND_RATES = {
-    "Delivery": 2,
-    "Dog Walk": 1.5,
-    "Cut Grass": 2,
-    "Detail Car": 2.5,
-    "Outing": 3,
-    "Moving": 3.5,
-    "Grocery Shopping": 1.5
+ERRAND_RATES: Dict[ErrandType, float] = {
+    ErrandType.from_string(name): rate
+    for name, rate in config.get('errand_rates').items()
 }
 
 # Additional time for specific errand types (in minutes)
-DELIVERY_ADDITIONAL_TIME = 10
+DELIVERY_ADDITIONAL_TIME: int = config.get('delivery_additional_time')
 
 # Working hours
-WORK_START_TIME = 480  # 8:00 AM in minutes
-WORK_END_TIME = 1020  # 5:00 PM in minutes
+# These values define the start and end of the working day in minutes from midnight.
+WORK_START_TIME: int = config.get('work_start_time')
+WORK_END_TIME: int = config.get('work_end_time')
 
 # Default problem generation parameters
-DEFAULT_NUM_CUSTOMERS = 10
-DEFAULT_NUM_CONTRACTORS = 2
+# These values are used when generating random problem instances.
+DEFAULT_NUM_CUSTOMERS: int = config.get('default_num_customers')
+DEFAULT_NUM_CONTRACTORS: int = config.get('default_num_contractors')
 
 # Scheduling period
-SCHEDULING_DAYS = 14
+# The number of days to schedule errands for.
+SCHEDULING_DAYS: int = config.get('scheduling_days')
+
+# Optimization parameters
+# These parameters are used by the optimization algorithm.
+OPTIMIZATION_MAX_TIME: int = config.get('optimization', {}).get('max_time_in_seconds', 60)
+OPTIMIZATION_LOG_PROGRESS: bool = config.get('optimization', {}).get('log_search_progress', True)
+
+# For backwards compatibility, define individual incentive constants
+# Note: It's recommended to use ERRAND_TYPES instead of these individual constants
+for errand in config.get('errand_types'):
+    globals()[f"{errand['name'].upper().replace(' ', '_')}_INCENTIVE"] = errand['incentive']

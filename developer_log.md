@@ -1,327 +1,232 @@
 # Developer Log
 
-## Instructions for use:
-As you work on the Synthetic Errands Scheduler v3, use this file to keep 
-a diary of your development process. For each significant task or milestone 
-you complete, add an entry to this log. Include the date, a brief description 
-of what you accomplished, any challenges you faced, and any decisions you made.
-
-Example entry format:
-
-[YYYY-MM-DD] Task: Brief description
-- Details of what was accomplished
-- Challenges faced
-- Decisions made
-- Next steps or todos
-
-This log will help track the development process and provide insights into 
-the evolution of the project. It can be valuable for future reference or 
-for onboarding other developers to the project.
-
-Remember to commit this file along with your code changes regularly.
-
 ## Project History Summary
 
 - Implemented modular structure with separate directories for models, utils, and algorithms
-- Developed basic optimization algorithm and visualization component
-- Implemented unit tests for all major components
-- Set up test runner and updated README with comprehensive project information
+- Developed basic optimization algorithm, visualization component, and unit tests
 - Implemented GUI with scrolling functionality and Manhattan distance visualization
 - Updated travel time calculation to use road-based routing
-- Fixed initial scheduler to account for actual errand and travel times
-- Adjusted errand prices to ensure reasonable profitability
 - Implemented new errand types and characteristics
 - Integrated Google OR-Tools for advanced optimization
-- Updated project documentation to reflect recent changes
 - Implemented centralized constants and capped same-day incentives
+- Improved scheduling algorithms and added detailed logging
+- Implemented configuration management system
+- Added proper logging throughout the application
+- Implemented ErrandType enum for improved type safety and maintainability
+- Updated test suite to use ErrandType enum
+- Implemented consistent logging in key algorithm files
+- Enhanced error handling in main module
+- Improved error handling in initial scheduler while maintaining greedy approach
+- Implemented comprehensive type hinting throughout the entire project
 
 ## Recent Development Log
 
-[2023-09-30] Task: Implement New Errand Types and Characteristics
-- Accomplished:
-  - Updated main.py to include new errand types: Delivery, Dog Walk, Cut Grass, Detail Car, Outing, and Moving
-  - Modified Errand class to handle new properties like incentives and disincentives
-  - Updated initial_scheduler.py and optimizer.py to account for specific requirements of each errand type
-  - Updated GUI to display new errand types and their characteristics
-- Challenges:
-  - Integrating new errand types into the existing system
-  - Balancing complexity of different errand types with a unified scheduling approach
-  - Implementing incentives and disincentives while maintaining system performance
-- Decisions:
-  - Implemented flexible structure for errand types to allow easy addition of new types
-  - Handled errand-specific logic in the Errand class to keep scheduler and optimizer more generic
-  - Used dictionary structure for disincentives to accommodate percentage and fixed-value penalties
-- Next steps:
-  - Thoroughly test the system with new errand types
-  - Update unit tests to cover new errand types and characteristics
-  - Refine optimization algorithm for diverse errand types
-  - Update visualization component to clearly display different errand types
-  - Consider implementing more sophisticated scheduling strategies for complex errand types
-  - Update project documentation
+[2023-10-22] Task: Implement Type Hinting in Schedule Model
+- Updated models/schedule.py to include type hints for all attributes, method parameters, and return values
+- Added necessary imports from typing module (List, Dict, Tuple, Any)
+- Updated method signatures to include type annotations
+- Challenges: Ensuring correct type annotations for complex data structures like self.assignments
+- Decisions: Used Dict[int, List[Tuple[Customer, Contractor, int]]] for self.assignments to accurately represent its structure
+- Next: Continue adding type hints to other core modules, run mypy for static type checking, and update related files as needed
 
-[2023-10-01] Task: Resolve Circular Import and Fix Visualization Error
-- Accomplished:
-  - Resolved circular import issue between models/schedule.py and algorithms/initial_scheduler.py
-  - Created utils/errand_utils.py to house the calculate_errand_time function
-  - Updated models/schedule.py and algorithms/initial_scheduler.py to import from utils/errand_utils.py
-  - Modified utils/visualization.py to handle both axes objects and filenames in visualize_schedule function
-  - Updated main.py to use new visualize_schedule function signature
-- Challenges:
-  - Identifying root cause of circular import issue
-  - Ensuring changes didn't introduce new issues in other parts of the codebase
-- Decisions:
-  - Created new utility file for shared functions to break circular dependency
-  - Made visualize_schedule function more flexible by accepting either axes object or filename
-- Next steps:
-  - Thoroughly test the entire system
-  - Update unit tests for new utils/errand_utils.py and modified visualization function
-  - Review codebase for potential circular imports or similar issues
-  - Update project documentation
-  - Consider implementing more robust dependency management system
+[2023-10-23] Task: Review and Document Existing Type Hints in Errand Model
+- Discovered that models/errand.py already has comprehensive type hinting implemented
+- Reviewed the existing type hints in the Errand class for correctness and completeness
+- Noted the use of Union[Dict[str, Union[str, int, float]], None] for the disincentive attribute, which accurately represents its possible types
+- Challenges: None, as the type hinting was already well-implemented
+- Decisions: No changes needed to the existing type hints in models/errand.py
+- Next: Continue with type hinting in other core modules, focusing on those that haven't been updated yet, such as models/customer.py and models/contractor.py
 
-[2023-10-02] Task: Refactor Initial Scheduler and Update Test Suite
-- Accomplished:
-  - Modified algorithms/initial_scheduler.py to implement a strictly greedy algorithm
-  - Removed considerations for travel time between errands in initial scheduling process
-  - Updated tests/test_initial_scheduler.py to align with new greedy approach
-  - Removed tests checking for travel time and dynamic scheduling
-  - Added new test to ensure customer order preservation in schedule
-- Challenges:
-  - Balancing between implementing strictly greedy algorithm and maintaining schedule efficiency
-  - Ensuring removal of travel time considerations doesn't negatively impact overall system
-  - Updating tests to reflect new greedy approach while maintaining comprehensive coverage
-- Decisions:
-  - Prioritized order of customers in input list over factors like travel time or contractor availability
-  - Kept working hours constraint (8:00 AM to 5:00 PM) in initial scheduler
-  - Moved more complex scheduling logic to optimization phase
-- Next steps:
-  - Thoroughly test new initial scheduler with various input scenarios
-  - Update optimizer to handle potentially less efficient initial schedules
-  - Review and update visualization component to accurately represent new scheduling approach
-  - Update project documentation to reflect changes in initial scheduling algorithm
-  - Consider implementing separate "smart" initial scheduler for comparison purposes
+[2023-10-24] Task: Implement Type Hinting in Customer Model
+- Updated models/customer.py to include type hints for all attributes, method parameters, and return values
+- Added necessary imports from typing module (Dict, List, Tuple)
+- Updated class and method signatures to include type annotations
+- Added docstrings to the Customer class and its methods to improve documentation
+- Challenges: Determining the most appropriate type hint for the availability attribute
+- Decisions: Used Dict[int, List[int]] for availability to represent days mapped to lists of available time slots
+- Next: Implement type hinting in the Contractor model and continue with other core modules as needed
 
-[2023-10-03] Task: Implement Strictly Greedy Initial Scheduler
-- Accomplished:
-  - Modified algorithms/initial_scheduler.py to implement a strictly greedy approach
-  - Updated the initial_schedule function to schedule errands in the order they appear in the customers list
-  - Removed all considerations of travel time and contractor location from the initial scheduling process
-  - Updated tests/test_initial_scheduler.py to align with the new strictly greedy approach
-  - Added a new test to verify that errands are scheduled at the earliest possible time for each contractor
-- Challenges:
-  - Ensuring the new approach maintains the working hours constraint (8:00 AM to 5:00 PM)
-  - Balancing simplicity of the greedy approach with the need for a functional initial schedule
-  - Updating test cases to properly validate the new scheduling behavior
-- Decisions:
-  - Removed all optimization logic from the initial scheduler, focusing solely on order-based assignment
-  - Kept the working hours constraint to ensure schedules remain within operational bounds
-  - Updated test suite to focus on order preservation and earliest possible scheduling
-- Next steps:
-  - Thoroughly test the new initial scheduler with various input scenarios
-  - Update the optimizer to handle potentially less efficient initial schedules
-  - Review and update the visualization component to accurately represent the new scheduling approach
-  - Update project documentation to reflect changes in the initial scheduling algorithm
-  - Consider implementing a separate "smart" initial scheduler for comparison purposes
-  - Evaluate the impact of the strictly greedy approach on overall system performance and optimization potential
+[2023-10-25] Task: Implement Type Hinting in Contractor Model
+- Updated models/contractor.py to include type hints for all attributes, method parameters, and return values
+- Added necessary imports from typing module (Dict, List, Tuple)
+- Updated class and method signatures to include type annotations
+- Added docstrings to the Contractor class and its methods to improve documentation
+- Challenges: Determining the most appropriate type hint for the schedule attribute
+- Decisions: Used Dict[int, List] for schedule to represent days mapped to lists of assignments (kept as List for flexibility)
+- Next: Continue implementing type hinting in other core modules, focusing on utility functions and algorithm files
 
-[2023-10-04] Task: Integrate Google OR-Tools for Advanced Optimization
-- Accomplished:
-  - Integrated Google OR-Tools library into the project for advanced optimization
-  - Refactored algorithms/optimizer.py to use OR-Tools for schedule optimization
-  - Updated the optimize_schedule function to create and solve a constraint programming model
-  - Modified the Schedule class to work with the new optimization approach
-  - Updated readme.md to include OR-Tools as a project dependency
-- Challenges:
-  - Learning and implementing OR-Tools effectively within the existing project structure
-  - Translating the scheduling problem into a constraint programming model
-  - Ensuring the new optimization approach respects all existing constraints and objectives
-- Decisions:
-  - Kept the initial greedy scheduler as a starting point for the OR-Tools optimizer
-  - Implemented a basic constraint model with room for future refinement and complexity
-  - Updated project documentation to reflect the integration of OR-Tools
-- Next steps:
-  - Thoroughly test the new optimization approach with various problem instances
-  - Fine-tune the OR-Tools model parameters for better performance
-  - Update unit tests to cover the new optimization logic
-  - Evaluate the improvement in schedule quality and profit compared to the previous approach
-  - Consider implementing more complex constraints and objectives in the OR-Tools model
-  - Update the GUI to reflect any new information or options related to the advanced optimization
+[2023-10-26] Task: Review and Document Existing Type Hints in Errand Utils
+- Discovered that utils/errand_utils.py already has comprehensive type hinting implemented
+- Reviewed the existing type hints in the calculate_errand_time function for correctness and completeness
+- Noted the use of Tuple[int, int] for location parameters and int for the return type
+- Challenges: None, as the type hinting was already well-implemented
+- Decisions: No changes needed to the existing type hints in utils/errand_utils.py
+- Next: Continue with type hinting in other utility functions and algorithm files, focusing on those that haven't been updated yet, such as utils/travel_time.py and algorithms/initial_scheduler.py
 
-[2023-10-05] Task: Update Project Documentation and Refine OR-Tools Integration
-- Accomplished:
-  - Updated readme.md to reflect the current state of the project, including OR-Tools integration
-  - Revised project_scope.md to include new features and adjust project constraints
-  - Updated ux_overview.md to describe the new GUI functionality and CLI options
-  - Refined the OR-Tools optimization model in algorithms/optimizer.py
-  - Updated test cases in tests/test_optimizer.py to cover new optimization scenarios
-- Challenges:
-  - Ensuring all documentation accurately reflects the current state of the project
-  - Balancing the complexity of the OR-Tools model with the need for efficient solving times
-  - Designing test cases that effectively validate the new optimization approach
+[2023-10-27] Task: Complete Type Hinting Implementation Across the Project
+- Implemented type hints in remaining files:
+  - utils/travel_time.py
+  - utils/city_map.py
+  - utils/visualization.py
+  - utils/config_manager.py
+  - algorithms/initial_scheduler.py
+  - algorithms/optimizer.py
+  - main.py
+  - run_tests.py
+  - All files in the gui/ directory
+  - All test files in the tests/ directory
+- Updated import statements to include necessary types from the typing module
+- Added type hints to function parameters, return values, and local variables where appropriate
+- Challenges: 
+  - Ensuring consistency in type hints across interconnected modules
+  - Determining appropriate type hints for complex data structures and function signatures
+  - Balancing specificity and flexibility in type hints, especially for functions with multiple possible return types
 - Decisions:
-  - Kept both GUI and CLI modes in the project scope to cater to different user needs
-  - Implemented a more detailed constraint model in the OR-Tools optimizer, focusing on time windows and travel times
-  - Updated the project's future improvements section to reflect new possibilities with OR-Tools
+  - Used Union types where functions could return different types based on conditions
+  - Implemented TypedDict for complex dictionary structures to provide more detailed type information
+  - Used Optional types for parameters and return values that could be None
+  - Added type hints to test files to maintain consistency across the entire codebase
 - Next steps:
-  - Conduct comprehensive testing of the entire system, including edge cases
-  - Gather user feedback on the new GUI and optimization results
-  - Explore additional OR-Tools features that could further improve scheduling efficiency
-  - Consider implementing a benchmark system to compare different optimization approaches
-  - Investigate potential performance optimizations for larger problem instances
+  - Run mypy or a similar static type checker to identify any remaining type-related issues
+  - Update project documentation to reflect the completion of type hinting implementation
+  - Consider implementing static type checking as part of the development workflow
 
-[2023-10-06] Task: Implement Centralized Constants and Cap Same-Day Incentives
-- Accomplished:
-  - Created a new constants.py file to store centralized constants for errand types, incentives, and other configuration parameters
-  - Updated main.py to use the centralized constants for errand types and incentives
-  - Modified models/errand.py to cap same-day incentives at 1.5x the base rate
-  - Updated gui/problem_definition_tab.py to display capped incentives in the GUI
-  - Revised project_scope.md, ux_overview.md, and developer_log.md to reflect these changes
-- Challenges:
-  - Ensuring consistency across the application when implementing centralized constants
-  - Balancing between flexibility and maintainability in constant definitions
-  - Updating the GUI to accurately display the capped incentives
-- Decisions:
-  - Created a separate constants.py file for better organization and easier future modifications
-  - Implemented a MAX_INCENTIVE_MULTIPLIER constant to enforce the 1.5x cap consistently
-  - Updated the GUI to display both the original incentive and the capped value for clarity
+[2023-10-28] Task: Update Project Documentation
+- Updated the following documentation files to reflect the implementation of type hints:
+  - readme.md: Added information about type hinting in the "Key Features" section and updated the "Contributing" guidelines
+  - project_scope.md: Included type hinting implementation in the "In-Scope" and "Deliverables" sections
+  - improvement_plan.md: Moved "Use Type Hinting" from "Remaining Tasks" to "Completed Tasks" and updated "Next Steps"
+  - ux_overview.md: Added a section on "Type Hinting and Code Quality" to explain the indirect benefits to user experience
+- Challenges: Ensuring that the documentation accurately reflects the current state of the project while maintaining readability
+- Decisions: 
+  - Emphasized the benefits of type hinting for code quality, maintainability, and reliability
+  - Updated the "Future Enhancements" section to include static type checking implementation
 - Next steps:
-  - Thoroughly test the system to ensure the capped incentives are correctly applied in all scenarios
-  - Update unit tests to cover the new capped incentive logic
-  - Review the entire codebase to ensure consistent use of centralized constants
-  - Consider implementing a configuration file for easy adjustment of constants without code changes
-  - Evaluate the impact of capped incentives on overall system profitability and optimization
+  - Continue to monitor and update type hints as the project evolves
+  - Consider implementing static type checking as part of the continuous integration process
 
-[2023-10-07] Task: Improve Maintainability by Integrating New Constants
-- Accomplished:
-  - Updated constants.py with new constants for errand rates, additional time for specific errand types, working hours, default problem generation parameters, and scheduling period
-  - Modified models/errand.py to use ERRAND_RATES and SCHEDULING_DAYS constants
-  - Updated utils/errand_utils.py to use DELIVERY_ADDITIONAL_TIME constant
-  - Refactored algorithms/initial_scheduler.py and algorithms/optimizer.py to use SCHEDULING_DAYS, WORK_START_TIME, and WORK_END_TIME constants
-  - Updated main.py to use DEFAULT_NUM_CUSTOMERS, DEFAULT_NUM_CONTRACTORS, SCHEDULING_DAYS, WORK_START_TIME, and WORK_END_TIME constants
+[2023-10-29] Task: Refactor optimizer.py for Improved Code Organization
+- Broke down the large optimize_schedule function into smaller, more focused functions:
+  - setup_model_and_variables: Sets up the CP model and variables
+  - add_constraints: Adds constraints to the model
+  - setup_objective: Sets up the objective function
+  - solve_model_and_extract_solution: Solves the model and extracts the solution
+- Updated the main optimize_schedule function to use these new functions
 - Challenges:
-  - Ensuring all relevant parts of the codebase were updated to use the new constants
-  - Maintaining consistency across different modules while introducing centralized constants
-  - Balancing between hardcoding values and using constants for better readability and maintainability
+  - Ensuring that the refactored code maintains the same functionality as the original
+  - Deciding on the appropriate level of granularity for the new functions
 - Decisions:
-  - Centralized all major configuration values in constants.py for easier maintenance and future modifications
-  - Used descriptive names for constants to improve code readability
-  - Kept some minor, context-specific values as local variables where appropriate
+  - Kept the overall structure of the optimization process while improving readability and maintainability
+  - Used type hints consistently in the new functions to maintain code quality
 - Next steps:
-  - Thoroughly test the entire system to ensure the new constants are correctly applied and don't introduce any bugs
-  - Update unit tests to reflect the use of new constants
-  - Review the codebase for any remaining hardcoded values that could be replaced with constants
-  - Consider implementing a configuration file or environment variables for dynamic constant setting
-  - Update project documentation to reflect the new centralized constants approach
+  - Update the test suite to reflect the changes in the optimizer module
+  - Consider similar refactoring for other complex modules in the project
 
-[2023-10-08] Task: Update Test Files to Use New Constants
-- Accomplished:
-  - Updated tests/test_models.py to use constants for errand types, working hours, and incentive multipliers
-  - Modified tests/test_utils.py to incorporate new constants and added a test for calculate_errand_time function
-  - Refactored tests/test_initial_scheduler.py to use constants for scheduling days, working hours, and errand types
-  - Updated tests/test_optimizer.py to use constants for problem generation and scheduling parameters
+[2023-10-30] Task: Improve Modularity of main.py and Create Separate CLI Interface
+- Created a new file cli_interface.py to handle CLI-specific functionality
+- Moved problem generation logic to a new file utils/problem_generator.py
+- Updated main.py to focus on setting up the application and delegating to the appropriate interface (CLI or GUI)
+- Refactored main.py to improve its structure and readability
+- Updated cli_interface.py to use the new problem_generator module
 - Challenges:
-  - Ensuring test cases still cover all necessary scenarios while using centralized constants
-  - Maintaining the integrity of existing tests while updating them to use new constants
-  - Balancing between using constants and keeping tests readable and easy to understand
+  - Ensuring that the separation of concerns is maintained while keeping the codebase cohesive
+  - Deciding on the appropriate level of abstraction for each module
 - Decisions:
-  - Used constants for all major parameters in test cases to ensure consistency with the main codebase
-  - Added new test cases where necessary to cover scenarios related to the newly introduced constants
-  - Kept some hard-coded values in tests where they serve as specific test inputs or expected outputs
+  - Kept main.py as lean as possible, focusing on high-level application flow
+  - Moved CLI-specific logic to cli_interface.py to improve modularity
+  - Created a separate problem_generator.py to encapsulate problem generation logic
 - Next steps:
-  - Run the entire test suite to ensure all tests pass with the new changes
-  - Review test coverage to identify any gaps introduced by the recent changes
-  - Update test documentation to reflect the use of centralized constants
-  - Consider adding more edge case tests related to the constants (e.g., boundary conditions for working hours)
-  - Evaluate the need for additional integration tests to ensure different components work correctly with the new constants
+  - Update the test suite to reflect the changes in the project structure
+  - Review and update import statements across the project to ensure they're using the new module structure
+  - Consider creating a similar interface module for GUI functionality if it becomes more complex
 
-[2023-10-09] Task: Update Project Documentation and Finalize Constant Integration
-- Accomplished:
-  - Updated readme.md to include information about centralized constants and their benefits
-  - Revised project_scope.md to emphasize the use of centralized constants for improved maintainability
-  - Updated ux_overview.md to reflect how centralized constants affect the user experience and system consistency
-  - Reviewed and updated all major components to ensure consistent use of centralized constants
-  - Added a new section in the developer documentation about working with and modifying constants
+[2023-10-31] Task: Remove Static Type Checking Implementation and Update Improvement Plan
+- Removed mypy.ini file and __init__.py files created for static type checking
+- Updated improvement_plan.md to remove the task related to implementing static type checking
+- Adjusted the next steps in the improvement plan to focus on:
+  1. Consistent Time Representation
+  2. Performance Optimization
+  3. Further Error Handling Enhancement
 - Challenges:
-  - Ensuring all documentation accurately reflects the current state of the project after constant integration
-  - Balancing between providing detailed information and maintaining readability in documentation
-  - Identifying all areas in the documentation that needed updates related to constant usage
+  - Ensuring all references to static type checking were removed from the project
+  - Deciding on the most important next steps for the project
 - Decisions:
-  - Added a dedicated section about centralized constants in readme.md to highlight their importance
-  - Updated the project scope to include maintainability through centralized constants as a key feature
-  - Emphasized the benefits of centralized constants for both users and developers in ux_overview.md
-  - Created a new developer guide section specifically for working with constants
+  - Focused on improving existing functionality and performance rather than adding new tools
+  - Prioritized tasks that would have the most immediate impact on the project's usability and efficiency
 - Next steps:
-  - Conduct a final review of all project files to ensure consistent use of centralized constants
-  - Consider creating a separate configuration file for easy modification of constants in production
-  - Plan for potential future enhancements, such as allowing certain constants to be user-configurable
-  - Gather feedback from team members on the new constant-based approach and documentation updates
-  - Prepare for the next phase of development, potentially focusing on performance optimizations or new features
+  - Begin work on updating time representations to use datetime objects
+  - Investigate performance bottlenecks and implement caching where appropriate
+  - Review and enhance error handling across all modules
 
-[2023-10-10] Task: Fix Visualization Issue in GUI
-- Accomplished:
-  - Identified and resolved the visualization error in the GUI's visualization tab
-  - Updated gui/visualization_tab.py to use the correct parameter name when calling visualize_schedule function
-  - Changed 'ax' parameter to 'ax_or_filename' in the visualize_schedule function call
+[2023-11-01] Task: Implement Consistent Time Representation
+- Updated utils/errand_utils.py to use datetime and timedelta objects
+- Modified utils/travel_time.py to return timedelta objects for travel times
+- Updated models/schedule.py to use datetime objects for assignments and calculations
+- Modified models/customer.py to use datetime and time objects for availability
+- Updated models/contractor.py to use datetime objects for scheduling
+- Adjusted models/errand.py to work with datetime objects for charge calculations
+- Updated algorithms/initial_scheduler.py to use datetime objects consistently
+- Modified algorithms/optimizer.py to work with datetime objects in constraints and objective function
 - Challenges:
-  - Identifying the root cause of the visualization error
-  - Ensuring the fix doesn't introduce new issues in other parts of the application
+  - Ensuring consistency across all modules when changing time representation
+  - Adapting the optimization model to work with datetime objects while maintaining integer constraints
 - Decisions:
-  - Kept the flexible design of the visualize_schedule function, allowing it to accept either an axes object or a filename
-  - Updated only the necessary part of the code to minimize potential side effects
+  - Used datetime.combine() to create full datetime objects when necessary
+  - Converted time representations to minutes since midnight for optimization constraints
+  - Updated profit calculations to use timedelta.total_seconds() for accurate time-based costs
 - Next steps:
-  - Thoroughly test the visualization functionality in both GUI and CLI modes
-  - Update any relevant documentation or comments related to the visualization function
-  - Review other parts of the codebase that might be calling the visualize_schedule function to ensure consistency
-  - Consider adding more robust error handling and user feedback in the GUI for visualization-related issues
+  - Update the test suite to reflect the changes in time representation
+  - Review and update the GUI components to work with the new datetime representations
+  - Investigate potential performance optimizations now that we're using datetime objects
 
-[2023-10-11] Task: Improve Visibility of Routes in Visualization
-- Accomplished:
-  - Updated utils/visualization.py to enhance the visibility of routes in the schedule visualization
-  - Increased the line width of the routes from 2 to 3
-  - Increased the opacity of the routes to 1 (fully opaque)
-  - Added a slight offset (0.15) to the routes to prevent them from aligning perfectly with grid lines
-  - Reduced the opacity of the city grid from 0.3 to 0.2
-  - Increased the size of customer and contractor markers for better visibility
-  - Updated the color scheme to use plt.cm.Set1 for better contrast between different contractors
+[2023-11-02] Task: Fix Time Representation Issues and Improve Error Handling
+- Updated algorithms/initial_scheduler.py to convert WORK_START_TIME and WORK_END_TIME to datetime.time objects
+- Modified algorithms/optimizer.py to use the new time objects consistently
+- Added error handling for cases where time conversion might fail
+- Updated gui/problem_definition_tab.py to import generate_problem from utils/problem_generator.py instead of main.py
 - Challenges:
-  - Balancing the visibility of routes with the clarity of other elements in the visualization
-  - Ensuring the changes don't negatively impact the overall aesthetics of the visualization
-  - Maintaining compatibility with both GUI and CLI visualization outputs
+  - Ensuring that all parts of the codebase use the new time representation consistently
+  - Identifying and updating all occurrences of the old time representation
 - Decisions:
-  - Used a combination of color, opacity, and line width adjustments to improve route visibility
-  - Implemented a small offset for routes to prevent them from being hidden by grid lines
-  - Kept the city grid visible but with reduced opacity to maintain context while emphasizing routes
+  - Created WORK_START_TIME_OBJ and WORK_END_TIME_OBJ in both initial_scheduler.py and optimizer.py for consistency
+  - Used these new time objects throughout the scheduling and optimization processes
 - Next steps:
-  - Test the updated visualization with various schedule scenarios to ensure consistent improvement
-  - Gather user feedback on the new visualization style
-  - Consider adding a legend or color coding for different contractors' routes
-  - Explore options for interactive visualization features in the GUI (e.g., hover information, zooming)
-  - Update relevant documentation to reflect the changes in the visualization component
+  - Run comprehensive tests to ensure that the time representation changes haven't introduced new bugs
+  - Update the documentation to reflect the new time representation approach
+  - Continue to optimize performance, focusing on areas where datetime operations might be expensive
 
-[2023-10-14] Task: Improve Scheduling Algorithms and Add Detailed Logging
-- Accomplished:
-  - Updated algorithms/initial_scheduler.py to include travel time considerations and more accurate profit calculations
-  - Modified algorithms/optimizer.py to improve the OR-Tools model, including better handling of travel times and more accurate profit calculations in the objective function
-  - Implemented detailed logging in both initial_scheduler.py and optimizer.py to provide insights into scheduling decisions and profit calculations
-  - Added a schedule comparison feature in optimizer.py to allow side-by-side analysis of initial and optimized schedules
-  - Updated main.py to utilize the new logging and comparison features
-  - Modified constants.py to include additional parameters needed for the improved algorithms
+[2023-11-03] Task: Fix Date and Time Handling in Errand Model
+- Updated models/errand.py to handle both datetime and date objects in apply_incentive, apply_disincentive, and calculate_final_charge methods
+- Modified type hints to use Union[datetime, date] for scheduled_date and request_date parameters
+- Added logic to extract date from datetime objects when necessary
+- Updated docstrings to reflect the changes in accepted types
 - Challenges:
-  - Balancing the complexity of the initial scheduler while maintaining its greedy nature
-  - Ensuring the OR-Tools model accurately represents all constraints and objectives
-  - Implementing detailed logging without significantly impacting performance
-  - Designing a clear and informative schedule comparison output
+  - Ensuring backward compatibility with existing code that might pass either datetime or date objects
+  - Maintaining consistency in date comparisons across different methods
 - Decisions:
-  - Kept the initial scheduler greedy but included travel time considerations for more realistic scheduling
-  - Enhanced the OR-Tools model to include travel times between errands and more accurate profit calculations
-  - Implemented logging at key decision points in both scheduling algorithms
-  - Created a separate function for schedule comparison to keep the code organized
+  - Used isinstance checks to handle both datetime and date objects
+  - Extracted date from datetime objects to ensure consistent comparisons
+  - Updated type hints to clearly indicate that both datetime and date objects are accepted
 - Next steps:
-  - Thoroughly test the updated algorithms with various problem instances to ensure correctness and performance
-  - Analyze the logs and comparison outputs to identify any remaining discrepancies between initial and optimized schedules
-  - Consider adding visualization improvements to better represent the differences between schedules
-  - Update unit tests to cover the new features and ensure they handle edge cases
-  - Gather user feedback on the new logging and comparison features
-  - Explore options for further optimizing the OR-Tools model, possibly by adjusting solver parameters or adding more sophisticated constraints
+  - Update test cases for the Errand model to cover both datetime and date inputs
+  - Review other parts of the codebase that interact with the Errand model to ensure compatibility
+  - Consider adding similar date/time flexibility to other models if necessary
+
+[2023-11-04] Task: Update GUI Components to Handle Both Integer and Datetime-based Day Representations
+- Modified gui/greedy_solution_tab.py and gui/optimized_solution_tab.py to handle both integer-based and datetime.date-based day representations
+- Updated the UpdateContent method in both files to use isinstance checks for determining the type of day representation
+- Added logic to format the day display string based on the type of day representation (integer or date)
+- Modified the start time handling to work with both integer minutes and datetime objects
+- Challenges:
+  - Ensuring backward compatibility with existing code that might use integer-based day representations
+  - Maintaining consistency in day and time displays across different parts of the GUI
+- Decisions:
+  - Used conditional statements to handle both integer and date-based day representations
+  - Implemented a flexible approach to displaying start times, accommodating both integer minutes and datetime objects
+  - Kept the changes localized to the GUI components to minimize impact on other parts of the system
+- Next steps:
+  - Test the GUI thoroughly with both integer-based and date-based schedules to ensure correct display
+  - Update the visualization component if necessary to handle the new date representations
+  - Consider updating other parts of the system to consistently use datetime objects for improved time handling
 
 # Add your log entries here as you work on the project

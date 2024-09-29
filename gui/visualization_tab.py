@@ -4,16 +4,24 @@ import matplotlib
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from typing import List, Optional
 from algorithms.initial_scheduler import initial_schedule
 from algorithms.optimizer import optimize_schedule
 from utils.visualization import visualize_schedule
+from models.customer import Customer
+from models.contractor import Contractor
+from models.schedule import Schedule
 
 class VisualizationTab(scrolled.ScrolledPanel):
-    def __init__(self, parent):
+    def __init__(self, parent: wx.Window) -> None:
         super().__init__(parent, -1, style=wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
+        self.figure: Figure
+        self.canvas: FigureCanvas
+        self.sizer: wx.BoxSizer
         self.InitUI()
 
-    def InitUI(self):
+    def InitUI(self) -> None:
         self.figure = Figure(figsize=(8, 8))
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
@@ -22,17 +30,21 @@ class VisualizationTab(scrolled.ScrolledPanel):
         self.SetupScrolling(scroll_x=True, scroll_y=True, rate_y=20)
         self.SetMinSize((780, 500))  # Set a minimum size for the panel
 
-    def UpdateContent(self, customers, contractors):
+    def UpdateContent(self, customers: List[Customer], contractors: List[Contractor]) -> None:
         if not self.figure.axes:
-            ax = self.figure.add_subplot(111)
+            ax: Axes = self.figure.add_subplot(111)
         else:
-            ax = self.figure.axes[0]
+            ax: Axes = self.figure.axes[0]
         ax.clear()
         
         try:
             # Generate initial schedule and optimize it
-            initial_sched = initial_schedule(customers, contractors)
-            optimized_sched = optimize_schedule(initial_sched)
+            initial_sched: Optional[Schedule] = initial_schedule(customers, contractors)
+            if initial_sched is None:
+                raise ValueError("Failed to create initial schedule")
+            optimized_sched: Optional[Schedule] = optimize_schedule(initial_sched)
+            if optimized_sched is None:
+                raise ValueError("Failed to optimize schedule")
             
             # Create the visualization
             visualize_schedule(optimized_sched, ax_or_filename=ax)
@@ -52,6 +64,6 @@ class VisualizationTab(scrolled.ScrolledPanel):
         self.Refresh()
         self.Update()
 
-    def OnSize(self, event):
+    def OnSize(self, event: wx.SizeEvent) -> None:
         self.SetupScrolling(scroll_x=True, scroll_y=True, rate_y=20)
         event.Skip()
