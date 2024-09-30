@@ -28,8 +28,9 @@ SyntheticErrandsScheduler/
 │   └── config_manager.py   # Configuration management module
 │
 ├── algorithms/             # Scheduling algorithms
-│   ├── initial_scheduler.py
-│   └── optimizer.py
+│   ├── initial_greedy_scheduler.py
+│   ├── CP_SAT_optimizer.py
+│   └── vehicle_routing_optimizer.py
 │
 ├── gui/                    # GUI components
 │   ├── main_frame.py
@@ -51,10 +52,14 @@ SyntheticErrandsScheduler/
 
 - Representation of Busyville as a 100x100 grid
 - Generation of random problem instances with customizable number of customers and contractors
-- Initial scheduling algorithm using a greedy approach
-- Optimization algorithm using Google OR-Tools to maximize profit
+- Initial scheduling algorithm using a simple greedy approach
+- Two optimization algorithms using Google OR-Tools:
+  - Constraint Programming (CP-SAT) solver for maximizing profit
+  - Vehicle Routing Problem (VRP) solver for optimizing routes
+- Ability to select between optimization algorithms in both GUI and CLI modes
+- General optimizer call implementation for easy switching between optimizers
 - Detailed logging of scheduling decisions and profit calculations
-- Side-by-side comparison of initial and optimized schedules
+- Side-by-side comparison of initial greedy and optimized schedules
 - Visualization of schedules and city layout
 - Comprehensive unit test suite
 - Graphical User Interface (GUI) for easy interaction
@@ -104,6 +109,8 @@ To run the application with the graphical user interface:
 python main.py
 ```
 
+In GUI mode, you can select the optimization algorithm (CP-SAT or VRP) using the dropdown menu in the Problem Definition tab.
+
 ### CLI Mode
 
 To run the application in command-line interface mode:
@@ -112,7 +119,14 @@ To run the application in command-line interface mode:
 python main.py --cli
 ```
 
-In CLI mode, the program now provides detailed logging of the scheduling process, including profit calculations for each errand and a side-by-side comparison of the initial and optimized schedules.
+By default, the CLI mode uses the CP-SAT optimizer. To specify the optimizer, use the `--optimizer` option:
+
+```
+python main.py --cli --optimizer cp-sat  # Use CP-SAT optimizer (default)
+python main.py --cli --optimizer vrp     # Use VRP optimizer
+```
+
+In CLI mode, the program provides detailed logging of the scheduling process, including profit calculations for each errand and a side-by-side comparison of the initial greedy and optimized schedules.
 
 ## Running Tests
 
@@ -127,7 +141,7 @@ This will discover and run all tests in the `tests` directory.
 ## Visualization
 
 The program generates two visualization files when run in CLI mode:
-- `initial_schedule.png`: Visualization of the initial schedule
+- `initial_greedy_schedule.png`: Visualization of the initial greedy schedule
 - `optimized_schedule.png`: Visualization of the optimized schedule
 
 These files show the city layout, customer and contractor locations, and the routes for each day.
@@ -138,9 +152,16 @@ In GUI mode, the visualization is displayed in the "Visualization" tab.
 
 The project uses Google OR-Tools for schedule optimization. This powerful library allows for sophisticated constraint programming and optimization techniques, potentially leading to better schedules and higher profits. The optimizer now includes:
 
+- Two optimization algorithms:
+  1. Constraint Programming (CP-SAT) solver: Focuses on maximizing profit while respecting all constraints.
+  2. Vehicle Routing Problem (VRP) solver: Optimizes routes for contractors, potentially reducing travel time and increasing efficiency.
+- Ability to select between optimization algorithms in both GUI and CLI modes
+- General optimizer call implementation for easy switching between optimizers
 - Detailed logging of optimization decisions
 - Consideration of travel time between errands
 - Improved profit calculation in the objective function
+
+The CP-SAT solver is better suited for complex constraints and objective functions, while the VRP solver is more efficient for route optimization. Users can choose the most appropriate solver based on their specific needs and problem characteristics.
 
 ## Logging
 
@@ -149,13 +170,15 @@ The application now uses Python's built-in logging module to provide detailed in
 ## Future Improvements
 
 - Fine-tune OR-Tools parameters for better optimization results
-- Implement more complex constraints and objectives in the optimization model
+- Implement more complex constraints and objectives in the optimization models
 - Add real-time updates and dynamic rescheduling
 - Enhance visualization with more detailed information
 - Implement more comprehensive error handling
 - Add option to save logs to a file
-- Investigate and resolve any discrepancies between initial and optimized schedule profits
+- Investigate and resolve any discrepancies between initial greedy and optimized schedule profits
 - Implement static type checking using mypy as part of the development workflow
+- Conduct performance comparisons between CP-SAT and VRP solvers for various problem sizes and characteristics
+- Implement a hybrid optimization approach combining both CP-SAT and VRP solvers
 
 For more details on the project scope and development process, please refer to `project_scope.md` and `developer_log.md`.
 

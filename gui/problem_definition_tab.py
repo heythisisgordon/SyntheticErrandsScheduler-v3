@@ -1,17 +1,15 @@
 import wx
 from typing import List, Tuple
-from utils.problem_generator import generate_problem
 from models.schedule import Schedule
-from models.customer import Customer
-from models.contractor import Contractor
 from constants import ERRAND_TYPES, MAX_INCENTIVE_MULTIPLIER, ErrandType
 
 class ProblemDefinitionTab(wx.Panel):
-    def __init__(self, parent: wx.Window) -> None:
+    def __init__(self, parent: wx.Window, main_frame) -> None:
         super().__init__(parent)
+        self.main_frame = main_frame
         self.num_customers: wx.SpinCtrl
         self.num_contractors: wx.SpinCtrl
-        self.generate_btn: wx.Button
+        self.optimizer_choice: wx.Choice
         self.InitUI()
 
     def InitUI(self) -> None:
@@ -29,6 +27,15 @@ class ProblemDefinitionTab(wx.Panel):
         hbox2.Add(wx.StaticText(self, label="Number of Contractors:"), flag=wx.RIGHT, border=8)
         hbox2.Add(self.num_contractors)
         vbox.Add(hbox2, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, border=10)
+
+        # Add optimizer selection dropdown
+        hbox3: wx.BoxSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.optimizer_choice = wx.Choice(self, choices=["CP-SAT Solver", "Vehicle Routing Solver"])
+        self.optimizer_choice.SetSelection(0)  # Default to CP-SAT Solver
+        self.optimizer_choice.Bind(wx.EVT_CHOICE, self.OnOptimizerChoice)
+        hbox3.Add(wx.StaticText(self, label="Optimizer:"), flag=wx.RIGHT, border=8)
+        hbox3.Add(self.optimizer_choice)
+        vbox.Add(hbox3, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, border=10)
 
         # Add model information
         vbox.Add(wx.StaticLine(self), flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, border=10)
@@ -80,24 +87,17 @@ class ProblemDefinitionTab(wx.Panel):
         working_hours_info: wx.StaticText = wx.StaticText(self, label="Working Hours: 8am to 5pm each day")
         vbox.Add(working_hours_info, flag=wx.LEFT|wx.TOP, border=10)
 
-        # Add a button to generate the problem
-        self.generate_btn = wx.Button(self, label='Generate Problem')
-        self.generate_btn.Bind(wx.EVT_BUTTON, self.OnGenerate)
-        vbox.Add(self.generate_btn, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, border=10)
-
         self.SetSizer(vbox)
 
-    def OnGenerate(self, event: wx.CommandEvent) -> None:
-        # Generate the problem and update other tabs
-        num_customers: int = self.num_customers.GetValue()
-        num_contractors: int = self.num_contractors.GetValue()
-        
-        # Generate problem instance
-        customers, contractors = generate_problem(num_customers, num_contractors)
-        
-        # Update other tabs
-        main_frame: wx.Frame = wx.GetApp().GetTopWindow()
-        main_frame.generated_problem.UpdateContent(customers, contractors)
-        main_frame.greedy_solution.UpdateContent(customers, contractors)
-        main_frame.optimized_solution.UpdateContent(customers, contractors)
-        main_frame.visualization.UpdateContent(customers, contractors)
+    def OnOptimizerChoice(self, event: wx.CommandEvent) -> None:
+        selected_optimizer = self.optimizer_choice.GetString(self.optimizer_choice.GetSelection())
+        self.main_frame.set_selected_optimizer(selected_optimizer)
+
+    def get_num_customers(self) -> int:
+        return self.num_customers.GetValue()
+
+    def get_num_contractors(self) -> int:
+        return self.num_contractors.GetValue()
+
+    def get_selected_optimizer(self) -> str:
+        return self.optimizer_choice.GetString(self.optimizer_choice.GetSelection())

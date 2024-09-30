@@ -9,11 +9,11 @@ from models.customer import Customer
 from models.contractor import Contractor
 from models.errand import Errand
 from models.schedule import Schedule
-from algorithms.initial_scheduler import initial_schedule, InitialSchedulingError
+from algorithms.initial_greedy_scheduler import initial_greedy_schedule, InitialSchedulingError
 from utils.city_map import GRID_SIZE
 from constants import WORK_START_TIME, WORK_END_TIME, SCHEDULING_DAYS, ERRAND_TYPES, ErrandType
 
-class TestInitialScheduler(unittest.TestCase):
+class TestInitialGreedyScheduler(unittest.TestCase):
     def setUp(self) -> None:
         # Create a sample problem for testing
         self.customers: List[Customer] = [
@@ -26,8 +26,8 @@ class TestInitialScheduler(unittest.TestCase):
             Contractor(1, (GRID_SIZE-1, GRID_SIZE-1))
         ]
 
-    def test_initial_schedule_creation(self) -> None:
-        schedule: Schedule = initial_schedule(self.customers, self.contractors)
+    def test_initial_greedy_schedule_creation(self) -> None:
+        schedule: Schedule = initial_greedy_schedule(self.customers, self.contractors)
         
         # Check if the schedule is an instance of Schedule
         self.assertIsInstance(schedule, Schedule)
@@ -41,7 +41,7 @@ class TestInitialScheduler(unittest.TestCase):
         self.assertEqual(len(assigned_customers), len(self.customers))
         
     def test_schedule_validity(self) -> None:
-        schedule: Schedule = initial_schedule(self.customers, self.contractors)
+        schedule: Schedule = initial_greedy_schedule(self.customers, self.contractors)
         
         for day, assignments in schedule.assignments.items():
             for customer, _, start_time in assignments:
@@ -50,7 +50,7 @@ class TestInitialScheduler(unittest.TestCase):
                 self.assertLess(start_time + customer.desired_errand.base_time, datetime.combine(start_time.date(), datetime.min.time().replace(hour=WORK_END_TIME // 60, minute=WORK_END_TIME % 60)))
 
     def test_contractor_assignment(self) -> None:
-        schedule: Schedule = initial_schedule(self.customers, self.contractors)
+        schedule: Schedule = initial_greedy_schedule(self.customers, self.contractors)
         
         for day, assignments in schedule.assignments.items():
             contractor_assignments: Dict[int, List[Tuple[Customer, datetime]]] = {contractor.id: [] for contractor in self.contractors}
@@ -63,7 +63,7 @@ class TestInitialScheduler(unittest.TestCase):
                                  f"Errands for contractor {contractor_id} are not in chronological order")
 
     def test_earliest_possible_scheduling(self) -> None:
-        schedule: Schedule = initial_schedule(self.customers, self.contractors)
+        schedule: Schedule = initial_greedy_schedule(self.customers, self.contractors)
         
         for day, assignments in schedule.assignments.items():
             contractor_end_times: Dict[int, datetime] = {contractor.id: datetime.combine(day, datetime.min.time().replace(hour=WORK_START_TIME // 60, minute=WORK_START_TIME % 60)) for contractor in self.contractors}
@@ -80,7 +80,7 @@ class TestInitialScheduler(unittest.TestCase):
             for i in range(5)
         ]
         
-        schedule: Schedule = initial_schedule(test_customers, self.contractors)
+        schedule: Schedule = initial_greedy_schedule(test_customers, self.contractors)
         
         # Extract the order of scheduled customers
         scheduled_customer_order: List[int] = []
@@ -95,11 +95,11 @@ class TestInitialScheduler(unittest.TestCase):
 
     def test_empty_customer_list(self) -> None:
         with self.assertRaises(InitialSchedulingError):
-            initial_schedule([], self.contractors)
+            initial_greedy_schedule([], self.contractors)
 
     def test_empty_contractor_list(self) -> None:
         with self.assertRaises(InitialSchedulingError):
-            initial_schedule(self.customers, [])
+            initial_greedy_schedule(self.customers, [])
 
     def test_no_feasible_schedule(self) -> None:
         # Create a scenario where no feasible schedule is possible
@@ -107,7 +107,7 @@ class TestInitialScheduler(unittest.TestCase):
             Customer(0, (10, 10), Errand(0, ERRAND_TYPES[0][0], timedelta(minutes=WORK_END_TIME - WORK_START_TIME + 1), ERRAND_TYPES[0][2], ERRAND_TYPES[0][3]), {0: list(range(WORK_START_TIME, WORK_END_TIME, 30))})
         ]
         with self.assertRaises(InitialSchedulingError):
-            initial_schedule(impossible_customers, self.contractors)
+            initial_greedy_schedule(impossible_customers, self.contractors)
 
 if __name__ == '__main__':
     unittest.main()

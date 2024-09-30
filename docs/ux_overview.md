@@ -7,17 +7,17 @@ User Interaction:
 1. GUI Mode (Default):
    - The user runs the program by executing the main.py file.
    - A graphical interface appears with multiple tabs:
-     a. Problem Definition: Allows users to set parameters for problem generation and displays errand types with their characteristics, including capped same-day incentives.
+     a. Problem Definition: Allows users to set parameters for problem generation, select the optimization algorithm (CP-SAT or VRP), and displays errand types with their characteristics, including capped same-day incentives.
      b. Generated Problem: Displays the randomly generated problem instance.
      c. Greedy Solution: Shows the initial schedule created by the greedy algorithm.
-     d. Optimized Solution: Presents the optimized schedule using Google OR-Tools.
+     d. Optimized Solution: Presents the optimized schedule using the selected algorithm (CP-SAT or VRP) from Google OR-Tools.
      e. Visualization: Provides a visual representation of the schedules and city layout.
    - Users can interact with each tab, adjusting parameters and viewing results in real-time.
    - The visualization tab allows for easy comparison between the initial and optimized schedules.
 
 2. CLI Mode:
    - The user runs the program by executing "python main.py --cli".
-   - The program automatically generates a problem instance, creates an initial schedule, and optimizes it.
+   - The program automatically generates a problem instance, creates an initial schedule, and optimizes it using the default optimization algorithm.
    - Results are displayed in the console, showing:
      - The initial and optimized schedules for each day
      - Total profit achieved for both schedules
@@ -27,6 +27,7 @@ Key Features:
 - Interactive GUI for easy problem definition and result analysis
 - Real-time visualization of schedules and city layout
 - Ability to compare initial (greedy) and optimized solutions
+- Option to select between CP-SAT and VRP optimization algorithms in the GUI
 - Option to run in CLI mode for quick testing and integration into other workflows
 - Detailed output of schedules and profits
 - Centralized constants for easy configuration and maintenance
@@ -51,6 +52,13 @@ Working Hours and Scheduling:
 - These constants are consistently applied across the initial scheduling, optimization, and visualization components.
 - Users can be confident that all generated schedules adhere to these predefined constraints.
 
+Optimization Algorithm Selection:
+- Users can now choose between two optimization algorithms in the GUI:
+  1. Constraint Programming (CP-SAT) Solver: Focuses on maximizing profit while respecting all constraints.
+  2. Vehicle Routing Problem (VRP) Solver: Optimizes routes for contractors, potentially reducing travel time and increasing efficiency.
+- The selected algorithm is used to generate the optimized schedule, allowing users to compare the results of different approaches.
+- This feature provides flexibility in solving different types of scheduling problems and allows for performance comparisons between different approaches.
+
 Type Hinting and Code Quality:
 - The entire codebase now includes comprehensive type hints, which indirectly benefits the user experience by:
   - Reducing the likelihood of type-related bugs, leading to a more stable and reliable application.
@@ -66,5 +74,7 @@ Future enhancements may include:
 - User-configurable errand types and incentives through the GUI
 - Option to modify key constants (like working hours or scheduling period) through the GUI or configuration files
 - Implementation of static type checking to further improve code quality and catch potential issues early in the development process
+- Hybrid optimization approach combining CP-SAT and VRP solvers for potentially better results
+- Detailed performance comparison tools for different optimization strategies
 
-By centralizing constants, improving maintainability, and implementing comprehensive type hinting, we've created a foundation for a more robust and flexible scheduling system that can easily adapt to future requirements while providing a consistent and reliable user experience.
+By centralizing constants, improving maintainability, implementing comprehensive type hinting, and providing multiple optimization strategies, we've created a foundation for a more robust and flexible scheduling system that can easily adapt to future requirements while providing a consistent and reliable user experience.

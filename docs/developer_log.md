@@ -1,5 +1,7 @@
 # Developer Log
 
+New entries must be appended to the end of the log. Do not edit or delete previous entries without specific instructions. Do not use placeholders for old entries when editing the developer log; the code has no way to know what data the placeholder represents.
+
 ## Project History Summary
 
 - Implemented modular structure with separate directories for models, utils, and algorithms
@@ -21,7 +23,7 @@
 
 ## Recent Development Log
 
-[2023-10-22] Task: Implement Type Hinting in Schedule Model
+1. Task: Implement Type Hinting in Schedule Model
 - Updated models/schedule.py to include type hints for all attributes, method parameters, and return values
 - Added necessary imports from typing module (List, Dict, Tuple, Any)
 - Updated method signatures to include type annotations
@@ -29,7 +31,7 @@
 - Decisions: Used Dict[int, List[Tuple[Customer, Contractor, int]]] for self.assignments to accurately represent its structure
 - Next: Continue adding type hints to other core modules, run mypy for static type checking, and update related files as needed
 
-[2023-10-23] Task: Review and Document Existing Type Hints in Errand Model
+2. Task: Review and Document Existing Type Hints in Errand Model
 - Discovered that models/errand.py already has comprehensive type hinting implemented
 - Reviewed the existing type hints in the Errand class for correctness and completeness
 - Noted the use of Union[Dict[str, Union[str, int, float]], None] for the disincentive attribute, which accurately represents its possible types
@@ -37,7 +39,7 @@
 - Decisions: No changes needed to the existing type hints in models/errand.py
 - Next: Continue with type hinting in other core modules, focusing on those that haven't been updated yet, such as models/customer.py and models/contractor.py
 
-[2023-10-24] Task: Implement Type Hinting in Customer Model
+3. Task: Implement Type Hinting in Customer Model
 - Updated models/customer.py to include type hints for all attributes, method parameters, and return values
 - Added necessary imports from typing module (Dict, List, Tuple)
 - Updated class and method signatures to include type annotations
@@ -46,7 +48,7 @@
 - Decisions: Used Dict[int, List[int]] for availability to represent days mapped to lists of available time slots
 - Next: Implement type hinting in the Contractor model and continue with other core modules as needed
 
-[2023-10-25] Task: Implement Type Hinting in Contractor Model
+4. Task: Implement Type Hinting in Contractor Model
 - Updated models/contractor.py to include type hints for all attributes, method parameters, and return values
 - Added necessary imports from typing module (Dict, List, Tuple)
 - Updated class and method signatures to include type annotations
@@ -55,7 +57,7 @@
 - Decisions: Used Dict[int, List] for schedule to represent days mapped to lists of assignments (kept as List for flexibility)
 - Next: Continue implementing type hinting in other core modules, focusing on utility functions and algorithm files
 
-[2023-10-26] Task: Review and Document Existing Type Hints in Errand Utils
+5. Task: Review and Document Existing Type Hints in Errand Utils
 - Discovered that utils/errand_utils.py already has comprehensive type hinting implemented
 - Reviewed the existing type hints in the calculate_errand_time function for correctness and completeness
 - Noted the use of Tuple[int, int] for location parameters and int for the return type
@@ -63,7 +65,7 @@
 - Decisions: No changes needed to the existing type hints in utils/errand_utils.py
 - Next: Continue with type hinting in other utility functions and algorithm files, focusing on those that haven't been updated yet, such as utils/travel_time.py and algorithms/initial_scheduler.py
 
-[2023-10-27] Task: Complete Type Hinting Implementation Across the Project
+6. Task: Complete Type Hinting Implementation Across the Project
 - Implemented type hints in remaining files:
   - utils/travel_time.py
   - utils/city_map.py
@@ -91,7 +93,7 @@
   - Update project documentation to reflect the completion of type hinting implementation
   - Consider implementing static type checking as part of the development workflow
 
-[2023-10-28] Task: Update Project Documentation
+7. Task: Update Project Documentation
 - Updated the following documentation files to reflect the implementation of type hints:
   - readme.md: Added information about type hinting in the "Key Features" section and updated the "Contributing" guidelines
   - project_scope.md: Included type hinting implementation in the "In-Scope" and "Deliverables" sections
@@ -105,7 +107,7 @@
   - Continue to monitor and update type hints as the project evolves
   - Consider implementing static type checking as part of the continuous integration process
 
-[2023-10-29] Task: Refactor optimizer.py for Improved Code Organization
+8. Task: Refactor optimizer.py for Improved Code Organization
 - Broke down the large optimize_schedule function into smaller, more focused functions:
   - setup_model_and_variables: Sets up the CP model and variables
   - add_constraints: Adds constraints to the model
@@ -122,7 +124,7 @@
   - Update the test suite to reflect the changes in the optimizer module
   - Consider similar refactoring for other complex modules in the project
 
-[2023-10-30] Task: Improve Modularity of main.py and Create Separate CLI Interface
+9. Task: Improve Modularity of main.py and Create Separate CLI Interface
 - Created a new file cli_interface.py to handle CLI-specific functionality
 - Moved problem generation logic to a new file utils/problem_generator.py
 - Updated main.py to focus on setting up the application and delegating to the appropriate interface (CLI or GUI)
@@ -140,7 +142,7 @@
   - Review and update import statements across the project to ensure they're using the new module structure
   - Consider creating a similar interface module for GUI functionality if it becomes more complex
 
-[2023-10-31] Task: Remove Static Type Checking Implementation and Update Improvement Plan
+10. Task: Remove Static Type Checking Implementation and Update Improvement Plan
 - Removed mypy.ini file and __init__.py files created for static type checking
 - Updated improvement_plan.md to remove the task related to implementing static type checking
 - Adjusted the next steps in the improvement plan to focus on:
@@ -158,7 +160,7 @@
   - Investigate performance bottlenecks and implement caching where appropriate
   - Review and enhance error handling across all modules
 
-[2023-11-01] Task: Implement Consistent Time Representation
+11. Task: Implement Consistent Time Representation
 - Updated utils/errand_utils.py to use datetime and timedelta objects
 - Modified utils/travel_time.py to return timedelta objects for travel times
 - Updated models/schedule.py to use datetime objects for assignments and calculations
@@ -179,7 +181,7 @@
   - Review and update the GUI components to work with the new datetime representations
   - Investigate potential performance optimizations now that we're using datetime objects
 
-[2023-11-02] Task: Fix Time Representation Issues and Improve Error Handling
+12. Task: Fix Time Representation Issues and Improve Error Handling
 - Updated algorithms/initial_scheduler.py to convert WORK_START_TIME and WORK_END_TIME to datetime.time objects
 - Modified algorithms/optimizer.py to use the new time objects consistently
 - Added error handling for cases where time conversion might fail
@@ -195,7 +197,7 @@
   - Update the documentation to reflect the new time representation approach
   - Continue to optimize performance, focusing on areas where datetime operations might be expensive
 
-[2023-11-03] Task: Fix Date and Time Handling in Errand Model
+13. Task: Fix Date and Time Handling in Errand Model
 - Updated models/errand.py to handle both datetime and date objects in apply_incentive, apply_disincentive, and calculate_final_charge methods
 - Modified type hints to use Union[datetime, date] for scheduled_date and request_date parameters
 - Added logic to extract date from datetime objects when necessary
@@ -212,7 +214,7 @@
   - Review other parts of the codebase that interact with the Errand model to ensure compatibility
   - Consider adding similar date/time flexibility to other models if necessary
 
-[2023-11-04] Task: Update GUI Components to Handle Both Integer and Datetime-based Day Representations
+14. Task: Update GUI Components to Handle Both Integer and Datetime-based Day Representations
 - Modified gui/greedy_solution_tab.py and gui/optimized_solution_tab.py to handle both integer-based and datetime.date-based day representations
 - Updated the UpdateContent method in both files to use isinstance checks for determining the type of day representation
 - Added logic to format the day display string based on the type of day representation (integer or date)
@@ -228,5 +230,80 @@
   - Test the GUI thoroughly with both integer-based and date-based schedules to ensure correct display
   - Update the visualization component if necessary to handle the new date representations
   - Consider updating other parts of the system to consistently use datetime objects for improved time handling
+
+15. Task: Implement Vehicle Routing Problem (VRP) Solver and Optimizer Selection
+- Created a new file algorithms/vehicle_routing_optimizer.py to implement the VRP solver using Google OR-Tools
+- Updated gui/problem_definition_tab.py to include a dropdown for selecting the optimizer (CP-SAT or VRP)
+- Modified gui/main_frame.py to store the selected optimizer and pass it to the optimized solution tab
+- Updated gui/optimized_solution_tab.py to use the selected optimizer when generating the optimized schedule
+- Updated docs/readme.md to include information about the new VRP solver and optimizer selection feature
+- Challenges:
+  - Integrating the VRP solver with the existing project structure and data models
+  - Ensuring that both optimizers (CP-SAT and VRP) can work with the same input data and produce compatible output
+- Decisions:
+  - Kept the VRP solver implementation separate from the existing CP-SAT solver for modularity
+  - Used a strategy pattern to allow easy switching between optimizers in the GUI
+  - Updated the Schedule model to accommodate both integer-based and datetime-based representations for compatibility
+- Next steps:
+  - Implement comprehensive unit tests for the new VRP solver
+  - Conduct performance comparisons between the CP-SAT and VRP solvers for various problem sizes
+  - Update the CLI interface to allow optimizer selection in command-line mode
+  - Consider implementing a hybrid approach that combines both solvers for potentially better results
+
+16. Task: Implement Optimizer Selection in CLI Mode
+- Updated main.py to add command-line arguments for selecting the optimizer (CP-SAT or VRP)
+- Modified cli_interface.py to accept the optimizer choice as an argument
+- Updated the cli_main function in cli_interface.py to use the selected optimizer
+- Added error handling for invalid optimizer selections
+- Updated the documentation in main.py and cli_interface.py to reflect the new CLI options
+- Challenges:
+  - Ensuring consistency between GUI and CLI optimizer selection mechanisms
+  - Maintaining backward compatibility with existing CLI usage
+- Decisions:
+  - Used argparse in main.py to handle command-line arguments, including the new --optimizer option
+  - Set CP-SAT as the default optimizer to maintain compatibility with existing usage
+  - Updated the cli_main function signature to accept the optimizer choice
+- Next steps:
+  - Update the project documentation (readme.md, ux_overview.md) to include information about CLI optimizer selection
+  - Create test cases for CLI optimizer selection
+  - Consider adding more detailed output in CLI mode to show which optimizer is being used
+
+17. Task: Rename Initial Scheduler to Initial Greedy Scheduler
+- Renamed algorithms/initial_scheduler.py to algorithms/initial_greedy_scheduler.py
+- Updated all references to initial_scheduler.py across the project:
+  - Modified imports in cli_interface.py, gui/optimized_solution_tab.py, gui/greedy_solution_tab.py, and gui/visualization_tab.py
+  - Updated function names from initial_schedule to initial_greedy_schedule
+- Updated tests/test_initial_scheduler.py to reflect the new naming convention
+- Modified relevant documentation files (readme.md, project_scope.md) to mention the "initial greedy scheduler" instead of just "initial scheduler"
+- Challenges:
+  - Ensuring all references to the initial scheduler were updated consistently across the project
+  - Maintaining backward compatibility with existing code and tests
+- Decisions:
+  - Kept the basic functionality of the initial greedy scheduler unchanged
+  - Updated documentation to emphasize the greedy nature of the initial scheduling algorithm
+  - Retained the InitialSchedulingError exception name for consistency
+- Next steps:
+  - Run comprehensive tests to ensure the renaming didn't introduce any bugs
+  - Review the initial greedy scheduler implementation to ensure it adheres to a true greedy approach
+  - Consider adding more detailed comments in the initial_greedy_scheduler.py file to explain the greedy algorithm
+
+18. Task: Implement General Optimizer Call and Rename CP-SAT Optimizer
+- Renamed 'optimizer.py' to 'CP_SAT_optimizer.py'
+- Updated import statements in all relevant files to use the new filename
+- Modified main.py to pass the optimizer parameter to both CLI and GUI modes
+- Updated gui/main_frame.py to accept and use the optimizer parameter
+- Ensured that gui/problem_definition_tab.py correctly updates the selected optimizer
+- Verified that gui/optimized_solution_tab.py uses the selected optimizer correctly
+- Challenges:
+  - Ensuring consistent optimizer selection across both GUI and CLI modes
+  - Maintaining backward compatibility with existing code and tests
+- Decisions:
+  - Used a string parameter ('cp-sat' or 'vrp') to represent the chosen optimizer
+  - Implemented conditional logic in relevant parts of the code to use the appropriate optimizer based on the selection
+  - Kept the existing optimizer implementations (CP-SAT and VRP) separate for modularity
+- Next steps:
+  - Update the project documentation (readme.md, ux_overview.md) to reflect the new optimizer selection feature
+  - Create additional test cases to ensure proper functioning of both optimizers in various scenarios
+  - Consider implementing a factory pattern or dependency injection for more flexible optimizer selection in the future
 
 # Add your log entries here as you work on the project

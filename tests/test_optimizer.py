@@ -5,7 +5,7 @@ from models.customer import Customer
 from models.contractor import Contractor
 from models.errand import Errand
 from models.schedule import Schedule
-from algorithms.optimizer import optimize_schedule, is_valid_schedule
+from algorithms.CP_SAT_optimizer import optimize_schedule, is_valid_schedule
 from utils.city_map import GRID_SIZE
 from constants import WORK_START_TIME, WORK_END_TIME, SCHEDULING_DAYS, ERRAND_TYPES, ErrandType
 

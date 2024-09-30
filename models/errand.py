@@ -76,9 +76,13 @@ class Errand:
         request_date_only = request_date.date() if isinstance(request_date, datetime) else request_date
 
         days_difference = (scheduled_date_only - request_date_only).days
-        if days_difference <= SCHEDULING_DAYS:
-            return self.charge
 
+        # Apply gradual disincentive within SLA window
+        if days_difference <= SCHEDULING_DAYS:
+            gradual_disincentive = 1 - (days_difference / SCHEDULING_DAYS) * 0.1  # 10% max reduction within SLA
+            return self.charge * gradual_disincentive
+
+        # Apply original disincentive for days beyond SLA window
         days_past = days_difference - SCHEDULING_DAYS
         if self.disincentive['type'] == 'percentage':
             reduction = min(self.disincentive['value'] * days_past / 100, 1)  # Cap at 100% reduction

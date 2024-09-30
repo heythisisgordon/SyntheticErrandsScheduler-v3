@@ -6,8 +6,6 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from typing import List, Optional
-from algorithms.initial_scheduler import initial_schedule
-from algorithms.optimizer import optimize_schedule
 from utils.visualization import visualize_schedule
 from models.customer import Customer
 from models.contractor import Contractor
@@ -30,7 +28,7 @@ class VisualizationTab(scrolled.ScrolledPanel):
         self.SetupScrolling(scroll_x=True, scroll_y=True, rate_y=20)
         self.SetMinSize((780, 500))  # Set a minimum size for the panel
 
-    def UpdateContent(self, customers: List[Customer], contractors: List[Contractor]) -> None:
+    def UpdateContent(self, customers: List[Customer], contractors: List[Contractor], optimized_sched: Schedule) -> None:
         if not self.figure.axes:
             ax: Axes = self.figure.add_subplot(111)
         else:
@@ -38,14 +36,6 @@ class VisualizationTab(scrolled.ScrolledPanel):
         ax.clear()
         
         try:
-            # Generate initial schedule and optimize it
-            initial_sched: Optional[Schedule] = initial_schedule(customers, contractors)
-            if initial_sched is None:
-                raise ValueError("Failed to create initial schedule")
-            optimized_sched: Optional[Schedule] = optimize_schedule(initial_sched)
-            if optimized_sched is None:
-                raise ValueError("Failed to optimize schedule")
-            
             # Create the visualization
             visualize_schedule(optimized_sched, ax_or_filename=ax)
             

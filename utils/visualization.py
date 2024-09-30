@@ -8,6 +8,7 @@ from models.customer import Customer
 from models.contractor import Contractor
 from utils.city_map import GRID_SIZE, create_city_grid
 from utils.travel_time import calculate_travel_time
+from datetime import date, datetime
 
 def visualize_schedule(schedule: Schedule, ax_or_filename: Union[Axes, str, None] = None) -> None:
     """
@@ -43,8 +44,17 @@ def visualize_schedule(schedule: Schedule, ax_or_filename: Union[Axes, str, None
     contractor_colors: np.ndarray = plt.cm.Set1(np.linspace(0, 1, len(schedule.contractors)))
     
     for day, assignments in schedule.assignments.items():
+        if isinstance(day, datetime):
+            day_str = day.strftime("%Y-%m-%d")
+        elif isinstance(day, date):
+            day_str = day.strftime("%Y-%m-%d")
+        elif isinstance(day, int):
+            day_str = f"Day {day}"
+        else:
+            day_str = str(day)
+        
         for contractor in schedule.contractors:
-            contractor_assignments: List[Tuple[Customer, Contractor, int]] = [a for a in assignments if a[1].id == contractor.id]
+            contractor_assignments: List[Tuple[Customer, Contractor, Union[int, datetime]]] = [a for a in assignments if a[1].id == contractor.id]
             if not contractor_assignments:
                 continue
             
@@ -61,7 +71,7 @@ def visualize_schedule(schedule: Schedule, ax_or_filename: Union[Axes, str, None
                 ax.plot([x + offset for x in path_x], [y + offset for y in path_y],
                         color=contractor_colors[contractor.id], 
                         alpha=1, linewidth=3, zorder=2,
-                        label=f'Contractor {contractor.id+1}, Day {day+1}' if i == 0 else "")
+                        label=f'Contractor {contractor.id+1}, {day_str}' if i == 0 else "")
     
     ax.set_title("Optimized Schedule Visualization")
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -84,14 +94,26 @@ def print_schedule(schedule: Schedule) -> None:
     print("===========================")
     
     for day, assignments in schedule.assignments.items():
-        print(f"\nDay {day + 1}:")
+        if isinstance(day, (datetime, date)):
+            day_str = day.strftime("%Y-%m-%d")
+        elif isinstance(day, int):
+            day_str = f"Day {day}"
+        else:
+            day_str = str(day)
+        
+        print(f"\n{day_str}:")
         for customer, contractor, start_time in assignments:
-            hours: int
-            minutes: int
-            hours, minutes = divmod(start_time, 60)
+            if isinstance(start_time, datetime):
+                time_str = start_time.strftime("%H:%M")
+            elif isinstance(start_time, int):
+                hours, minutes = divmod(start_time, 60)
+                time_str = f"{hours:02d}:{minutes:02d}"
+            else:
+                time_str = str(start_time)
+            
             print(f"  Contractor {contractor.id + 1} - Customer {customer.id + 1}:")
             print(f"    Errand: {customer.desired_errand.type}")
-            print(f"    Start Time: {hours:02d}:{minutes:02d}")
+            print(f"    Start Time: {time_str}")
             print(f"    Location: ({customer.location[0]}, {customer.location[1]})")
     
     print(f"\nTotal Profit: ${schedule.calculate_total_profit():.2f}")
