@@ -121,7 +121,7 @@ def setup_objective(model: cp_model.CpModel, schedule: Schedule, x: Dict) -> Non
                 total_time = get_errand_time(errand, contractor.location, customer.location)
                 
                 charge = errand.calculate_final_charge(datetime.now() + timedelta(days=k), datetime.now())
-                cost = total_time.total_seconds() / 60 * Schedule.contractor_cost_per_minute
+                cost = total_time.total_seconds() / 60 * contractor.rate
                 profit = charge - cost
                 
                 objective.append(cp_model.LinearExpr.Term(x[i, j, k], int(profit * 100)))  # Convert to cents for integer optimization
@@ -166,7 +166,7 @@ def solve_model_and_extract_solution(model: cp_model.CpModel, schedule: Schedule
                         
                         total_time = get_errand_time(customer.desired_errand, contractor_location, customer.location)
                         charge = customer.desired_errand.calculate_final_charge(start_time, datetime.now())
-                        cost = total_time.total_seconds() / 60 * Schedule.contractor_cost_per_minute
+                        cost = total_time.total_seconds() / 60 * contractor.rate
                         profit = charge - cost
 
                         logger.info(f"  Customer {customer.id} assigned to Contractor {contractor.id}")

@@ -306,4 +306,81 @@ New entries must be appended to the end of the log. Do not edit or delete previo
   - Create additional test cases to ensure proper functioning of both optimizers in various scenarios
   - Consider implementing a factory pattern or dependency injection for more flexible optimizer selection in the future
 
+19. Task: Improve GUI Navigation and Problem Definition Tab
+- Updated gui/main_frame.py to allow free navigation between tabs
+- Modified the OnPageChanged method to provide informative warnings instead of restrictive error messages
+- Updated gui/problem_definition_tab.py to increase the maximum Base Time value to 480 minutes
+- Added Disincentive fields for all errand types in the Problem Definition tab
+- Implemented a new "Commit Changes Temporarily" button in the Problem Definition tab
+- Updated the layout of the Problem Definition tab for better readability and user experience
+- Challenges:
+  - Balancing user freedom with necessary guidance through the problem-solving process
+  - Ensuring that temporary changes are correctly applied without affecting permanent settings
+- Decisions:
+  - Used wx.MessageBox for displaying informative warnings about potentially missing data or unavailable features
+  - Implemented a separate method for handling temporary changes, distinct from permanent changes
+  - Updated the explanatory note in the Problem Definition tab to clarify the difference between temporary and permanent commits
+- Next steps:
+  - Conduct thorough testing of the new navigation system and Problem Definition tab features
+  - Update the user documentation to reflect the new GUI behavior and Problem Definition options
+  - Consider implementing a visual indicator for tabs with incomplete or ungenerated data
+
+20. Task: Update Project Documentation
+- Updated readme.md to reflect the latest changes in the project
+- Modified ux_overview.md to include information about improved GUI navigation and new Problem Definition features
+- Updated project_scope.md to include the new features in the "In-Scope" and "Deliverables" sections
+- Added entries to the developer_log.md (this file) to document recent changes
+- Challenges:
+  - Ensuring all documentation is consistent with the latest changes
+  - Balancing detail with readability in the documentation updates
+- Decisions:
+  - Focused on highlighting user-facing changes in the ux_overview.md
+  - Added specific mentions of new features (e.g., extended Base Time range, Disincentive fields for all errand types) in the project_scope.md
+  - Kept the readme.md update concise, focusing on key features and changes
+- Next steps:
+  - Review all documentation for consistency and completeness
+  - Consider creating or updating user guides or tutorials to showcase the new features
+  - Plan for regular documentation reviews and updates as the project continues to evolve
+
+21. Task: Implement Systems Engineering Framework
+- Created a new "systems_engineering" folder under the /docs/ directory
+- Developed a comprehensive Requirements Specification Document (RSD)
+- Created a System Architecture Document
+- Produced a Traceability Matrix linking requirements to architectural components
+- Developed a Test Plan outlining both automated and manual testing approaches
+- Created an Interface Control Document (ICD) defining interfaces between system components and with external systems
+- Designed a Data Flow Diagram (DFD) with visual representations and written descriptions
+- Created a Use Case Diagram and detailed descriptions for each use case
+- Developed Sequence Diagrams for key system operations
+- Created a Risk Management Plan
+- Developed a comprehensive Project Plan
+- Challenges:
+  - Ensuring consistency and traceability across all systems engineering documents
+  - Balancing the level of detail in each document to provide comprehensive information without overwhelming readers
+- Decisions:
+  - Used standardized formats and cross-referencing between documents for consistency
+  - Implemented Mermaid diagrams for visual representations to enhance clarity
+  - Included both high-level overviews and detailed breakdowns in documents like the Project Plan and Risk Management Plan
+- Next steps:
+  - Review all systems engineering documents for consistency and completeness
+  - Update other project documentation to reflect the new systems engineering approach
+  - Implement processes to keep systems engineering documents up-to-date as the project evolves
+
+22. Task: Update Project Documentation for Systems Engineering Framework
+- Updated readme.md to include information about the new systems engineering documents and their locations
+- Modified project_scope.md to reflect the expanded scope including the systems engineering framework
+- Updated ux_overview.md to mention how the systems engineering approach contributes to a better user experience
+- Added entries to the developer_log.md to document the creation of the systems engineering framework
+- Challenges:
+  - Ensuring all documentation accurately reflects the current state of the project
+  - Balancing the amount of detail provided about the systems engineering framework in different documents
+- Decisions:
+  - Added a new section in readme.md specifically for systems engineering documentation
+  - Updated the "Deliverables" section in project_scope.md to include all new systems engineering artifacts
+  - Kept ux_overview.md focused on user-facing implications of the systems engineering approach
+- Next steps:
+  - Conduct a thorough review of all project documentation for consistency
+  - Consider creating a separate systems engineering overview document to provide a high-level summary of the framework
+  - Plan for regular updates to all documentation as the project progresses
+
 # Add your log entries here as you work on the project

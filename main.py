@@ -32,22 +32,19 @@ def run_cli_mode(optimizer: str) -> NoReturn:
     cli_main(optimizer)
     sys.exit(0)
 
-def run_gui_mode(optimizer: str) -> NoReturn:
+def run_gui_mode() -> NoReturn:
     """
     Run the application in GUI mode.
-
-    Args:
-        optimizer (str): The chosen optimizer ('cp-sat' or 'vrp')
     """
     try:
         from gui.main_frame import main as gui_main
         logger.info("Starting Synthetic Errands Scheduler in GUI mode")
-        gui_main(optimizer)
+        gui_main()
         sys.exit(0)
     except ImportError:
         logger.warning("wxPython is not installed. Running in CLI mode instead.")
         logger.info("To run in GUI mode, please install wxPython: pip install -U wxPython")
-        run_cli_mode(optimizer)
+        run_cli_mode("cp-sat")  # Default to CP-SAT optimizer if running in CLI mode due to missing wxPython
 
 def main() -> NoReturn:
     """
@@ -56,14 +53,14 @@ def main() -> NoReturn:
     parser = argparse.ArgumentParser(description="Synthetic Errands Scheduler")
     parser.add_argument("--cli", action="store_true", help="Run in CLI mode")
     parser.add_argument("--optimizer", choices=["cp-sat", "vrp"], default="cp-sat",
-                        help="Choose the optimization algorithm (default: cp-sat)")
+                        help="Choose the optimization algorithm for CLI mode (default: cp-sat)")
     args = parser.parse_args()
 
     try:
         if args.cli:
             run_cli_mode(args.optimizer)
         else:
-            run_gui_mode(args.optimizer)
+            run_gui_mode()
     except KeyboardInterrupt:
         logger.info("Program terminated by user.")
         sys.exit(0)

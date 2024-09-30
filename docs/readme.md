@@ -40,12 +40,29 @@ SyntheticErrandsScheduler/
 │   ├── optimized_solution_tab.py
 │   └── visualization_tab.py
 │
-└── tests/                  # Unit tests
-    ├── test_models.py
-    ├── test_utils.py
-    ├── test_initial_scheduler.py
-    ├── test_optimizer.py
-    └── test_visualization.py
+├── tests/                  # Unit tests
+│   ├── test_models.py
+│   ├── test_utils.py
+│   ├── test_initial_scheduler.py
+│   ├── test_optimizer.py
+│   └── test_visualization.py
+│
+└── docs/                   # Documentation
+    ├── readme.md
+    ├── project_scope.md
+    ├── developer_log.md
+    ├── ux_overview.md
+    └── systems_engineering/
+        ├── requirements_specification_document.md
+        ├── system_architecture_document.md
+        ├── traceability_matrix.md
+        ├── test_plan.md
+        ├── interface_control_document.md
+        ├── data_flow_diagram.md
+        ├── use_case_diagram_and_descriptions.md
+        ├── sequence_diagrams.md
+        ├── risk_management_plan.md
+        └── project_plan.md
 ```
 
 ## Key Features
@@ -53,9 +70,7 @@ SyntheticErrandsScheduler/
 - Representation of Busyville as a 100x100 grid
 - Generation of random problem instances with customizable number of customers and contractors
 - Initial scheduling algorithm using a simple greedy approach
-- Two optimization algorithms using Google OR-Tools:
-  - Constraint Programming (CP-SAT) solver for maximizing profit
-  - Vehicle Routing Problem (VRP) solver for optimizing routes
+- Modular optimizer capability for advanced scheduling optimization
 - Ability to select between optimization algorithms in both GUI and CLI modes
 - General optimizer call implementation for easy switching between optimizers
 - Detailed logging of scheduling decisions and profit calculations
@@ -65,6 +80,36 @@ SyntheticErrandsScheduler/
 - Graphical User Interface (GUI) for easy interaction
 - Centralized configuration management for improved maintainability
 - Type hints implemented throughout the codebase for improved readability and maintainability
+- Improved GUI navigation with informative warnings instead of restrictive error messages
+- Ability to set longer Base Time values (up to 480 minutes) for errand types
+- Disincentive fields added for all errand types
+- New "Commit Changes Temporarily" button in the Problem Definition tab
+
+## Systems Engineering Documentation
+
+The project now includes comprehensive systems engineering documentation:
+
+1. Requirements Specification Document (RSD): Located at `docs/systems_engineering/requirements_specification_document.md`. This document outlines the functional and non-functional requirements for the system.
+
+2. System Architecture Document: Located at `docs/systems_engineering/system_architecture_document.md`. This document provides an overview of the system's structure, key components, and their interactions.
+
+3. Traceability Matrix: Located at `docs/systems_engineering/traceability_matrix.md`. This document maps the requirements from the RSD to the components described in the System Architecture Document.
+
+4. Test Plan: Located at `docs/systems_engineering/test_plan.md`. This document outlines the strategy for verifying and validating the system requirements, including both automated and manual testing approaches.
+
+5. Interface Control Document (ICD): Located at `docs/systems_engineering/interface_control_document.md`. This document defines the interfaces between system components and with external systems.
+
+6. Data Flow Diagram (DFD): Located at `docs/systems_engineering/data_flow_diagram.md`. This document provides a visual representation of how data moves through the system.
+
+7. Use Case Diagram and Descriptions: Located at `docs/systems_engineering/use_case_diagram_and_descriptions.md`. This document illustrates the system actors and their interactions with the system.
+
+8. Sequence Diagrams: Located at `docs/systems_engineering/sequence_diagrams.md`. This document shows the interactions between objects in the system over time for key operations.
+
+9. Risk Management Plan: Located at `docs/systems_engineering/risk_management_plan.md`. This document identifies potential risks, assesses their impact, and outlines mitigation strategies.
+
+10. Project Plan: Located at `docs/systems_engineering/project_plan.md`. This document outlines the approach for developing the Synthetic Errands Scheduler System, including timelines, milestones, and resource allocation.
+
+These documents provide a robust framework for understanding, developing, and maintaining the Synthetic Errands Scheduler system. They ensure a systematic approach to the project, facilitating better communication among team members and stakeholders, and supporting traceability, testing, and risk management throughout the project lifecycle.
 
 ## Type Hinting
 
@@ -109,7 +154,7 @@ To run the application with the graphical user interface:
 python main.py
 ```
 
-In GUI mode, you can select the optimization algorithm (CP-SAT or VRP) using the dropdown menu in the Problem Definition tab.
+In GUI mode, you can select the optimization algorithm using the dropdown menu in the Problem Definition tab.
 
 ### CLI Mode
 
@@ -119,11 +164,10 @@ To run the application in command-line interface mode:
 python main.py --cli
 ```
 
-By default, the CLI mode uses the CP-SAT optimizer. To specify the optimizer, use the `--optimizer` option:
+To specify the optimizer, use the `--optimizer` option:
 
 ```
-python main.py --cli --optimizer cp-sat  # Use CP-SAT optimizer (default)
-python main.py --cli --optimizer vrp     # Use VRP optimizer
+python main.py --cli --optimizer [optimizer_name]
 ```
 
 In CLI mode, the program provides detailed logging of the scheduling process, including profit calculations for each errand and a side-by-side comparison of the initial greedy and optimized schedules.
@@ -150,26 +194,24 @@ In GUI mode, the visualization is displayed in the "Visualization" tab.
 
 ## Optimization
 
-The project uses Google OR-Tools for schedule optimization. This powerful library allows for sophisticated constraint programming and optimization techniques, potentially leading to better schedules and higher profits. The optimizer now includes:
+The project uses a modular optimizer capability for schedule optimization. This allows for sophisticated optimization techniques, potentially leading to better schedules and higher profits. The optimizer includes:
 
-- Two optimization algorithms:
-  1. Constraint Programming (CP-SAT) solver: Focuses on maximizing profit while respecting all constraints.
-  2. Vehicle Routing Problem (VRP) solver: Optimizes routes for contractors, potentially reducing travel time and increasing efficiency.
+- Support for multiple optimization algorithms
 - Ability to select between optimization algorithms in both GUI and CLI modes
 - General optimizer call implementation for easy switching between optimizers
 - Detailed logging of optimization decisions
 - Consideration of travel time between errands
 - Improved profit calculation in the objective function
 
-The CP-SAT solver is better suited for complex constraints and objective functions, while the VRP solver is more efficient for route optimization. Users can choose the most appropriate solver based on their specific needs and problem characteristics.
+Users can choose the most appropriate solver based on their specific needs and problem characteristics.
 
 ## Logging
 
-The application now uses Python's built-in logging module to provide detailed information about its operations. Log messages are displayed in the console and can be useful for debugging or understanding the application's behavior.
+The application uses Python's built-in logging module to provide detailed information about its operations. Log messages are displayed in the console and can be useful for debugging or understanding the application's behavior.
 
 ## Future Improvements
 
-- Fine-tune OR-Tools parameters for better optimization results
+- Fine-tune optimization parameters for better results
 - Implement more complex constraints and objectives in the optimization models
 - Add real-time updates and dynamic rescheduling
 - Enhance visualization with more detailed information
@@ -177,8 +219,8 @@ The application now uses Python's built-in logging module to provide detailed in
 - Add option to save logs to a file
 - Investigate and resolve any discrepancies between initial greedy and optimized schedule profits
 - Implement static type checking using mypy as part of the development workflow
-- Conduct performance comparisons between CP-SAT and VRP solvers for various problem sizes and characteristics
-- Implement a hybrid optimization approach combining both CP-SAT and VRP solvers
+- Conduct performance comparisons between different optimization algorithms for various problem sizes and characteristics
+- Implement a hybrid optimization approach combining multiple optimization strategies
 
 For more details on the project scope and development process, please refer to `project_scope.md` and `developer_log.md`.
 

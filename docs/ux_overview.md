@@ -7,13 +7,14 @@ User Interaction:
 1. GUI Mode (Default):
    - The user runs the program by executing the main.py file.
    - A graphical interface appears with multiple tabs:
-     a. Problem Definition: Allows users to set parameters for problem generation, select the optimization algorithm (CP-SAT or VRP), and displays errand types with their characteristics, including capped same-day incentives.
+     a. Problem Definition: Allows users to set parameters for problem generation, select the optimization algorithm (CP-SAT or VRP), and displays errand types with their characteristics, including capped same-day incentives and disincentives for all errand types.
      b. Generated Problem: Displays the randomly generated problem instance.
      c. Greedy Solution: Shows the initial schedule created by the greedy algorithm.
      d. Optimized Solution: Presents the optimized schedule using the selected algorithm (CP-SAT or VRP) from Google OR-Tools.
      e. Visualization: Provides a visual representation of the schedules and city layout.
    - Users can interact with each tab, adjusting parameters and viewing results in real-time.
    - The visualization tab allows for easy comparison between the initial and optimized schedules.
+   - Users can now freely navigate between tabs, with informative warnings instead of restrictive error messages.
 
 2. CLI Mode:
    - The user runs the program by executing "python main.py --cli".
@@ -33,12 +34,16 @@ Key Features:
 - Centralized constants for easy configuration and maintenance
 - Same-day incentives capped at 1.5x the base rate for fair pricing
 - Comprehensive type hinting throughout the codebase, enhancing code reliability and maintainability
+- Improved GUI navigation with informative warnings instead of restrictive error messages
+- Ability to set longer Base Time values (up to 480 minutes) for errand types
+- Disincentive fields added for all errand types
+- New "Commit Changes Temporarily" button in the Problem Definition tab
 
 This design allows for both intuitive interaction through the GUI and quick, scriptable execution through the CLI. It caters to users who prefer visual interaction as well as those who need programmatic access to the scheduler's functionality.
 
 Errand Types and Incentives:
-- The Problem Definition tab in the GUI now displays all errand types with their base times, same-day incentives (capped at 1.5x), and disincentives.
-- Users can easily understand the pricing structure for each errand type.
+- The Problem Definition tab in the GUI now displays all errand types with their base times (up to 480 minutes), same-day incentives (capped at 1.5x), and disincentives for all errand types.
+- Users can easily understand and modify the pricing structure for each errand type.
 - The centralized constants ensure that any future changes to errand types or incentives will be consistently reflected across the entire application.
 
 Benefits of Centralized Constants:
@@ -65,6 +70,16 @@ Type Hinting and Code Quality:
   - Improving code maintainability, allowing for faster implementation of new features and bug fixes.
   - Enhancing code readability, making it easier for developers to understand and modify the codebase, potentially leading to more efficient algorithms and better performance.
 
+Improved GUI Navigation:
+- Users can now freely navigate between tabs without encountering restrictive error messages.
+- Informative warnings are displayed when accessing tabs where previous steps haven't been completed, providing context about potentially missing data or unavailable features.
+- This change allows for a more flexible workflow while still guiding users through the proper sequence of steps.
+
+Problem Definition Enhancements:
+- Base Time for errand types can now be set up to 480 minutes (8 hours), allowing for longer errands.
+- Disincentive fields have been added for all errand types, providing more flexibility in pricing strategies.
+- A new "Commit Changes Temporarily" button allows users to apply changes for the current session without saving them permanently.
+
 Future enhancements may include:
 - More advanced problem definition options in the GUI
 - Real-time optimization progress display
@@ -77,4 +92,4 @@ Future enhancements may include:
 - Hybrid optimization approach combining CP-SAT and VRP solvers for potentially better results
 - Detailed performance comparison tools for different optimization strategies
 
-By centralizing constants, improving maintainability, implementing comprehensive type hinting, and providing multiple optimization strategies, we've created a foundation for a more robust and flexible scheduling system that can easily adapt to future requirements while providing a consistent and reliable user experience.
+By centralizing constants, improving maintainability, implementing comprehensive type hinting, providing multiple optimization strategies, and enhancing GUI navigation and problem definition options, we've created a foundation for a more robust and flexible scheduling system that can easily adapt to future requirements while providing a consistent and reliable user experience.

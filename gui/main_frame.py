@@ -7,9 +7,8 @@ from gui.optimized_solution_tab import OptimizedSolutionTab
 from gui.visualization_tab import VisualizationTab
 
 class SyntheticErrandsSchedulerGUI(wx.Frame):
-    def __init__(self, optimizer: str) -> None:
+    def __init__(self) -> None:
         super().__init__(parent=None, title='Synthetic Errands Scheduler')
-        self.selected_optimizer: str = optimizer
         self.InitUI()
 
     def InitUI(self) -> None:
@@ -71,9 +70,6 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
         tab.FitInside()
         event.Skip()
 
-    def set_selected_optimizer(self, optimizer: str) -> None:
-        self.selected_optimizer = optimizer
-
     def enable_greedy_solution(self) -> None:
         self.greedy_solution.enable_generate_button()
 
@@ -84,27 +80,22 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
         self.visualization.UpdateContent(customers, contractors, optimized_schedule)
 
     def OnPageChanged(self, event: wx.BookCtrlEvent) -> None:
-        old = event.GetOldSelection()
         new = event.GetSelection()
-        sel = self.notebook.GetSelection()
         event.Skip()
 
-        # Ensure that the user can't skip steps
-        if new > old + 1:
-            wx.MessageBox("Please complete the previous steps first.", "Warning", wx.OK | wx.ICON_WARNING)
-            self.notebook.SetSelection(old)
-        elif new == 2 and not self.greedy_solution.generate_button.IsEnabled():
-            wx.MessageBox("Please generate a problem first.", "Warning", wx.OK | wx.ICON_WARNING)
-            self.notebook.SetSelection(old)
+        # Provide warnings when necessary, but allow users to proceed
+        if new == 2 and not self.greedy_solution.generate_button.IsEnabled():
+            wx.MessageBox("Warning: A problem has not been generated yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
         elif new == 3 and not self.optimized_solution.optimize_button.IsEnabled():
-            wx.MessageBox("Please generate a greedy solution first.", "Warning", wx.OK | wx.ICON_WARNING)
-            self.notebook.SetSelection(old)
+            wx.MessageBox("Warning: A greedy solution has not been generated yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
+        elif new == 4 and not hasattr(self.visualization, 'optimized_schedule'):
+            wx.MessageBox("Warning: An optimized solution has not been generated yet. The visualization may be incomplete.", "Warning", wx.OK | wx.ICON_WARNING)
 
-def main(optimizer: str) -> None:
+def main() -> None:
     app: wx.App = wx.App()
-    ex: SyntheticErrandsSchedulerGUI = SyntheticErrandsSchedulerGUI(optimizer)
+    ex: SyntheticErrandsSchedulerGUI = SyntheticErrandsSchedulerGUI()
     ex.Show()
     app.MainLoop()
 
 if __name__ == '__main__':
-    main("cp-sat")  # Default to CP-SAT optimizer when run directly
+    main()

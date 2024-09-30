@@ -4,11 +4,13 @@ from typing import List
 from models.customer import Customer
 from models.contractor import Contractor
 from utils.problem_generator import generate_problem
+from utils.config_manager import ConfigManager
 
 class ProblemGenerationTab(scrolled.ScrolledPanel):
     def __init__(self, parent: wx.Window, main_frame) -> None:
         super().__init__(parent, -1, style=wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
         self.main_frame = main_frame
+        self.config_manager = ConfigManager()
         self.vbox: wx.BoxSizer
         self.customers: List[Customer] = []
         self.contractors: List[Contractor] = []
@@ -33,9 +35,10 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
         # Get the problem parameters from the problem definition tab
         num_customers = self.main_frame.problem_definition.get_num_customers()
         num_contractors = self.main_frame.problem_definition.get_num_contractors()
+        contractor_rate = self.main_frame.problem_definition.get_contractor_rate()
         
         # Generate the problem
-        self.customers, self.contractors = generate_problem(num_customers, num_contractors)
+        self.customers, self.contractors = generate_problem(num_customers, num_contractors, contractor_rate)
         
         # Update the content with the generated problem
         self.UpdateContent(self.customers, self.contractors)
@@ -60,6 +63,11 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
         for contractor in contractors:
             info: str = f"Contractor {contractor.id}: Location {contractor.location}"
             self.content_box.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=5)
+
+        # Display contractor rate
+        contractor_rate = self.main_frame.problem_definition.get_contractor_rate()
+        rate_info: str = f"\nContractor Rate: ${contractor_rate:.2f} per minute"
+        self.content_box.Add(wx.StaticText(self, label=rate_info), flag=wx.ALL, border=5)
 
         self.Layout()
         self.SetupScrolling(scroll_x=False, scroll_y=True, rate_y=20)

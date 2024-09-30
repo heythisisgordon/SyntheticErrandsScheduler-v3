@@ -22,13 +22,14 @@ class ProblemGenerationError(Exception):
     """Custom exception for errors during problem generation."""
     pass
 
-def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors: int = DEFAULT_NUM_CONTRACTORS) -> Tuple[List[Customer], List[Contractor]]:
+def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors: int = DEFAULT_NUM_CONTRACTORS, contractor_rate: float = 0.5) -> Tuple[List[Customer], List[Contractor]]:
     """
     Generate a random problem instance with customers and contractors.
 
     Args:
         num_customers (int): Number of customers to generate. Defaults to DEFAULT_NUM_CUSTOMERS.
         num_contractors (int): Number of contractors to generate. Defaults to DEFAULT_NUM_CONTRACTORS.
+        contractor_rate (float): The rate per minute for contractors. Defaults to 0.5.
 
     Returns:
         Tuple[List[Customer], List[Contractor]]: Lists of generated customers and contractors.
@@ -75,9 +76,9 @@ def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors
             else:
                 raise ProblemGenerationError(f"Failed to find valid road location for contractor {i}")
 
-            contractor = Contractor(i, (x, y))
+            contractor = Contractor(i, (x, y), contractor_rate)
             contractors.append(contractor)
-            logger.debug(f"Generated contractor {i} at location {(x, y)}")
+            logger.debug(f"Generated contractor {i} at location {(x, y)} with rate ${contractor_rate:.2f}/minute")
 
         return customers, contractors
     except Exception as e:

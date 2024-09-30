@@ -17,12 +17,21 @@ class OptimizedSolutionTab(scrolled.ScrolledPanel):
         super().__init__(parent, -1, style=wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
         self.main_frame = main_frame
         self.vbox: wx.BoxSizer
+        self.optimizer_choice: wx.Choice
         self.InitUI()
 
     def InitUI(self) -> None:
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         
-        # Add "Optimize Greedy Solution" button at the top
+        # Add optimizer selection dropdown
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.optimizer_choice = wx.Choice(self, choices=["CP-SAT Solver", "Vehicle Routing Solver"])
+        self.optimizer_choice.SetSelection(0)  # Default to CP-SAT Solver
+        hbox.Add(wx.StaticText(self, label="Optimizer:"), flag=wx.RIGHT|wx.ALIGN_CENTER_VERTICAL, border=8)
+        hbox.Add(self.optimizer_choice)
+        self.vbox.Add(hbox, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, border=10)
+        
+        # Add "Optimize Greedy Solution" button
         self.optimize_button = wx.Button(self, label="Optimize Greedy Solution")
         self.optimize_button.Bind(wx.EVT_BUTTON, self.OnOptimizeGreedySolution)
         self.optimize_button.Disable()  # Initially disabled
@@ -43,8 +52,8 @@ class OptimizedSolutionTab(scrolled.ScrolledPanel):
         customers = self.main_frame.problem_generation.customers
         contractors = self.main_frame.problem_generation.contractors
         
-        # Get the selected optimizer from the problem definition tab
-        optimizer = self.main_frame.problem_definition.get_selected_optimizer()
+        # Get the selected optimizer
+        optimizer = self.optimizer_choice.GetString(self.optimizer_choice.GetSelection())
         
         # Generate the optimized solution
         self.UpdateContent(customers, contractors, optimizer)

@@ -1,7 +1,7 @@
 Project Scope: Synthetic Errands Scheduler v3
 
 Objective:
-Develop a modular and maintainable Synthetic Errands Scheduler that addresses the basic use case outlined in the Capstone Kickoff, incorporating advanced optimization techniques and centralized configuration for improved consistency and ease of modification.
+Develop a modular and maintainable Synthetic Errands Scheduler that addresses the basic use case outlined in the Capstone Kickoff, incorporating advanced optimization techniques and centralized configuration for improved consistency and ease of modification. Implement a robust systems engineering framework to ensure a comprehensive and well-documented approach to the project.
 
 In-Scope:
 1. Modular project structure with separate directories for models, utils, algorithms, and GUI components
@@ -29,6 +29,21 @@ In-Scope:
 17. Improved travel time consideration in both initial and optimized scheduling
 18. Enhanced profit calculation in the optimization objective function
 19. Implementation of comprehensive type hints throughout the codebase for improved readability and maintainability
+20. Improved GUI navigation with informative warnings instead of restrictive error messages
+21. Ability to set longer Base Time values (up to 480 minutes) for errand types
+22. Disincentive fields added for all errand types
+23. New "Commit Changes Temporarily" button in the Problem Definition tab
+24. Implementation of a comprehensive systems engineering framework, including:
+    - Requirements Specification Document (RSD)
+    - System Architecture Document
+    - Traceability Matrix
+    - Test Plan
+    - Interface Control Document (ICD)
+    - Data Flow Diagram (DFD)
+    - Use Case Diagram and Descriptions
+    - Sequence Diagrams
+    - Risk Management Plan
+    - Project Plan
 
 Out-of-Scope:
 1. Real-time traffic considerations
@@ -59,5 +74,22 @@ Deliverables:
 10. Updated optimization algorithms with improved travel time consideration and profit calculation
 11. Comprehensive type hints implemented throughout the codebase
 12. Multiple optimization strategies (CP-SAT and VRP) with user-selectable option in both GUI and CLI modes
+13. Improved GUI navigation with informative warnings
+14. Extended Base Time range for errand types (up to 480 minutes)
+15. Disincentive fields for all errand types
+16. Temporary changes functionality in the Problem Definition tab
+17. Systems Engineering Framework documents:
+    a. Requirements Specification Document (RSD)
+    b. System Architecture Document
+    c. Traceability Matrix
+    d. Test Plan
+    e. Interface Control Document (ICD)
+    f. Data Flow Diagram (DFD)
+    g. Use Case Diagram and Descriptions
+    h. Sequence Diagrams
+    i. Risk Management Plan
+    j. Project Plan
 
-Note: This version emphasizes a modular approach to software design, incorporates advanced optimization techniques, and provides a user-friendly interface, allowing for easier maintenance, testing, and future enhancements. The use of centralized constants ensures consistency across the application and simplifies future modifications to errand types, incentives, and other key parameters. This approach significantly improves the maintainability of the project by reducing the need for changes across multiple files when updating core business rules or configuration settings. The addition of detailed logging and schedule comparison features enhances the ability to analyze and improve the scheduling algorithms. The implementation of comprehensive type hints throughout the codebase further improves code readability, helps catch potential type-related bugs earlier, and enhances overall maintainability. The inclusion of multiple optimization strategies (CP-SAT and VRP) provides flexibility in solving different types of scheduling problems and allows for performance comparisons between different approaches.
+Note: This version emphasizes a modular approach to software design, incorporates advanced optimization techniques, and provides a user-friendly interface, allowing for easier maintenance, testing, and future enhancements. The use of centralized constants ensures consistency across the application and simplifies future modifications to errand types, incentives, and other key parameters. This approach significantly improves the maintainability of the project by reducing the need for changes across multiple files when updating core business rules or configuration settings. The addition of detailed logging and schedule comparison features enhances the ability to analyze and improve the scheduling algorithms. The implementation of comprehensive type hints throughout the codebase further improves code readability, helps catch potential type-related bugs earlier, and enhances overall maintainability. The inclusion of multiple optimization strategies (CP-SAT and VRP) provides flexibility in solving different types of scheduling problems and allows for performance comparisons between different approaches. The improved GUI navigation, extended Base Time range, addition of disincentive fields for all errand types, and the new temporary changes functionality in the Problem Definition tab enhance the user experience and provide more flexibility in problem definition and exploration.
+
+The implementation of a comprehensive systems engineering framework ensures a well-documented and structured approach to the project. This framework provides a solid foundation for understanding the system requirements, architecture, and interactions, facilitating better communication among team members and stakeholders. It also supports traceability, testing, and risk management throughout the project lifecycle, contributing to the overall quality and reliability of the Synthetic Errands Scheduler system.

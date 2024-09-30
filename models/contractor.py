@@ -2,7 +2,7 @@
 Contractor model for the Synthetic Errands Scheduler
 
 This module defines the Contractor class, which represents a contractor in the scheduling system.
-It includes attributes for contractor identification, location, and schedule.
+It includes attributes for contractor identification, location, schedule, and rate.
 """
 
 from typing import Dict, List, Tuple
@@ -17,20 +17,23 @@ class Contractor:
         location (Tuple[int, int]): The current (x, y) coordinates of the contractor's location.
         initial_location (Tuple[int, int]): The initial (x, y) coordinates of the contractor's location.
         schedule (Dict[datetime, List[Tuple[datetime, datetime]]]): A dictionary mapping dates to lists of time slots (start and end times).
+        rate (float): The contractor's rate per minute.
     """
 
-    def __init__(self, id: int, location: Tuple[int, int]):
+    def __init__(self, id: int, location: Tuple[int, int], rate: float):
         """
         Initialize a Contractor object.
 
         Args:
             id (int): Unique identifier for the contractor.
             location (Tuple[int, int]): The (x, y) coordinates of the contractor's initial location.
+            rate (float): The contractor's rate per minute.
         """
         self.id: int = id
         self.location: Tuple[int, int] = location
         self.initial_location: Tuple[int, int] = location
         self.schedule: Dict[datetime, List[Tuple[datetime, datetime]]] = {}
+        self.rate: float = rate
 
     def is_available(self, date: datetime, start_time: datetime, end_time: datetime) -> bool:
         """
@@ -75,7 +78,7 @@ class Contractor:
         Returns:
             str: A string describing the Contractor object.
         """
-        return f"Contractor(id={self.id}, location={self.location})"
+        return f"Contractor(id={self.id}, location={self.location}, rate=${self.rate:.2f}/minute)"
 
     def __repr__(self) -> str:
         """

@@ -79,7 +79,7 @@ def initial_greedy_schedule(customers: List[Customer], contractors: List[Contrac
 
                         if potential_end_time.time() <= WORK_END_TIME_OBJ:
                             schedule.assignments.setdefault(current_date, []).append((customer, contractor, potential_start_time))
-                            logger.info(f"Scheduled customer {customer.id} with contractor {contractor.id} at start time {potential_start_time.time()}")
+                            logger.info(f"Scheduled customer {customer.id} with contractor {contractor.id} (rate: ${contractor.rate:.2f}/min) at start time {potential_start_time.time()}")
                             contractor.available_time = potential_end_time
                             break
                     else:

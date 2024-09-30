@@ -141,7 +141,7 @@ def build_schedule_from_solution(schedule: Schedule, manager: pywrapcp.RoutingIn
     for vehicle_id in range(manager.GetNumberOfVehicles()):
         contractor = schedule.contractors[vehicle_id]
         index = routing.Start(vehicle_id)
-        plan_output = f"Route for contractor {contractor.id}:\n"
+        plan_output = f"Route for contractor {contractor.id} (rate: ${contractor.rate:.2f}/min):\n"
         route_distance = 0
         while not routing.IsEnd(index):
             time_var = time_dimension.CumulVar(index)
@@ -170,7 +170,7 @@ def test_vrp_solver():
     logger.info("Running VRP solver tests")
     
     # Test case 1: Simple case (should succeed)
-    contractors = [Contractor(1, (0, 0)), Contractor(2, (10, 10))]
+    contractors = [Contractor(1, (0, 0), 0.5), Contractor(2, (10, 10), 0.6)]
     customers = [
         Customer(1, (5, 5), Errand(ErrandType.DELIVERY, timedelta(minutes=30))),
         Customer(2, (15, 15), Errand(ErrandType.DOG_WALK, timedelta(minutes=45))),
@@ -181,7 +181,7 @@ def test_vrp_solver():
     logger.info("Test case 1 passed: Solution found for simple case")
 
     # Test case 2: More complex case (should succeed)
-    contractors = [Contractor(i, (i*10, i*10)) for i in range(1, 6)]
+    contractors = [Contractor(i, (i*10, i*10), 0.5 + i*0.1) for i in range(1, 6)]
     customers = [
         Customer(i, (i*5, i*5), Errand(ErrandType.DELIVERY, timedelta(minutes=30)))
         for i in range(1, 11)
@@ -192,7 +192,7 @@ def test_vrp_solver():
     logger.info("Test case 2 passed: Solution found for complex case")
 
     # Test case 3: Edge case - no customers (should succeed with empty assignments)
-    contractors = [Contractor(1, (0, 0))]
+    contractors = [Contractor(1, (0, 0), 0.5)]
     customers = []
     test_schedule = Schedule(contractors, customers)
     optimized_schedule = optimize_schedule_vrp(test_schedule)
@@ -208,7 +208,7 @@ def test_vrp_solver():
     logger.info("Test case 4 passed: Correct handling of no contractors")
 
     # Test case 5: Large problem (may take longer to solve)
-    contractors = [Contractor(i, (i*10, i*10)) for i in range(1, 21)]
+    contractors = [Contractor(i, (i*10, i*10), 0.5 + i*0.05) for i in range(1, 21)]
     customers = [
         Customer(i, (i*5, i*5), Errand(ErrandType.DELIVERY, timedelta(minutes=30)))
         for i in range(1, 101)

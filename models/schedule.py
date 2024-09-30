@@ -7,8 +7,6 @@ from models.customer import Customer
 from models.errand import Errand
 
 class Schedule:
-    contractor_cost_per_minute: float = 0.5  # $0.5 per minute of contractor time
-
     def __init__(self, contractors: List[Contractor], customers: List[Customer]):
         self.contractors: List[Contractor] = contractors
         self.customers: List[Customer] = customers
@@ -37,8 +35,8 @@ class Schedule:
         # Calculate total errand time
         errand_duration: timedelta = get_errand_time(errand, contractor.location, customer.location)
 
-        # Calculate contractor cost
-        contractor_cost: float = (travel_time + errand_duration).total_seconds() / 60 * self.contractor_cost_per_minute
+        # Calculate contractor cost using the contractor's individual rate
+        contractor_cost: float = (travel_time + errand_duration).total_seconds() / 60 * contractor.rate
 
         # Calculate errand charge with incentives and disincentives
         final_charge: float = errand.calculate_final_charge(current_date, datetime.now())
