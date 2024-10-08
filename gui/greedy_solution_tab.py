@@ -54,9 +54,6 @@ class GreedySolutionTab(scrolled.ScrolledPanel):
         # Update the content of this tab
         self.UpdateContent(customers, contractors, self.schedule)
         
-        # Update the greedy schedule visualization
-        self.main_frame.update_greedy_visualization(customers, contractors, self.schedule)
-        
         # Update the contractor schedule tab
         self.main_frame.update_contractor_schedule(self.schedule)
         
