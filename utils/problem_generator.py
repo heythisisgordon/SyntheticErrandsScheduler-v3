@@ -8,13 +8,13 @@ with customers and contractors.
 import random
 import logging
 from typing import List, Tuple, Dict
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from models.customer import Customer
 from models.contractor import Contractor
 from models.errand import Errand
 from utils.city_map import is_valid_road_location, GRID_SIZE
-from constants import ERRAND_TYPES, DEFAULT_NUM_CUSTOMERS, DEFAULT_NUM_CONTRACTORS, SCHEDULING_DAYS, WORK_START_TIME, WORK_END_TIME
+from constants import ERRAND_TYPES, DEFAULT_NUM_CUSTOMERS, DEFAULT_NUM_CONTRACTORS, SCHEDULING_DAYS, WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -43,6 +43,8 @@ def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors
 
         logger.info(f"Generating problem with {num_customers} customers and {num_contractors} contractors")
 
+        start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
         # Generate customers
         for i in range(num_customers):
             # Generate random valid road location
@@ -58,8 +60,16 @@ def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors
             errand_type, base_time, incentive, disincentive = random.choice(ERRAND_TYPES)
             errand = Errand(i, errand_type, timedelta(minutes=base_time), incentive, disincentive)
 
-            # Generate random availability
-            availability: Dict[int, List[int]] = {day: list(range(WORK_START_TIME, WORK_END_TIME, 30)) for day in range(SCHEDULING_DAYS)}  # 30-minute slots
+            # Generate full-day availability for all scheduling days
+            availability: Dict[datetime, List[Tuple[datetime, datetime]]] = {}
+            for day in range(SCHEDULING_DAYS):
+                current_date = start_date + timedelta(days=day)
+                availability[current_date] = [
+                    (
+                        datetime.combine(current_date, WORK_START_TIME_OBJ),
+                        datetime.combine(current_date, WORK_END_TIME_OBJ)
+                    )
+                ]
 
             customer = Customer(i, (x, y), errand, availability)
             customers.append(customer)

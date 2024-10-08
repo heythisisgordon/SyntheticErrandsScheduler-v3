@@ -6,15 +6,17 @@ ConfigManager to load values from the config.yaml file, ensuring that all
 constants are centralized and easily modifiable.
 
 Usage:
-    from constants import WORK_START_TIME, ErrandType, ERRAND_TYPES
+    from constants import WORK_START_TIME_OBJ, ErrandType, ERRAND_TYPES
 
 Note: This file should not be modified directly. To change any values,
 update the config.yaml file instead.
 """
 
 from utils.config_manager import config
+from utils.time_utils import convert_minutes_to_time
 from typing import List, Tuple, Dict, Union
 from enum import Enum, auto
+import datetime
 
 class ErrandType(Enum):
     """
@@ -76,9 +78,9 @@ ERRAND_RATES: Dict[ErrandType, float] = {
 DELIVERY_ADDITIONAL_TIME: int = config.get('delivery_additional_time')
 
 # Working hours
-# These values define the start and end of the working day in minutes from midnight.
-WORK_START_TIME: int = config.get('work_start_time')
-WORK_END_TIME: int = config.get('work_end_time')
+# These values define the start and end of the working day as datetime.time objects.
+WORK_START_TIME_OBJ: datetime.time = convert_minutes_to_time(config.get('work_start_time'))
+WORK_END_TIME_OBJ: datetime.time = convert_minutes_to_time(config.get('work_end_time'))
 
 # Default problem generation parameters
 # These values are used when generating random problem instances.

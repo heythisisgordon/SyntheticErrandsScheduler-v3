@@ -10,9 +10,7 @@ In-Scope:
 4. Travel time calculation using road-based routing
 5. Generation of random problem instances with customizable number of customers and contractors
 6. Greedy algorithm for initial scheduling in a separate module
-7. Advanced optimization algorithms:
-   a. Constraint Programming (CP-SAT) solver using Google OR-Tools to maximize profit
-   b. Vehicle Routing Problem (VRP) solver using Google OR-Tools for route optimization
+7. (removed)
 8. User-selectable optimization algorithm in both GUI and CLI modes
 9. Console output and GUI display of the initial and optimized schedules and profits
 10. Detailed visualization of the schedule and city layout
@@ -44,41 +42,28 @@ In-Scope:
     - Sequence Diagrams
     - Risk Management Plan
     - Project Plan
+25. Interactive Greedy Schedule Visualizer for detailed analysis of the greedy solution
+26. Contractor calendar functionality for managing contractor availability and assignments
+27. Integration of contractor calendars with scheduling algorithms and optimizers
+28. Implementation of MasterContractorCalendar for centralized management of all contractor calendars
 
 Out-of-Scope:
 1. Real-time traffic considerations
 2. Multiple optimization objectives (focus solely on profit)
 3. Persistent data storage
-4. Advanced error handling and logging
+4. (removed)
 5. Performance optimizations for large-scale problems (>100 customers or >10 contractors)
 
 Constraints:
-- Must use Python 3.7 or higher
-- Uses numpy and matplotlib for calculations and visualization
-- Uses Google OR-Tools for advanced optimization
-- Uses wxPython for GUI implementation
 - Must complete scheduling within a 14-day period
 - Must adhere to contractor working hours (8am to 5pm)
 - Same-day incentives must be capped at 1.5x the base rate
+- Scheduling must respect contractor calendar availability
 
 Deliverables:
 1. Functional Python program implementing the scheduler with a modular structure
-2. Advanced visualization of the schedule and city layout
-3. Comprehensive unit test suite
-4. README file with instructions for running the program and explanation of the modular structure
-5. Detailed documentation of the implemented algorithms and data structures
-6. Graphical User Interface for easy interaction and visualization
-7. Centralized constants file (constants.py) for easy configuration and maintenance
-8. Detailed logging system for both initial and optimized scheduling processes
-9. Schedule comparison feature for side-by-side analysis of initial and optimized schedules
-10. Updated optimization algorithms with improved travel time consideration and profit calculation
-11. Comprehensive type hints implemented throughout the codebase
-12. Multiple optimization strategies (CP-SAT and VRP) with user-selectable option in both GUI and CLI modes
-13. Improved GUI navigation with informative warnings
-14. Extended Base Time range for errand types (up to 480 minutes)
-15. Disincentive fields for all errand types
-16. Temporary changes functionality in the Problem Definition tab
-17. Systems Engineering Framework documents:
+2. Optimization models
+3. Systems Engineering documents:
     a. Requirements Specification Document (RSD)
     b. System Architecture Document
     c. Traceability Matrix
@@ -90,6 +75,6 @@ Deliverables:
     i. Risk Management Plan
     j. Project Plan
 
-Note: This version emphasizes a modular approach to software design, incorporates advanced optimization techniques, and provides a user-friendly interface, allowing for easier maintenance, testing, and future enhancements. The use of centralized constants ensures consistency across the application and simplifies future modifications to errand types, incentives, and other key parameters. This approach significantly improves the maintainability of the project by reducing the need for changes across multiple files when updating core business rules or configuration settings. The addition of detailed logging and schedule comparison features enhances the ability to analyze and improve the scheduling algorithms. The implementation of comprehensive type hints throughout the codebase further improves code readability, helps catch potential type-related bugs earlier, and enhances overall maintainability. The inclusion of multiple optimization strategies (CP-SAT and VRP) provides flexibility in solving different types of scheduling problems and allows for performance comparisons between different approaches. The improved GUI navigation, extended Base Time range, addition of disincentive fields for all errand types, and the new temporary changes functionality in the Problem Definition tab enhance the user experience and provide more flexibility in problem definition and exploration.
+Note: This program emphasizes a modular approach to software design, incorporates advanced optimization techniques, and provides a user-friendly interface, allowing for easier maintenance, testing, and future enhancements. The program uses centralized constants to ensure consistency across the application and simplify future modifications to errand types, incentives, and other key parameters. This approach significantly improves the maintainability of the project by reducing the need for changes across multiple files when updating core algorithms or configuration settings. The program uses comprehensive type hints throughout the codebase to enable code readability, help catch potential type-related bugs earlier, and enhance overall maintainability.
 
-The implementation of a comprehensive systems engineering framework ensures a well-documented and structured approach to the project. This framework provides a solid foundation for understanding the system requirements, architecture, and interactions, facilitating better communication among team members and stakeholders. It also supports traceability, testing, and risk management throughout the project lifecycle, contributing to the overall quality and reliability of the Synthetic Errands Scheduler system.
+This program is founded on a comprehensive systems engineering framework to ensure a well-documented and structured approach to the project. This framework provides a solid foundation for understanding the system requirements, architecture, and interactions, facilitating better communication among team members and stakeholders. It also supports traceability, testing, and risk management throughout the project lifecycle, contributing to the overall quality and reliability of the Synthetic Errands Scheduler system.

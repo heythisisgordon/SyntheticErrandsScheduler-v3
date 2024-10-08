@@ -43,12 +43,13 @@ Some requirements will be tested using a combination of automated and manual app
 | FR-PR-1 | Verify Busyville representation | Unit test to check grid dimensions and properties | Visual inspection of generated grid in GUI |
 | FR-PR-2 | Generate random problem instances | Automated test to generate and validate multiple instances | Manual review of generated instances for reasonableness |
 | FR-PR-3 | Verify errand representation | Unit test to check errand attributes | Manual verification of errand details in GUI |
-| FR-PR-4 | Verify contractor representation | Unit test to validate contractor properties | Manual check of contractor information in GUI |
+| FR-PR-4 | Verify contractor representation with calendars | Unit test to validate contractor properties and calendar | Manual check of contractor information and calendar in GUI |
 | FR-SA-1 | Test initial greedy scheduling | Integration test to verify greedy algorithm output | Manual review of initial schedule in GUI |
 | FR-SA-2 | Test modular optimizer capability | Automated tests for each optimizer algorithm | Manual comparison of different optimizer results |
 | FR-SA-3 | Verify multiple optimizer support | System test to check integration of multiple optimizers | Manual testing of optimizer selection and execution |
 | FR-SA-4 | Test optimizer selection interface | Automated UI tests for optimizer selection | Manual testing of optimizer selection process |
 | FR-SA-5 | Verify easy addition of new optimizers | Automated test to add a mock optimizer | Manual code review and testing of new optimizer addition |
+| FR-SA-6 | Verify respect for contractor calendars | Integration tests for scheduling with calendars | Manual verification of schedule adherence to calendars |
 | FR-TC-1 | Test travel time calculation | Unit test for travel time function | Manual verification of travel times in GUI |
 | FR-TC-2 | Verify same-day incentives | Automated tests for incentive calculations | Manual check of incentive application in GUI |
 | FR-TC-3 | Test disincentive application | Unit tests for disincentive logic | Manual verification of disincentives in problem definition |
@@ -56,10 +57,17 @@ Some requirements will be tested using a combination of automated and manual app
 | FR-UI-1 | Test GUI functionality | Automated UI tests for tab navigation | Manual testing of GUI layout and functionality |
 | FR-UI-2 | Verify CLI functionality | Automated tests for CLI commands | Manual testing of CLI interface |
 | FR-UI-3 to FR-UI-11 | Test specific GUI features | Automated UI tests for each feature | Manual usability testing of GUI features |
+| FR-UI-12 | Test contractor calendar display | Automated UI tests for calendar rendering | Manual verification of calendar display in GUI |
 | FR-DM-1 | Test centralized configuration | Integration tests for config management | Manual modification and testing of config file |
 | FR-DM-2 | Verify problem instance saving/loading | Automated tests for save/load functionality | Manual testing of save/load feature in GUI and CLI |
+| FR-DM-3 | Test contractor calendar data management | Unit tests for calendar data persistence | Manual verification of calendar data storage and retrieval |
 | FR-RL-1 | Check logging functionality | Automated tests to verify log output | Manual review of log contents |
 | FR-RL-2 | Test schedule visualization | Automated tests for visualization generation | Manual inspection of generated visualizations |
+| FR-CM-1 | Test contractor calendar creation | Unit tests for calendar creation | Manual testing of calendar creation in GUI |
+| FR-CM-2 | Verify time slot marking | Unit tests for marking availability | Manual testing of time slot marking in GUI |
+| FR-CM-3 | Test calendar viewing in GUI | Automated UI tests for calendar display | Manual inspection of calendar view in GUI |
+| FR-CM-4 | Verify scheduling respects calendars | Integration tests with scheduling algorithms | Manual verification of schedule adherence to calendars |
+| FR-CM-5 | Test MasterContractorCalendar functionality | Unit and integration tests for MasterContractorCalendar methods | Manual verification of centralized calendar management in scheduling process |
 
 ### 4.2 Non-Functional Requirements
 
@@ -120,6 +128,9 @@ Some requirements will be tested using a combination of automated and manual app
 
 - Risk: Automated tests missing edge cases
   Contingency: Complement automated testing with exploratory manual testing to uncover unexpected issues
+
+- Risk: Contractor calendar integration causing scheduling conflicts
+  Contingency: Implement comprehensive unit and integration tests for calendar functionality, and conduct thorough manual testing of scheduling scenarios
 
 ## 9. Approval and Sign-off
 

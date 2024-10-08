@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from typing import Union, List, Tuple, Dict
+from typing import Union, List, Tuple
 import numpy as np
 from models.schedule import Schedule
 from models.customer import Customer
@@ -9,6 +9,9 @@ from models.contractor import Contractor
 from utils.city_map import GRID_SIZE, create_city_grid
 from utils.travel_time import calculate_travel_time
 from datetime import date, datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 def visualize_schedule(schedule: Schedule, ax_or_filename: Union[Axes, str, None] = None) -> None:
     """

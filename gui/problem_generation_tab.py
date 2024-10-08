@@ -50,24 +50,41 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
         self.content_box.Clear(True)
         
         # Display customer information
-        self.content_box.Add(wx.StaticText(self, label="Customers:"), flag=wx.ALL, border=5)
+        customer_section = wx.StaticBox(self, label="Customers")
+        customer_sizer = wx.StaticBoxSizer(customer_section, wx.VERTICAL)
+        
         for customer in customers:
-            info: str = f"Customer {customer.id}: Location {customer.location}, " \
-                   f"Errand: {customer.desired_errand.type}, " \
-                   f"Base Time: {customer.desired_errand.base_time}, " \
-                   f"Charge: ${customer.desired_errand.charge:.2f}"
-            self.content_box.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=5)
+            customer_info = wx.StaticBox(self, label=f"Customer {customer.id}")
+            customer_info_sizer = wx.StaticBoxSizer(customer_info, wx.VERTICAL)
+            
+            info: List[str] = [
+                f"Location: {customer.location}",
+                f"Errand: {customer.desired_errand.type.name}",
+                f"Base Time: {customer.desired_errand.base_time}",
+                f"Charge: ${customer.desired_errand.charge:.2f}"
+            ]
+            
+            for line in info:
+                customer_info_sizer.Add(wx.StaticText(self, label=line), flag=wx.ALL, border=2)
+            
+            customer_sizer.Add(customer_info_sizer, flag=wx.ALL|wx.EXPAND, border=5)
+        
+        self.content_box.Add(customer_sizer, flag=wx.ALL|wx.EXPAND, border=10)
 
         # Display contractor information
-        self.content_box.Add(wx.StaticText(self, label="\nContractors:"), flag=wx.ALL, border=5)
+        contractor_section = wx.StaticBox(self, label="Contractors")
+        contractor_sizer = wx.StaticBoxSizer(contractor_section, wx.VERTICAL)
+        
         for contractor in contractors:
             info: str = f"Contractor {contractor.id}: Location {contractor.location}"
-            self.content_box.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=5)
+            contractor_sizer.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=2)
 
         # Display contractor rate
         contractor_rate = self.main_frame.problem_definition.get_contractor_rate()
-        rate_info: str = f"\nContractor Rate: ${contractor_rate:.2f} per minute"
-        self.content_box.Add(wx.StaticText(self, label=rate_info), flag=wx.ALL, border=5)
+        rate_info: str = f"Contractor Rate: ${contractor_rate:.2f} per minute"
+        contractor_sizer.Add(wx.StaticText(self, label=rate_info), flag=wx.ALL, border=2)
+
+        self.content_box.Add(contractor_sizer, flag=wx.ALL|wx.EXPAND, border=10)
 
         self.Layout()
         self.SetupScrolling(scroll_x=False, scroll_y=True, rate_y=20)

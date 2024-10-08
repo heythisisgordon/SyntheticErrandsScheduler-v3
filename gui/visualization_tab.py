@@ -17,6 +17,7 @@ class VisualizationTab(scrolled.ScrolledPanel):
         self.figure: Figure
         self.canvas: FigureCanvas
         self.sizer: wx.BoxSizer
+        self.optimized_schedule: Optional[Schedule] = None
         self.InitUI()
 
     def InitUI(self) -> None:
@@ -29,6 +30,8 @@ class VisualizationTab(scrolled.ScrolledPanel):
         self.SetMinSize((780, 500))  # Set a minimum size for the panel
 
     def UpdateContent(self, customers: List[Customer], contractors: List[Contractor], optimized_sched: Schedule) -> None:
+        self.optimized_schedule = optimized_sched
+        
         if not self.figure.axes:
             ax: Axes = self.figure.add_subplot(111)
         else:

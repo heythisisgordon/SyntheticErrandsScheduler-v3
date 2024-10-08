@@ -9,14 +9,14 @@ import logging
 from typing import Dict, List, Tuple, Optional
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 from models.schedule import Schedule
 from models.customer import Customer
 from models.contractor import Contractor
 from models.errand import Errand, ErrandType
 from utils.travel_time import calculate_travel_time
 from utils.errand_utils import get_errand_time, calculate_errand_end_time
-from constants import SCHEDULING_DAYS, WORK_START_TIME, WORK_END_TIME
+from constants import SCHEDULING_DAYS, WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -41,16 +41,21 @@ def create_data_model(schedule: Schedule) -> Dict:
         data['distance_matrix'].append(row)
     
     # Time windows (in minutes from start of day)
-    data['time_windows'] = [(WORK_START_TIME, WORK_END_TIME)] * len(locations)
+    start_minutes = WORK_START_TIME_OBJ.hour * 60 + WORK_START_TIME_OBJ.minute
+    end_minutes = WORK_END_TIME_OBJ.hour * 60 + WORK_END_TIME_OBJ.minute
+    data['time_windows'] = [(start_minutes, end_minutes)] * len(locations)
     
     # Service times (in minutes)
     data['service_times'] = [0] * len(schedule.contractors)  # No service time for contractors
     data['service_times'].extend([int(customer.desired_errand.base_time.total_seconds() / 60) for customer in schedule.customers])
     
+    # Contractor calendars
+    data['contractor_calendars'] = [contractor.calendar for contractor in schedule.contractors]
+    
     logger.debug(f"Data model created: {data}")
     return data
 
-def optimize_schedule_vrp(schedule: Schedule) -> Schedule:
+def optimize_schedule_vrp(schedule: Schedule) -> Tuple[Schedule, Schedule]:
     """
     Optimize the given schedule using Google OR-Tools Vehicle Routing solver.
     
@@ -58,7 +63,7 @@ def optimize_schedule_vrp(schedule: Schedule) -> Schedule:
         schedule (Schedule): The initial schedule to optimize
     
     Returns:
-        Schedule: The optimized schedule, or the original schedule if no solution was found
+        Tuple[Schedule, Schedule]: The initial schedule and the optimized schedule
     """
     logger.info("Starting VRP optimization")
     try:
@@ -72,7 +77,18 @@ def optimize_schedule_vrp(schedule: Schedule) -> Schedule:
         def time_callback(from_index, to_index):
             from_node = manager.IndexToNode(from_index)
             to_node = manager.IndexToNode(to_index)
-            return data['distance_matrix'][from_node][to_node] + data['service_times'][from_node]
+            travel_time = data['distance_matrix'][from_node][to_node]
+            service_time = data['service_times'][from_node]
+            
+            # Check contractor availability
+            if from_node < data['num_vehicles']:  # It's a contractor
+                contractor_calendar = data['contractor_calendars'][from_node]
+                current_time = datetime.now().replace(hour=WORK_START_TIME_OBJ.hour, minute=WORK_START_TIME_OBJ.minute)
+                end_time = current_time + timedelta(minutes=travel_time + service_time)
+                if not contractor_calendar.is_available(current_time, end_time):
+                    return 10000  # Large penalty for unavailable time slots
+            
+            return travel_time + service_time
 
         transit_callback_index = routing.RegisterTransitCallback(time_callback)
         routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
@@ -81,7 +97,7 @@ def optimize_schedule_vrp(schedule: Schedule) -> Schedule:
         routing.AddDimension(
             transit_callback_index,
             60,  # allow waiting time
-            WORK_END_TIME - WORK_START_TIME,  # maximum time per vehicle
+            data['time_windows'][0][1] - data['time_windows'][0][0],  # maximum time per vehicle
             False,  # Don't force start cumul to zero
             time)
         time_dimension = routing.GetDimensionOrDie(time)
@@ -120,23 +136,23 @@ def optimize_schedule_vrp(schedule: Schedule) -> Schedule:
 
         if solution:
             logger.info("Solution found, building new schedule")
-            return build_schedule_from_solution(schedule, manager, routing, solution, time_dimension)
+            optimized_schedule = build_schedule_from_solution(schedule, manager, routing, solution, time_dimension)
+            return schedule, optimized_schedule
         else:
             logger.warning('No solution found. Returning original schedule.')
-            return schedule
+            return schedule, schedule
     except Exception as e:
         logger.error(f"Error occurred during VRP optimization: {str(e)}", exc_info=True)
-        return schedule
+        return schedule, schedule
 
 def build_schedule_from_solution(schedule: Schedule, manager: pywrapcp.RoutingIndexManager, 
                                  routing: pywrapcp.RoutingModel, solution: pywrapcp.Assignment, 
                                  time_dimension: pywrapcp.RoutingDimension) -> Schedule:
     """Builds a new schedule from the VRP solution."""
     new_schedule = Schedule(schedule.contractors.copy(), schedule.customers.copy())
-    new_schedule.assignments = {}
 
     logger.info("Building optimized schedule:")
-    today = datetime.now().date()
+    today = datetime.now().replace(hour=WORK_START_TIME_OBJ.hour, minute=WORK_START_TIME_OBJ.minute, second=0, microsecond=0)
 
     for vehicle_id in range(manager.GetNumberOfVehicles()):
         contractor = schedule.contractors[vehicle_id]
@@ -148,9 +164,18 @@ def build_schedule_from_solution(schedule: Schedule, manager: pywrapcp.RoutingIn
             node = manager.IndexToNode(index)
             if node >= len(schedule.contractors):  # It's a customer
                 customer = schedule.customers[node - len(schedule.contractors)]
-                start_time = datetime.combine(today, time(hour=WORK_START_TIME // 60, minute=WORK_START_TIME % 60)) + timedelta(minutes=solution.Min(time_var))
-                new_schedule.assignments.setdefault(today, []).append((customer, contractor, start_time))
-                plan_output += f" {node} Start: {start_time.time()} -> "
+                start_time = today + timedelta(minutes=solution.Min(time_var))
+                end_time = start_time + get_errand_time(customer.desired_errand, contractor.location, customer.location)
+                
+                if contractor.calendar.is_available(start_time, end_time):
+                    errand_id = f"errand_{customer.id}_{contractor.id}_{start_time.strftime('%Y%m%d%H%M')}"
+                    if contractor.calendar.reserve_time_slot(errand_id, start_time, end_time):
+                        new_schedule.add_assignment(start_time, customer, contractor)
+                        plan_output += f" {node} Start: {start_time.time()} -> "
+                    else:
+                        logger.warning(f"Failed to reserve time slot for customer {customer.id} with contractor {contractor.id} at {start_time}")
+                else:
+                    logger.warning(f"Contractor {contractor.id} is not available for customer {customer.id} at {start_time}")
             
             previous_index = index
             index = solution.Value(routing.NextVar(index))
@@ -172,22 +197,22 @@ def test_vrp_solver():
     # Test case 1: Simple case (should succeed)
     contractors = [Contractor(1, (0, 0), 0.5), Contractor(2, (10, 10), 0.6)]
     customers = [
-        Customer(1, (5, 5), Errand(ErrandType.DELIVERY, timedelta(minutes=30))),
-        Customer(2, (15, 15), Errand(ErrandType.DOG_WALK, timedelta(minutes=45))),
+        Customer(1, (5, 5), Errand(1, ErrandType.DELIVERY, timedelta(minutes=30), 1.0, None)),
+        Customer(2, (15, 15), Errand(2, ErrandType.DOG_WALK, timedelta(minutes=45), 1.0, None)),
     ]
     test_schedule = Schedule(contractors, customers)
-    optimized_schedule = optimize_schedule_vrp(test_schedule)
+    initial_schedule, optimized_schedule = optimize_schedule_vrp(test_schedule)
     assert optimized_schedule.assignments, "Test case 1 failed: No solution found for simple case"
     logger.info("Test case 1 passed: Solution found for simple case")
 
     # Test case 2: More complex case (should succeed)
     contractors = [Contractor(i, (i*10, i*10), 0.5 + i*0.1) for i in range(1, 6)]
     customers = [
-        Customer(i, (i*5, i*5), Errand(ErrandType.DELIVERY, timedelta(minutes=30)))
+        Customer(i, (i*5, i*5), Errand(i, ErrandType.DELIVERY, timedelta(minutes=30), 1.0, None))
         for i in range(1, 11)
     ]
     test_schedule = Schedule(contractors, customers)
-    optimized_schedule = optimize_schedule_vrp(test_schedule)
+    initial_schedule, optimized_schedule = optimize_schedule_vrp(test_schedule)
     assert optimized_schedule.assignments, "Test case 2 failed: No solution found for complex case"
     logger.info("Test case 2 passed: Solution found for complex case")
 
@@ -195,31 +220,27 @@ def test_vrp_solver():
     contractors = [Contractor(1, (0, 0), 0.5)]
     customers = []
     test_schedule = Schedule(contractors, customers)
-    optimized_schedule = optimize_schedule_vrp(test_schedule)
+    initial_schedule, optimized_schedule = optimize_schedule_vrp(test_schedule)
     assert optimized_schedule.assignments == {}, "Test case 3 failed: Unexpected assignments for no customers"
     logger.info("Test case 3 passed: Correct handling of no customers")
 
     # Test case 4: Edge case - no contractors (should return original schedule)
     contractors = []
-    customers = [Customer(1, (5, 5), Errand(ErrandType.DELIVERY, timedelta(minutes=30)))]
+    customers = [Customer(1, (5, 5), Errand(1, ErrandType.DELIVERY, timedelta(minutes=30), 1.0, None))]
     test_schedule = Schedule(contractors, customers)
-    optimized_schedule = optimize_schedule_vrp(test_schedule)
+    initial_schedule, optimized_schedule = optimize_schedule_vrp(test_schedule)
     assert optimized_schedule == test_schedule, "Test case 4 failed: Unexpected result for no contractors"
     logger.info("Test case 4 passed: Correct handling of no contractors")
 
     # Test case 5: Large problem (may take longer to solve)
     contractors = [Contractor(i, (i*10, i*10), 0.5 + i*0.05) for i in range(1, 21)]
     customers = [
-        Customer(i, (i*5, i*5), Errand(ErrandType.DELIVERY, timedelta(minutes=30)))
+        Customer(i, (i*5, i*5), Errand(i, ErrandType.DELIVERY, timedelta(minutes=30), 1.0, None))
         for i in range(1, 101)
     ]
     test_schedule = Schedule(contractors, customers)
-    optimized_schedule = optimize_schedule_vrp(test_schedule)
+    initial_schedule, optimized_schedule = optimize_schedule_vrp(test_schedule)
     assert optimized_schedule.assignments, "Test case 5 failed: No solution found for large problem"
     logger.info("Test case 5 passed: Solution found for large problem")
 
     logger.info("All VRP solver tests passed successfully")
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    test_vrp_solver()

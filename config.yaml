@@ -62,3 +62,12 @@ optimization:
 scheduling_days: 14
 work_end_time: 1020
 work_start_time: 480
+visualization_colors:
+  travel_time: '#D3D3D3'  # Light gray
+  errand_time: '#ADD8E6'  # Light blue
+  same_day_incentive: '#90EE90'  # Light green
+  contractor_1: '#FF6347'  # Tomato
+  contractor_2: '#4682B4'  # Steel Blue
+  contractor_3: '#32CD32'  # Lime Green
+  contractor_4: '#FFD700'  # Gold
+  contractor_5: '#8A2BE2'  # Blue Violet

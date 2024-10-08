@@ -1,12 +1,13 @@
 import wx
 import wx.lib.scrolledpanel as scrolled
-from typing import List
+from typing import List, Tuple, Dict
 from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
 from algorithms.initial_greedy_scheduler import initial_greedy_schedule
 from algorithms.CP_SAT_optimizer import optimize_schedule
 from algorithms.vehicle_routing_optimizer import optimize_schedule_vrp
+from utils.schedule_analyzer import compare_schedules
 from datetime import datetime, date
 import logging
 
@@ -66,62 +67,110 @@ class OptimizedSolutionTab(scrolled.ScrolledPanel):
         
         # Optimize schedule based on selected optimizer
         if optimizer == "CP-SAT Solver":
-            optimized_sched: Schedule = optimize_schedule(initial_sched)
+            initial_sched, optimized_sched = optimize_schedule(initial_sched)
         elif optimizer == "Vehicle Routing Solver":
-            optimized_sched: Schedule = optimize_schedule_vrp(initial_sched)
+            initial_sched, optimized_sched = optimize_schedule_vrp(initial_sched)
         else:
             raise ValueError(f"Unknown optimizer: {optimizer}")
         
-        # Display optimized schedule information
-        self.content_box.Add(wx.StaticText(self, label=f"Optimized Schedule ({optimizer}):"), flag=wx.ALL, border=5)
+        # Display schedules side by side
+        self.display_schedules_side_by_side(initial_sched, optimized_sched, optimizer)
         
-        if not optimized_sched.assignments:
-            self.content_box.Add(wx.StaticText(self, label="No optimized schedule found. Displaying initial greedy schedule."), flag=wx.ALL, border=5)
-            schedule_to_display = initial_sched
-        else:
-            schedule_to_display = optimized_sched
-
-        for day, assignments in schedule_to_display.assignments.items():
-            if isinstance(day, date):
-                day_str = day.strftime("%Y-%m-%d")
-            else:
-                day_str = f"Day {day + 1}"
-            self.content_box.Add(wx.StaticText(self, label=f"\n{day_str}:"), flag=wx.ALL, border=5)
-            for customer, contractor, start_time in assignments:
-                if isinstance(start_time, datetime):
-                    time_str = start_time.strftime("%H:%M")
-                else:
-                    hours, minutes = divmod(start_time, 60)
-                    time_str = f"{hours:02d}:{minutes:02d}"
-                info: str = f"  Contractor {contractor.id} - Customer {customer.id}:"
-                self.content_box.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=2)
-                info = f"    Errand: {customer.desired_errand.type}"
-                self.content_box.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=2)
-                info = f"    Start Time: {time_str}"
-                self.content_box.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=2)
-                info = f"    Location: {customer.location}"
-                self.content_box.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=2)
-
-        initial_profit: float = initial_sched.calculate_total_profit()
-        optimized_profit: float = optimized_sched.calculate_total_profit()
-        profit_improvement: float = optimized_profit - initial_profit
-        
-        self.content_box.Add(wx.StaticText(self, label=f"\nInitial Greedy Schedule Profit: ${initial_profit:.2f}"), flag=wx.ALL, border=5)
-        self.content_box.Add(wx.StaticText(self, label=f"Optimized Schedule Profit: ${optimized_profit:.2f}"), flag=wx.ALL, border=5)
-        self.content_box.Add(wx.StaticText(self, label=f"Profit Improvement: ${profit_improvement:.2f}"), flag=wx.ALL, border=5)
-
-        if profit_improvement == 0:
-            self.content_box.Add(wx.StaticText(self, label="Note: The optimizer couldn't improve upon the initial greedy schedule."), flag=wx.ALL, border=5)
-
-        logger.info(f"Optimization results: Initial greedy profit: ${initial_profit:.2f}, Optimized profit: ${optimized_profit:.2f}, Improvement: ${profit_improvement:.2f}")
+        # Compare schedules
+        self.display_schedule_comparison(initial_sched, optimized_sched)
 
         self.Layout()
         self.SetupScrolling(scroll_x=False, scroll_y=True, rate_y=20)
         self.Refresh()
         self.Update()
 
+        # Update the Contractor Schedule tab
+        self.main_frame.update_contractor_schedule(optimized_sched)
+
         # Update the Visualization tab
         self.main_frame.update_visualization(customers, contractors, optimized_sched)
+
+    def display_schedules_side_by_side(self, initial_sched: Schedule, optimized_sched: Schedule, optimizer: str) -> None:
+        self.content_box.Add(wx.StaticText(self, label=f"Schedule Comparison ({optimizer}):"), flag=wx.ALL, border=5)
+        
+        grid_sizer = wx.GridSizer(rows=1, cols=2, hgap=10, vgap=10)
+        
+        initial_panel = self.create_schedule_panel(initial_sched, "Initial Greedy Schedule")
+        optimized_panel = self.create_schedule_panel(optimized_sched, "Optimized Schedule")
+        
+        grid_sizer.Add(initial_panel, 0, wx.EXPAND)
+        grid_sizer.Add(optimized_panel, 0, wx.EXPAND)
+        
+        self.content_box.Add(grid_sizer, 0, wx.EXPAND|wx.ALL, 10)
+
+    def create_schedule_panel(self, schedule: Schedule, title: str) -> wx.Panel:
+        panel = wx.Panel(self)
+        box = wx.StaticBox(panel, label=title)
+        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        
+        for day, assignments in schedule.assignments.items():
+            if isinstance(day, date):
+                day_str = day.strftime("%Y-%m-%d")
+            else:
+                day_str = f"Day {day + 1}"
+            sizer.Add(wx.StaticText(panel, label=f"\n{day_str}:"), flag=wx.ALL, border=5)
+            for customer, contractor, start_time in assignments:
+                if isinstance(start_time, datetime):
+                    time_str = start_time.strftime("%H:%M")
+                else:
+                    hours, minutes = divmod(start_time, 60)
+                    time_str = f"{hours:02d}:{minutes:02d}"
+                info: str = f"  C{customer.id}-T{contractor.id} @ {time_str}"
+                sizer.Add(wx.StaticText(panel, label=info), flag=wx.ALL, border=2)
+        
+        panel.SetSizer(sizer)
+        return panel
+
+    def display_schedule_comparison(self, initial_sched: Schedule, optimized_sched: Schedule) -> None:
+        initial_analysis, optimized_analysis, profit_difference = compare_schedules(initial_sched, optimized_sched)
+        
+        comparison_box = wx.StaticBox(self, label="Schedule Comparison")
+        comparison_sizer = wx.StaticBoxSizer(comparison_box, wx.VERTICAL)
+        
+        metrics = [
+            ("Total Travel Time (hours)", "total_travel_time"),
+            ("Average Travel Time (hours)", "average_travel_time"),
+            ("Total Errands", "total_errands"),
+            ("Average Errands per Day", "average_errands_per_day"),
+            ("Max Errands per Day", "max_errands_per_day"),
+            ("Min Errands per Day", "min_errands_per_day"),
+        ]
+        
+        for metric_name, metric_key in metrics:
+            initial_value = initial_analysis[metric_key]
+            optimized_value = optimized_analysis[metric_key]
+            difference = optimized_value - initial_value
+            comparison_sizer.Add(wx.StaticText(self, label=f"{metric_name}:"), flag=wx.ALL, border=2)
+            comparison_sizer.Add(wx.StaticText(self, label=f"  Initial: {initial_value:.2f}"), flag=wx.ALL, border=2)
+            comparison_sizer.Add(wx.StaticText(self, label=f"  Optimized: {optimized_value:.2f}"), flag=wx.ALL, border=2)
+            comparison_sizer.Add(wx.StaticText(self, label=f"  Difference: {difference:.2f}"), flag=wx.ALL, border=2)
+        
+        initial_profit = initial_sched.calculate_total_profit()
+        optimized_profit = optimized_sched.calculate_total_profit()
+        
+        comparison_sizer.Add(wx.StaticText(self, label=f"Total Profit:"), flag=wx.ALL, border=2)
+        comparison_sizer.Add(wx.StaticText(self, label=f"  Initial: ${initial_profit:.2f}"), flag=wx.ALL, border=2)
+        comparison_sizer.Add(wx.StaticText(self, label=f"  Optimized: ${optimized_profit:.2f}"), flag=wx.ALL, border=2)
+        comparison_sizer.Add(wx.StaticText(self, label=f"  Difference: ${profit_difference:.2f}"), flag=wx.ALL, border=2)
+        
+        if profit_difference > 0:
+            improvement_percentage = (profit_difference / initial_profit) * 100
+            comparison_sizer.Add(wx.StaticText(self, label=f"Improvement Percentage: {improvement_percentage:.2f}%"), flag=wx.ALL, border=5)
+        elif profit_difference == 0:
+            comparison_sizer.Add(wx.StaticText(self, label="Note: The optimizer couldn't improve upon the initial greedy schedule."), flag=wx.ALL, border=5)
+        else:
+            decrease_percentage = (-profit_difference / initial_profit) * 100
+            comparison_sizer.Add(wx.StaticText(self, label=f"Decrease Percentage: {decrease_percentage:.2f}%"), flag=wx.ALL, border=5)
+            comparison_sizer.Add(wx.StaticText(self, label="Warning: The optimized schedule performed worse than the initial greedy schedule."), flag=wx.ALL, border=5)
+        
+        self.content_box.Add(comparison_sizer, 0, wx.EXPAND|wx.ALL, 10)
+        
+        logger.info(f"Optimization results: Initial profit: ${initial_profit:.2f}, Optimized profit: ${optimized_profit:.2f}, Difference: ${profit_difference:.2f}")
 
     def OnSize(self, event: wx.SizeEvent) -> None:
         self.SetupScrolling(scroll_x=False, scroll_y=True, rate_y=20)

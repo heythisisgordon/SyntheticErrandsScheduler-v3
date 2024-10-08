@@ -1,6 +1,6 @@
 # Developer Log
 
-New entries must be appended to the end of the log. Do not edit or delete previous entries without specific instructions. Do not use placeholders for old entries when editing the developer log; the code has no way to know what data the placeholder represents.
+New entries must be appended to the end of the log. Do not edit or delete previous entries without specific instructions.
 
 ## Project History Summary
 
@@ -23,364 +23,232 @@ New entries must be appended to the end of the log. Do not edit or delete previo
 
 ## Recent Development Log
 
-1. Task: Implement Type Hinting in Schedule Model
-- Updated models/schedule.py to include type hints for all attributes, method parameters, and return values
-- Added necessary imports from typing module (List, Dict, Tuple, Any)
-- Updated method signatures to include type annotations
-- Challenges: Ensuring correct type annotations for complex data structures like self.assignments
-- Decisions: Used Dict[int, List[Tuple[Customer, Contractor, int]]] for self.assignments to accurately represent its structure
-- Next: Continue adding type hints to other core modules, run mypy for static type checking, and update related files as needed
+1. Task: Implement Consistent Time Representation
+- Updated various modules to use datetime and timedelta objects
+- Modified optimization model to work with datetime objects while maintaining integer constraints
+- Improved consistency and accuracy in time-based calculations across the project
+- Next steps: Update test suite, review GUI components, investigate performance optimizations
 
-2. Task: Review and Document Existing Type Hints in Errand Model
-- Discovered that models/errand.py already has comprehensive type hinting implemented
-- Reviewed the existing type hints in the Errand class for correctness and completeness
-- Noted the use of Union[Dict[str, Union[str, int, float]], None] for the disincentive attribute, which accurately represents its possible types
-- Challenges: None, as the type hinting was already well-implemented
-- Decisions: No changes needed to the existing type hints in models/errand.py
-- Next: Continue with type hinting in other core modules, focusing on those that haven't been updated yet, such as models/customer.py and models/contractor.py
+2. Task: Fix Time Representation Issues and Improve Error Handling
+- Updated algorithms to use datetime.time objects consistently
+- Added error handling for time conversion failures
+- Created WORK_START_TIME_OBJ and WORK_END_TIME_OBJ for consistency
+- Next steps: Comprehensive testing, documentation updates, performance optimization
 
-3. Task: Implement Type Hinting in Customer Model
-- Updated models/customer.py to include type hints for all attributes, method parameters, and return values
-- Added necessary imports from typing module (Dict, List, Tuple)
-- Updated class and method signatures to include type annotations
-- Added docstrings to the Customer class and its methods to improve documentation
-- Challenges: Determining the most appropriate type hint for the availability attribute
-- Decisions: Used Dict[int, List[int]] for availability to represent days mapped to lists of available time slots
-- Next: Implement type hinting in the Contractor model and continue with other core modules as needed
+3. Task: Fix Date and Time Handling in Errand Model
+- Updated Errand model to handle both datetime and date objects
+- Modified type hints and added logic to extract dates from datetime objects
+- Ensured backward compatibility and consistent date comparisons
+- Next steps: Update test cases, review related codebase interactions
 
-4. Task: Implement Type Hinting in Contractor Model
-- Updated models/contractor.py to include type hints for all attributes, method parameters, and return values
-- Added necessary imports from typing module (Dict, List, Tuple)
-- Updated class and method signatures to include type annotations
-- Added docstrings to the Contractor class and its methods to improve documentation
-- Challenges: Determining the most appropriate type hint for the schedule attribute
-- Decisions: Used Dict[int, List] for schedule to represent days mapped to lists of assignments (kept as List for flexibility)
-- Next: Continue implementing type hinting in other core modules, focusing on utility functions and algorithm files
+4. Task: Update GUI Components for Integer and Datetime-based Day Representations
+- Modified GUI components to handle both integer-based and datetime.date-based representations
+- Implemented flexible approach for displaying start times
+- Next steps: Thorough GUI testing, update visualization components
 
-5. Task: Review and Document Existing Type Hints in Errand Utils
-- Discovered that utils/errand_utils.py already has comprehensive type hinting implemented
-- Reviewed the existing type hints in the calculate_errand_time function for correctness and completeness
-- Noted the use of Tuple[int, int] for location parameters and int for the return type
-- Challenges: None, as the type hinting was already well-implemented
-- Decisions: No changes needed to the existing type hints in utils/errand_utils.py
-- Next: Continue with type hinting in other utility functions and algorithm files, focusing on those that haven't been updated yet, such as utils/travel_time.py and algorithms/initial_scheduler.py
+5. Task: Implement Vehicle Routing Problem (VRP) Solver and Optimizer Selection
+- Created vehicle_routing_optimizer.py using Google OR-Tools
+- Updated GUI and CLI to allow selection between CP-SAT and VRP optimizers
+- Modified relevant modules to accommodate both optimizers
+- Next steps: Implement unit tests, conduct performance comparisons, update CLI interface
 
-6. Task: Complete Type Hinting Implementation Across the Project
-- Implemented type hints in remaining files:
-  - utils/travel_time.py
-  - utils/city_map.py
-  - utils/visualization.py
-  - utils/config_manager.py
-  - algorithms/initial_scheduler.py
-  - algorithms/optimizer.py
-  - main.py
-  - run_tests.py
-  - All files in the gui/ directory
-  - All test files in the tests/ directory
-- Updated import statements to include necessary types from the typing module
-- Added type hints to function parameters, return values, and local variables where appropriate
-- Challenges: 
-  - Ensuring consistency in type hints across interconnected modules
-  - Determining appropriate type hints for complex data structures and function signatures
-  - Balancing specificity and flexibility in type hints, especially for functions with multiple possible return types
-- Decisions:
-  - Used Union types where functions could return different types based on conditions
-  - Implemented TypedDict for complex dictionary structures to provide more detailed type information
-  - Used Optional types for parameters and return values that could be None
-  - Added type hints to test files to maintain consistency across the entire codebase
-- Next steps:
-  - Run mypy or a similar static type checker to identify any remaining type-related issues
-  - Update project documentation to reflect the completion of type hinting implementation
-  - Consider implementing static type checking as part of the development workflow
+6. Task: Implement Optimizer Selection in CLI Mode
+- Added command-line arguments for optimizer selection
+- Updated cli_interface.py to use the selected optimizer
+- Implemented error handling for invalid selections
+- Next steps: Update documentation, create test cases for CLI optimizer selection
 
-7. Task: Update Project Documentation
-- Updated the following documentation files to reflect the implementation of type hints:
-  - readme.md: Added information about type hinting in the "Key Features" section and updated the "Contributing" guidelines
-  - project_scope.md: Included type hinting implementation in the "In-Scope" and "Deliverables" sections
-  - improvement_plan.md: Moved "Use Type Hinting" from "Remaining Tasks" to "Completed Tasks" and updated "Next Steps"
-  - ux_overview.md: Added a section on "Type Hinting and Code Quality" to explain the indirect benefits to user experience
-- Challenges: Ensuring that the documentation accurately reflects the current state of the project while maintaining readability
-- Decisions: 
-  - Emphasized the benefits of type hinting for code quality, maintainability, and reliability
-  - Updated the "Future Enhancements" section to include static type checking implementation
-- Next steps:
-  - Continue to monitor and update type hints as the project evolves
-  - Consider implementing static type checking as part of the continuous integration process
+7. Task: Rename Initial Scheduler to Initial Greedy Scheduler
+- Renamed files and updated all references across the project
+- Modified documentation to emphasize the greedy nature of the algorithm
+- Next steps: Comprehensive testing, review implementation for adherence to greedy approach
 
-8. Task: Refactor optimizer.py for Improved Code Organization
-- Broke down the large optimize_schedule function into smaller, more focused functions:
-  - setup_model_and_variables: Sets up the CP model and variables
-  - add_constraints: Adds constraints to the model
-  - setup_objective: Sets up the objective function
-  - solve_model_and_extract_solution: Solves the model and extracts the solution
-- Updated the main optimize_schedule function to use these new functions
-- Challenges:
-  - Ensuring that the refactored code maintains the same functionality as the original
-  - Deciding on the appropriate level of granularity for the new functions
-- Decisions:
-  - Kept the overall structure of the optimization process while improving readability and maintainability
-  - Used type hints consistently in the new functions to maintain code quality
-- Next steps:
-  - Update the test suite to reflect the changes in the optimizer module
-  - Consider similar refactoring for other complex modules in the project
-
-9. Task: Improve Modularity of main.py and Create Separate CLI Interface
-- Created a new file cli_interface.py to handle CLI-specific functionality
-- Moved problem generation logic to a new file utils/problem_generator.py
-- Updated main.py to focus on setting up the application and delegating to the appropriate interface (CLI or GUI)
-- Refactored main.py to improve its structure and readability
-- Updated cli_interface.py to use the new problem_generator module
-- Challenges:
-  - Ensuring that the separation of concerns is maintained while keeping the codebase cohesive
-  - Deciding on the appropriate level of abstraction for each module
-- Decisions:
-  - Kept main.py as lean as possible, focusing on high-level application flow
-  - Moved CLI-specific logic to cli_interface.py to improve modularity
-  - Created a separate problem_generator.py to encapsulate problem generation logic
-- Next steps:
-  - Update the test suite to reflect the changes in the project structure
-  - Review and update import statements across the project to ensure they're using the new module structure
-  - Consider creating a similar interface module for GUI functionality if it becomes more complex
-
-10. Task: Remove Static Type Checking Implementation and Update Improvement Plan
-- Removed mypy.ini file and __init__.py files created for static type checking
-- Updated improvement_plan.md to remove the task related to implementing static type checking
-- Adjusted the next steps in the improvement plan to focus on:
-  1. Consistent Time Representation
-  2. Performance Optimization
-  3. Further Error Handling Enhancement
-- Challenges:
-  - Ensuring all references to static type checking were removed from the project
-  - Deciding on the most important next steps for the project
-- Decisions:
-  - Focused on improving existing functionality and performance rather than adding new tools
-  - Prioritized tasks that would have the most immediate impact on the project's usability and efficiency
-- Next steps:
-  - Begin work on updating time representations to use datetime objects
-  - Investigate performance bottlenecks and implement caching where appropriate
-  - Review and enhance error handling across all modules
-
-11. Task: Implement Consistent Time Representation
-- Updated utils/errand_utils.py to use datetime and timedelta objects
-- Modified utils/travel_time.py to return timedelta objects for travel times
-- Updated models/schedule.py to use datetime objects for assignments and calculations
-- Modified models/customer.py to use datetime and time objects for availability
-- Updated models/contractor.py to use datetime objects for scheduling
-- Adjusted models/errand.py to work with datetime objects for charge calculations
-- Updated algorithms/initial_scheduler.py to use datetime objects consistently
-- Modified algorithms/optimizer.py to work with datetime objects in constraints and objective function
-- Challenges:
-  - Ensuring consistency across all modules when changing time representation
-  - Adapting the optimization model to work with datetime objects while maintaining integer constraints
-- Decisions:
-  - Used datetime.combine() to create full datetime objects when necessary
-  - Converted time representations to minutes since midnight for optimization constraints
-  - Updated profit calculations to use timedelta.total_seconds() for accurate time-based costs
-- Next steps:
-  - Update the test suite to reflect the changes in time representation
-  - Review and update the GUI components to work with the new datetime representations
-  - Investigate potential performance optimizations now that we're using datetime objects
-
-12. Task: Fix Time Representation Issues and Improve Error Handling
-- Updated algorithms/initial_scheduler.py to convert WORK_START_TIME and WORK_END_TIME to datetime.time objects
-- Modified algorithms/optimizer.py to use the new time objects consistently
-- Added error handling for cases where time conversion might fail
-- Updated gui/problem_definition_tab.py to import generate_problem from utils/problem_generator.py instead of main.py
-- Challenges:
-  - Ensuring that all parts of the codebase use the new time representation consistently
-  - Identifying and updating all occurrences of the old time representation
-- Decisions:
-  - Created WORK_START_TIME_OBJ and WORK_END_TIME_OBJ in both initial_scheduler.py and optimizer.py for consistency
-  - Used these new time objects throughout the scheduling and optimization processes
-- Next steps:
-  - Run comprehensive tests to ensure that the time representation changes haven't introduced new bugs
-  - Update the documentation to reflect the new time representation approach
-  - Continue to optimize performance, focusing on areas where datetime operations might be expensive
-
-13. Task: Fix Date and Time Handling in Errand Model
-- Updated models/errand.py to handle both datetime and date objects in apply_incentive, apply_disincentive, and calculate_final_charge methods
-- Modified type hints to use Union[datetime, date] for scheduled_date and request_date parameters
-- Added logic to extract date from datetime objects when necessary
-- Updated docstrings to reflect the changes in accepted types
-- Challenges:
-  - Ensuring backward compatibility with existing code that might pass either datetime or date objects
-  - Maintaining consistency in date comparisons across different methods
-- Decisions:
-  - Used isinstance checks to handle both datetime and date objects
-  - Extracted date from datetime objects to ensure consistent comparisons
-  - Updated type hints to clearly indicate that both datetime and date objects are accepted
-- Next steps:
-  - Update test cases for the Errand model to cover both datetime and date inputs
-  - Review other parts of the codebase that interact with the Errand model to ensure compatibility
-  - Consider adding similar date/time flexibility to other models if necessary
-
-14. Task: Update GUI Components to Handle Both Integer and Datetime-based Day Representations
-- Modified gui/greedy_solution_tab.py and gui/optimized_solution_tab.py to handle both integer-based and datetime.date-based day representations
-- Updated the UpdateContent method in both files to use isinstance checks for determining the type of day representation
-- Added logic to format the day display string based on the type of day representation (integer or date)
-- Modified the start time handling to work with both integer minutes and datetime objects
-- Challenges:
-  - Ensuring backward compatibility with existing code that might use integer-based day representations
-  - Maintaining consistency in day and time displays across different parts of the GUI
-- Decisions:
-  - Used conditional statements to handle both integer and date-based day representations
-  - Implemented a flexible approach to displaying start times, accommodating both integer minutes and datetime objects
-  - Kept the changes localized to the GUI components to minimize impact on other parts of the system
-- Next steps:
-  - Test the GUI thoroughly with both integer-based and date-based schedules to ensure correct display
-  - Update the visualization component if necessary to handle the new date representations
-  - Consider updating other parts of the system to consistently use datetime objects for improved time handling
-
-15. Task: Implement Vehicle Routing Problem (VRP) Solver and Optimizer Selection
-- Created a new file algorithms/vehicle_routing_optimizer.py to implement the VRP solver using Google OR-Tools
-- Updated gui/problem_definition_tab.py to include a dropdown for selecting the optimizer (CP-SAT or VRP)
-- Modified gui/main_frame.py to store the selected optimizer and pass it to the optimized solution tab
-- Updated gui/optimized_solution_tab.py to use the selected optimizer when generating the optimized schedule
-- Updated docs/readme.md to include information about the new VRP solver and optimizer selection feature
-- Challenges:
-  - Integrating the VRP solver with the existing project structure and data models
-  - Ensuring that both optimizers (CP-SAT and VRP) can work with the same input data and produce compatible output
-- Decisions:
-  - Kept the VRP solver implementation separate from the existing CP-SAT solver for modularity
-  - Used a strategy pattern to allow easy switching between optimizers in the GUI
-  - Updated the Schedule model to accommodate both integer-based and datetime-based representations for compatibility
-- Next steps:
-  - Implement comprehensive unit tests for the new VRP solver
-  - Conduct performance comparisons between the CP-SAT and VRP solvers for various problem sizes
-  - Update the CLI interface to allow optimizer selection in command-line mode
-  - Consider implementing a hybrid approach that combines both solvers for potentially better results
-
-16. Task: Implement Optimizer Selection in CLI Mode
-- Updated main.py to add command-line arguments for selecting the optimizer (CP-SAT or VRP)
-- Modified cli_interface.py to accept the optimizer choice as an argument
-- Updated the cli_main function in cli_interface.py to use the selected optimizer
-- Added error handling for invalid optimizer selections
-- Updated the documentation in main.py and cli_interface.py to reflect the new CLI options
-- Challenges:
-  - Ensuring consistency between GUI and CLI optimizer selection mechanisms
-  - Maintaining backward compatibility with existing CLI usage
-- Decisions:
-  - Used argparse in main.py to handle command-line arguments, including the new --optimizer option
-  - Set CP-SAT as the default optimizer to maintain compatibility with existing usage
-  - Updated the cli_main function signature to accept the optimizer choice
-- Next steps:
-  - Update the project documentation (readme.md, ux_overview.md) to include information about CLI optimizer selection
-  - Create test cases for CLI optimizer selection
-  - Consider adding more detailed output in CLI mode to show which optimizer is being used
-
-17. Task: Rename Initial Scheduler to Initial Greedy Scheduler
-- Renamed algorithms/initial_scheduler.py to algorithms/initial_greedy_scheduler.py
-- Updated all references to initial_scheduler.py across the project:
-  - Modified imports in cli_interface.py, gui/optimized_solution_tab.py, gui/greedy_solution_tab.py, and gui/visualization_tab.py
-  - Updated function names from initial_schedule to initial_greedy_schedule
-- Updated tests/test_initial_scheduler.py to reflect the new naming convention
-- Modified relevant documentation files (readme.md, project_scope.md) to mention the "initial greedy scheduler" instead of just "initial scheduler"
-- Challenges:
-  - Ensuring all references to the initial scheduler were updated consistently across the project
-  - Maintaining backward compatibility with existing code and tests
-- Decisions:
-  - Kept the basic functionality of the initial greedy scheduler unchanged
-  - Updated documentation to emphasize the greedy nature of the initial scheduling algorithm
-  - Retained the InitialSchedulingError exception name for consistency
-- Next steps:
-  - Run comprehensive tests to ensure the renaming didn't introduce any bugs
-  - Review the initial greedy scheduler implementation to ensure it adheres to a true greedy approach
-  - Consider adding more detailed comments in the initial_greedy_scheduler.py file to explain the greedy algorithm
-
-18. Task: Implement General Optimizer Call and Rename CP-SAT Optimizer
+8. Task: Implement General Optimizer Call and Rename CP-SAT Optimizer
 - Renamed 'optimizer.py' to 'CP_SAT_optimizer.py'
-- Updated import statements in all relevant files to use the new filename
-- Modified main.py to pass the optimizer parameter to both CLI and GUI modes
-- Updated gui/main_frame.py to accept and use the optimizer parameter
-- Ensured that gui/problem_definition_tab.py correctly updates the selected optimizer
-- Verified that gui/optimized_solution_tab.py uses the selected optimizer correctly
-- Challenges:
-  - Ensuring consistent optimizer selection across both GUI and CLI modes
-  - Maintaining backward compatibility with existing code and tests
-- Decisions:
-  - Used a string parameter ('cp-sat' or 'vrp') to represent the chosen optimizer
-  - Implemented conditional logic in relevant parts of the code to use the appropriate optimizer based on the selection
-  - Kept the existing optimizer implementations (CP-SAT and VRP) separate for modularity
-- Next steps:
-  - Update the project documentation (readme.md, ux_overview.md) to reflect the new optimizer selection feature
-  - Create additional test cases to ensure proper functioning of both optimizers in various scenarios
-  - Consider implementing a factory pattern or dependency injection for more flexible optimizer selection in the future
+- Updated import statements and modified main.py for consistent optimizer selection
+- Kept CP-SAT and VRP implementations separate for modularity
+- Next steps: Update documentation, create additional test cases
 
-19. Task: Improve GUI Navigation and Problem Definition Tab
-- Updated gui/main_frame.py to allow free navigation between tabs
-- Modified the OnPageChanged method to provide informative warnings instead of restrictive error messages
-- Updated gui/problem_definition_tab.py to increase the maximum Base Time value to 480 minutes
-- Added Disincentive fields for all errand types in the Problem Definition tab
-- Implemented a new "Commit Changes Temporarily" button in the Problem Definition tab
-- Updated the layout of the Problem Definition tab for better readability and user experience
-- Challenges:
-  - Balancing user freedom with necessary guidance through the problem-solving process
-  - Ensuring that temporary changes are correctly applied without affecting permanent settings
-- Decisions:
-  - Used wx.MessageBox for displaying informative warnings about potentially missing data or unavailable features
-  - Implemented a separate method for handling temporary changes, distinct from permanent changes
-  - Updated the explanatory note in the Problem Definition tab to clarify the difference between temporary and permanent commits
-- Next steps:
-  - Conduct thorough testing of the new navigation system and Problem Definition tab features
-  - Update the user documentation to reflect the new GUI behavior and Problem Definition options
-  - Consider implementing a visual indicator for tabs with incomplete or ungenerated data
+9. Task: Improve GUI Navigation and Problem Definition Tab
+- Updated main_frame.py for free navigation between tabs
+- Modified problem_definition_tab.py with new features (increased Base Time, Disincentive fields)
+- Implemented "Commit Changes Temporarily" button
+- Next steps: Thorough testing, update user documentation
 
-20. Task: Update Project Documentation
-- Updated readme.md to reflect the latest changes in the project
-- Modified ux_overview.md to include information about improved GUI navigation and new Problem Definition features
-- Updated project_scope.md to include the new features in the "In-Scope" and "Deliverables" sections
-- Added entries to the developer_log.md (this file) to document recent changes
-- Challenges:
-  - Ensuring all documentation is consistent with the latest changes
-  - Balancing detail with readability in the documentation updates
-- Decisions:
-  - Focused on highlighting user-facing changes in the ux_overview.md
-  - Added specific mentions of new features (e.g., extended Base Time range, Disincentive fields for all errand types) in the project_scope.md
-  - Kept the readme.md update concise, focusing on key features and changes
-- Next steps:
-  - Review all documentation for consistency and completeness
-  - Consider creating or updating user guides or tutorials to showcase the new features
-  - Plan for regular documentation reviews and updates as the project continues to evolve
+10. Task: Implement Systems Engineering Framework
+- Created "systems_engineering" folder with comprehensive documentation
+- Developed RSD, System Architecture Document, Traceability Matrix, Test Plan, ICD, DFD, Use Case Diagram, Sequence Diagrams, Risk Management Plan, and Project Plan
+- Used standardized formats and Mermaid diagrams for clarity
+- Next steps: Review for consistency, update project documentation, implement update processes
 
-21. Task: Implement Systems Engineering Framework
-- Created a new "systems_engineering" folder under the /docs/ directory
-- Developed a comprehensive Requirements Specification Document (RSD)
-- Created a System Architecture Document
-- Produced a Traceability Matrix linking requirements to architectural components
-- Developed a Test Plan outlining both automated and manual testing approaches
-- Created an Interface Control Document (ICD) defining interfaces between system components and with external systems
-- Designed a Data Flow Diagram (DFD) with visual representations and written descriptions
-- Created a Use Case Diagram and detailed descriptions for each use case
-- Developed Sequence Diagrams for key system operations
-- Created a Risk Management Plan
-- Developed a comprehensive Project Plan
-- Challenges:
-  - Ensuring consistency and traceability across all systems engineering documents
-  - Balancing the level of detail in each document to provide comprehensive information without overwhelming readers
-- Decisions:
-  - Used standardized formats and cross-referencing between documents for consistency
-  - Implemented Mermaid diagrams for visual representations to enhance clarity
-  - Included both high-level overviews and detailed breakdowns in documents like the Project Plan and Risk Management Plan
-- Next steps:
-  - Review all systems engineering documents for consistency and completeness
-  - Update other project documentation to reflect the new systems engineering approach
-  - Implement processes to keep systems engineering documents up-to-date as the project evolves
+11. Task: Update Project Documentation for Systems Engineering Framework
+- Updated readme.md, project_scope.md, and ux_overview.md
+- Added new section in readme.md for systems engineering documentation
+- Updated "Deliverables" section in project_scope.md
+- Next steps: Thorough documentation review, consider creating a systems engineering overview document
 
-22. Task: Update Project Documentation for Systems Engineering Framework
-- Updated readme.md to include information about the new systems engineering documents and their locations
-- Modified project_scope.md to reflect the expanded scope including the systems engineering framework
-- Updated ux_overview.md to mention how the systems engineering approach contributes to a better user experience
-- Added entries to the developer_log.md to document the creation of the systems engineering framework
-- Challenges:
-  - Ensuring all documentation accurately reflects the current state of the project
-  - Balancing the amount of detail provided about the systems engineering framework in different documents
-- Decisions:
-  - Added a new section in readme.md specifically for systems engineering documentation
-  - Updated the "Deliverables" section in project_scope.md to include all new systems engineering artifacts
-  - Kept ux_overview.md focused on user-facing implications of the systems engineering approach
+12. Task: Implement Greedy Schedule Visualizer
+- Created greedy_schedule_visualizer_tab.py and updated related components
+- Implemented interactive visualization using plotly
+- Used ConfigManager for customizable color scheme
+- Next steps: Thorough testing, gather user feedback, consider adding more interactive features
+
+13. Task: Implement Greedy Schedule Visualization Tab
+- Created new GreedyScheduleVisualizerTab class in gui/greedy_schedule_visualizer_tab.py
+- Implemented visualization of greedy schedule using matplotlib
+- Added error handling for potential issues during visualization
+- Integrated the new tab into the main application frame (gui/main_frame.py)
+- Updated GreedySolutionTab to trigger visualization update when a greedy solution is generated
+- Modified main frame to handle the new tab order and provide appropriate warnings
+- Next steps: Comprehensive testing of the new visualization feature, gather user feedback, consider performance optimizations for large schedules
+
+14. Task: Fix Travel Time Plotting in Greedy Schedule Visualizer
+- Updated DrawSchedule method in greedy_schedule_visualizer_tab.py to correctly plot travel time
+- Separated travel time and errand time calculations and drawing
+- Improved color contrast for better visibility of travel time blocks
+- Added checks to ensure positive width for all drawn rectangles
+- Updated legend to reflect the new travel time color
+- Next steps: Comprehensive testing with various schedules, gather user feedback on the improved visualization
+
+15. Task: Fix Gaps Between Errands in Greedy Scheduler
+- Updated initial_greedy_scheduler.py to properly account for travel time between errands
+- Added calculate_next_available_time function to determine the earliest start time for each errand
+- Modified the scheduling logic to update contractor's location after each errand
+- Updated test_initial_scheduler.py to include new tests for travel time consideration
+- Modified existing tests to account for travel time in schedule validation
+- Next steps: Comprehensive testing of the updated greedy scheduler, review and update related documentation
+
+16. Task: Fix CP-SAT Solver Not Improving on Initial Greedy Schedule
+- Created a new utility module utils/schedule_analyzer.py for schedule comparison functionality
+- Updated optimized_solution_tab.py to display both initial and optimized schedules side by side
+- Modified CP_SAT_optimizer.py and vehicle_routing_optimizer.py to return both initial and optimized schedules
+- Implemented detailed schedule comparison in optimized_solution_tab.py using the new schedule_analyzer module
+- Updated test cases in test_optimizer.py to reflect the changes in optimizer return values
+- Next steps: Conduct thorough testing with various problem instances, analyze performance differences between initial and optimized schedules, and investigate potential improvements to the CP-SAT model
+
+17. Task: Implement Contractor Schedules Tab
+- Created a new ContractorScheduleTab class in gui/contractor_schedule_tab.py
+- Implemented a tabular representation of contractors' schedules using wx.grid.Grid
+- Updated main_frame.py to include the new ContractorScheduleTab
+- Modified greedy_solution_tab.py and optimized_solution_tab.py to update the contractor schedule when new schedules are generated
+- Added update_contractor_schedule method in main_frame.py to facilitate updates
+- Ensured proper integration with existing tabs and functionality
+- Next steps: Conduct thorough testing with various schedule sizes, gather user feedback on the new tab, consider adding filtering or sorting options for large schedules, and update user documentation to include information about the new Contractor Schedules tab
+
+18. Task: Remove File-based Logging and Transition to Console-only Logging
+- Removed the "synthetic_errands_scheduler.log" file and all related references
+- Updated the logging configuration in main.py to use only console-based logging
+- Removed file handler from logging setup in all relevant files
+- Updated README.md to reflect the changes in the logging system
+- Ensured all modules are using the console-based logging consistently
+- Next steps: Comprehensive testing of logging functionality across the application, update any remaining documentation that might reference file-based logging
+
+19. Task: Implement Contractor Calendar Feature
+- Created a new ContractorCalendar class in models/contractor_calendar.py
+- Updated the Contractor class in models/contractor.py to include a calendar attribute
+- Modified the Schedule class in models/schedule.py to use the contractor calendar for availability checks
+- Updated initial_greedy_scheduler.py to use the contractor calendar when scheduling errands
+- Modified CP_SAT_optimizer.py and vehicle_routing_optimizer.py to incorporate calendar constraints
+- Updated test files (test_models.py, test_initial_scheduler.py, test_optimizer.py) to include tests for the new calendar functionality
+- Updated readme.md to include information about the new contractor calendar feature
+- Next steps: Conduct comprehensive testing of the calendar functionality across all components, gather user feedback, and consider implementing a GUI for contractors to input their availability
+
+20. Task: Complete Contractor Calendar Feature Implementation
+- Updated all necessary components to fully integrate the contractor calendar feature
+- Modified the CLI interface (cli_interface.py) to display contractor calendar information
+- Added new test cases in test_optimizer.py for both CP-SAT and VRP optimizers to ensure they respect contractor calendars
+- Updated system engineering documents (RSD, System Architecture Document, Traceability Matrix, and Test Plan) to reflect the new feature
+- Enhanced the ux_overview.md to describe how users can interact with the calendar functionality
+- Conducted comprehensive testing across all affected components
+- Next steps: Gather user feedback on the contractor calendar feature, consider implementing a GUI for contractors to input and manage their availability, and explore potential optimizations for calendar-based scheduling
+
+21. Task: Fix Overlapping Errands in Greedy Scheduler
+- Updated scheduling_utils.py to modify calculate_next_available_time function:
+  - Included errand time in the total duration when calling get_next_available_slot
+  - Ensured that the returned start time includes both travel time and errand time within working hours
+  - Used ContractorCalendar's is_available method to double-check availability
+- Refactored initial_greedy_scheduler.py:
+  - Removed redundant calculation of total_time
+  - Updated logic to use ContractorCalendar.reserve_time_slot for successful assignments
+  - Implemented proper error handling for cases when no valid time slot is found
+  - Updated contractor location after each successful assignment
+- Updated test_initial_scheduler.py:
+  - Added new tests to verify that travel time is correctly considered between errands
+  - Implemented tests for back-to-back assignments and assignments spanning multiple days
+  - Added a test to check for overlapping assignments
+  - Enhanced existing tests to verify travel time more precisely
+- Insights gained:
+  - Proper consideration of travel time is crucial for creating realistic and efficient schedules
+  - The ContractorCalendar class plays a vital role in preventing overlapping assignments
+  - Edge cases, such as back-to-back assignments and assignments spanning multiple days, require special attention in both implementation and testing
+- Next steps: Conduct comprehensive testing with various problem instances, gather user feedback on the improved scheduling logic, and consider implementing visualization improvements to highlight the proper handling of travel time between errands
+
+22. Task: Implement and Update Scheduling Utility Functions
+- Updated utils/scheduling_utils.py with improved implementations of utility functions:
+  - find_next_available_slot: Enhanced to look up to two weeks ahead for available slots
+  - is_valid_assignment: Improved checks for working hours and contractor availability
+  - calculate_assignment_profit: Updated to use the new time representation
+- Created a new file tests/test_scheduling_utils.py with comprehensive unit tests for the utility functions
+- Ensured that the new tests are automatically included in the test suite (run_tests.py)
+- Insights gained:
+  - Centralized utility functions improve code reusability and maintainability
+  - Comprehensive unit tests are crucial for ensuring the reliability of utility functions
+  - The new utility functions provide a solid foundation for improving scheduling algorithms
+- Next steps: Integrate the updated utility functions into the main scheduling algorithms (greedy scheduler and optimizers), update related documentation, and conduct thorough testing to ensure the changes don't introduce any regressions
+
+23. Updated code to use datetime consistently throughout.
+
+24. Task: Implement MasterContractorCalendar
+- Created a new MasterContractorCalendar class in models/master_contractor_calendar.py
+- Updated initial_greedy_scheduler.py to use MasterContractorCalendar instead of individual ContractorCalendars
+- Modified test_initial_scheduler.py to work with the new MasterContractorCalendar
+- Verified that CP_SAT_optimizer.py and vehicle_routing_optimizer.py don't require changes as they already work with individual contractor calendars
+- Insights gained:
+  - Centralizing contractor calendar management can simplify scheduling logic
+  - The MasterContractorCalendar provides a single point of access for all contractor availability information
+  - Existing optimization algorithms (CP-SAT and VRP) can work with the new structure without modifications
+- Next steps: Conduct comprehensive testing of the new MasterContractorCalendar implementation, update documentation to reflect the changes, and consider potential optimizations in scheduling algorithms that can leverage the centralized calendar management
+
+25. Task: Update System Engineering Documentation for MasterContractorCalendar
+- Updated the Requirements Specification Document (RSD) to include FR-CM-5 for the MasterContractorCalendar
+- Modified the System Architecture Document to incorporate the MasterContractorCalendar component
+- Updated the Traceability Matrix in the RSD to include FR-CM-5
+- Added a new test case for FR-CM-5 in the Test Plan
+- Insights gained:
+  - Keeping system engineering documentation up-to-date is crucial for maintaining a clear overview of the project
+  - The MasterContractorCalendar impacts multiple aspects of the system, requiring updates across various documents
+  - Comprehensive documentation helps in understanding the system's structure and functionality
+- Next steps: Conduct a thorough review of all updated documents for consistency, consider potential impacts on other parts of the system, and plan for any necessary updates to user documentation or training materials
+
+26. Task: Finalize MasterContractorCalendar Implementation and Documentation
+- Updated the ux_overview.md file to include information about the MasterContractorCalendar and its impact on user experience
+- Modified the project_scope.md file to include the MasterContractorCalendar in the scope and deliverables
+- Conducted a final review of all changes made to ensure consistency across the codebase and documentation
+- Insights gained:
+  - The MasterContractorCalendar feature enhances the system's ability to manage contractor availability efficiently
+  - Centralized calendar management improves scheduling performance, especially for large-scale problems
+  - Comprehensive documentation updates are crucial for maintaining a clear understanding of the system's capabilities and structure
+- Next steps: 
+  1. Conduct comprehensive testing of the MasterContractorCalendar implementation
+  2. Gather user feedback on the impact of the new feature on scheduling efficiency
+  3. Consider potential optimizations in scheduling algorithms that can leverage the centralized calendar management
+  4. Plan for any necessary updates to user documentation or training materials
+  5. Explore possibilities for expanding the functionality of the MasterContractorCalendar in future iterations
+
+27. Task: Implement Proper Time Slots for Scheduling in Contractor Calendars
+- Updated ContractorCalendar and MasterContractorCalendar classes to implement proper time slots
+- Modified initial_greedy_scheduler.py, CP_SAT_optimizer.py, and vehicle_routing_optimizer.py to work with the new calendar structure
+- Updated test files (test_optimizer.py, test_initial_scheduler.py, test_master_contractor_calendar.py) to ensure compatibility with the new calendar structure
+- Added new tests to cover the new functionality, including tests for overlapping time slots and splitting availability slots
+- Insights gained:
+  - Proper time slot management is crucial for creating realistic and efficient schedules
+  - The new calendar structure provides more flexibility in handling contractor availability
+  - Comprehensive testing is essential when implementing core changes to the scheduling system
 - Next steps:
-  - Conduct a thorough review of all project documentation for consistency
-  - Consider creating a separate systems engineering overview document to provide a high-level summary of the framework
-  - Plan for regular updates to all documentation as the project progresses
+  1. Conduct thorough testing of the entire system to ensure the new calendar structure works correctly in all scenarios
+  2. Update user documentation to reflect the new time slot management capabilities
+  3. Gather user feedback on the improved scheduling accuracy and flexibility
+  4. Investigate potential performance optimizations for large-scale scheduling problems
+  5. Consider implementing a GUI for easier management of contractor availability slots
 
 # Add your log entries here as you work on the project

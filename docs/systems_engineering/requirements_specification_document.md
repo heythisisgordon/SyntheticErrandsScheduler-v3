@@ -11,7 +11,7 @@ The Synthetic Errands Scheduler is a software system designed to optimize the sc
 FR-PR-1: The system shall represent Busyville as a 100x100 grid. [Priority: High]
 FR-PR-2: The system shall support the generation of random problem instances with customizable numbers of customers and contractors. [Priority: High]
 FR-PR-3: The system shall represent errands with specific types, locations, and time requirements. [Priority: High]
-FR-PR-4: The system shall represent contractors with specific working hours and locations. [Priority: High]
+FR-PR-4: The system shall represent contractors with specific working hours, locations, and availability calendars. [Priority: High]
 
 ### 2.2 Scheduling Algorithms (FR-SA)
 
@@ -20,6 +20,7 @@ FR-SA-2: The system shall implement a modular optimizer capability for advanced 
 FR-SA-3: The system shall support the integration of multiple optimizer algorithms. [Priority: High]
 FR-SA-4: The system shall provide an interface for selecting and configuring different optimizer algorithms. [Priority: Medium]
 FR-SA-5: The system shall allow for easy addition of new optimizer algorithms without modifying existing code. [Priority: Medium]
+FR-SA-6: The system shall respect contractor calendar availability when generating schedules. [Priority: High]
 
 ### 2.3 Time and Cost Calculations (FR-TC)
 
@@ -41,16 +42,26 @@ FR-UI-8: The GUI shall allow users to set Base Time values up to 480 minutes for
 FR-UI-9: The GUI shall provide Disincentive fields for all errand types. [Priority: Medium]
 FR-UI-10: The GUI shall include a "Commit Changes Temporarily" button in the Problem Definition tab. [Priority: Low]
 FR-UI-11: The GUI shall provide an interface for selecting and configuring optimizer algorithms. [Priority: Medium]
+FR-UI-12: The GUI shall display contractor availability based on their calendars. [Priority: Medium]
 
 ### 2.5 Data Management (FR-DM)
 
 FR-DM-1: The system shall use a centralized configuration system for managing constants and parameters. [Priority: High]
 FR-DM-2: The system shall support loading and saving of problem instances and solutions. [Priority: Low]
+FR-DM-3: The system shall manage and store contractor calendar data. [Priority: High]
 
 ### 2.6 Reporting and Logging (FR-RL)
 
 FR-RL-1: The system shall provide detailed logging of scheduling decisions and profit calculations. [Priority: Medium]
 FR-RL-2: The system shall generate visualizations of initial and optimized schedules. [Priority: Medium]
+
+### 2.7 Contractor Calendar Management (FR-CM)
+
+FR-CM-1: The system shall allow the creation and management of individual contractor calendars. [Priority: High]
+FR-CM-2: The system shall support marking time slots as available or unavailable in contractor calendars. [Priority: High]
+FR-CM-3: The system shall allow viewing of contractor calendars in the GUI. [Priority: Medium]
+FR-CM-4: The system shall ensure that scheduling algorithms respect contractor calendar availability. [Priority: High]
+FR-CM-5: The system shall implement a MasterContractorCalendar for centralized management of all contractor calendars. [Priority: High]
 
 ## 3. Non-Functional Requirements
 
@@ -92,12 +103,13 @@ NFR-S-2: The system architecture shall allow for future expansion of features an
 | FR-PR-1 | test_city_map.py | utils/city_map.py |
 | FR-PR-2 | test_problem_generator.py | utils/problem_generator.py |
 | FR-PR-3 | test_models.py | models/errand.py |
-| FR-PR-4 | test_models.py | models/contractor.py |
+| FR-PR-4 | test_models.py | models/contractor.py, models/contractor_calendar.py |
 | FR-SA-1 | test_initial_scheduler.py | algorithms/initial_greedy_scheduler.py |
-| FR-SA-2 | test_optimizer.py | algorithms/optimizer.py |
-| FR-SA-3 | test_optimizer.py | algorithms/optimizer.py |
+| FR-SA-2 | test_optimizer.py | algorithms/CP_SAT_optimizer.py, algorithms/vehicle_routing_optimizer.py |
+| FR-SA-3 | test_optimizer.py | algorithms/CP_SAT_optimizer.py, algorithms/vehicle_routing_optimizer.py |
 | FR-SA-4 | test_main.py, test_cli_interface.py | main.py, cli_interface.py |
-| FR-SA-5 | code review | algorithms/optimizer.py |
+| FR-SA-5 | code review | algorithms/CP_SAT_optimizer.py, algorithms/vehicle_routing_optimizer.py |
+| FR-SA-6 | test_initial_scheduler.py, test_optimizer.py | algorithms/initial_greedy_scheduler.py, algorithms/CP_SAT_optimizer.py, algorithms/vehicle_routing_optimizer.py |
 | FR-TC-1 | test_travel_time.py | utils/travel_time.py |
 | FR-TC-2 | test_errand_utils.py | utils/errand_utils.py |
 | FR-TC-3 | test_errand_utils.py | utils/errand_utils.py |
@@ -113,10 +125,17 @@ NFR-S-2: The system architecture shall allow for future expansion of features an
 | FR-UI-9 | manual testing | gui/problem_definition_tab.py |
 | FR-UI-10 | manual testing | gui/problem_definition_tab.py |
 | FR-UI-11 | manual testing | gui/problem_definition_tab.py |
+| FR-UI-12 | manual testing | gui/contractor_schedule_tab.py |
 | FR-DM-1 | test_config_manager.py | utils/config_manager.py |
 | FR-DM-2 | TBD | TBD |
+| FR-DM-3 | test_models.py | models/contractor_calendar.py |
 | FR-RL-1 | manual testing | various modules |
 | FR-RL-2 | test_visualization.py | utils/visualization.py |
+| FR-CM-1 | test_models.py | models/contractor_calendar.py |
+| FR-CM-2 | test_models.py | models/contractor_calendar.py |
+| FR-CM-3 | manual testing | gui/contractor_schedule_tab.py |
+| FR-CM-4 | test_initial_scheduler.py, test_optimizer.py | algorithms/initial_greedy_scheduler.py, algorithms/CP_SAT_optimizer.py, algorithms/vehicle_routing_optimizer.py |
+| FR-CM-5 | test_master_contractor_calendar.py | models/master_contractor_calendar.py |
 
 Note: Non-functional requirements are typically verified through a combination of testing, code review, and performance analysis across the entire system.
 
@@ -145,5 +164,8 @@ The system will be considered valid when it meets all high-priority requirements
 - Integration with external data sources for real-world scheduling scenarios.
 - Development of a web-based interface for broader accessibility.
 - Implementation of real-time updates and dynamic rescheduling capabilities.
+- Enhanced contractor calendar management, including recurring availability patterns and long-term scheduling.
+- Integration with external calendar systems for automatic contractor availability updates.
+- Mobile application for contractors to view and manage their schedules on-the-go.
 
 This Requirements Specification Document serves as a foundation for the development and evaluation of the Synthetic Errands Scheduler. It should be reviewed and updated regularly as the project evolves.

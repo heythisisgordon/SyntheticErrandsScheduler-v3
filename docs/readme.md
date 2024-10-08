@@ -18,7 +18,9 @@ SyntheticErrandsScheduler/
 │   ├── customer.py
 │   ├── contractor.py
 │   ├── errand.py
-│   └── schedule.py
+│   ├── schedule.py
+│   ├── contractor_calendar.py
+│   └── master_contractor_calendar.py
 │
 ├── utils/                  # Utility functions
 │   ├── city_map.py
@@ -38,7 +40,9 @@ SyntheticErrandsScheduler/
 │   ├── generated_problem_tab.py
 │   ├── greedy_solution_tab.py
 │   ├── optimized_solution_tab.py
-│   └── visualization_tab.py
+│   ├── visualization_tab.py
+│   ├── greedy_schedule_visualizer_tab.py
+│   └── contractor_schedule_tab.py
 │
 ├── tests/                  # Unit tests
 │   ├── test_models.py
@@ -79,11 +83,8 @@ SyntheticErrandsScheduler/
 - Comprehensive unit test suite
 - Graphical User Interface (GUI) for easy interaction
 - Centralized configuration management for improved maintainability
-- Type hints implemented throughout the codebase for improved readability and maintainability
-- Improved GUI navigation with informative warnings instead of restrictive error messages
-- Ability to set longer Base Time values (up to 480 minutes) for errand types
-- Disincentive fields added for all errand types
-- New "Commit Changes Temporarily" button in the Problem Definition tab
+- Contractor calendar functionality for managing contractor availability and assignments
+- MasterContractorCalendar for centralized management of all contractor calendars
 
 ## Systems Engineering Documentation
 
@@ -111,16 +112,6 @@ The project now includes comprehensive systems engineering documentation:
 
 These documents provide a robust framework for understanding, developing, and maintaining the Synthetic Errands Scheduler system. They ensure a systematic approach to the project, facilitating better communication among team members and stakeholders, and supporting traceability, testing, and risk management throughout the project lifecycle.
 
-## Type Hinting
-
-The entire codebase has been updated with comprehensive type hints. This includes:
-
-- Type annotations for all function parameters and return values
-- Type hints for class attributes and local variables
-- Use of complex types from the `typing` module (e.g., List, Dict, Tuple, Optional) where appropriate
-
-These type hints improve code readability, catch potential type-related bugs earlier, and make the codebase more maintainable. They also provide better support for IDEs and static type checkers like mypy.
-
 ## Getting Started
 
 1. Ensure you have Python 3.7+ installed
@@ -134,15 +125,14 @@ These type hints improve code readability, catch potential type-related bugs ear
 
 ## Configuration
 
-The project now uses a centralized configuration system. The main configuration file is `config.yaml`. This file contains all the configurable parameters for the project, including:
+The project uses a centralized configuration system. The main configuration file is `config.yaml`. This file contains all the configurable parameters for the project, including:
 
 - Errand types and their characteristics
 - Working hours
 - Scheduling period
 - Default problem generation parameters
 - Optimization parameters
-
-To modify any of these settings, edit the `config.yaml` file. The changes will be automatically reflected in the application without needing to modify the code.
+- Visualization colors
 
 ## Running the Application
 
@@ -154,7 +144,16 @@ To run the application with the graphical user interface:
 python main.py
 ```
 
-In GUI mode, you can select the optimization algorithm using the dropdown menu in the Problem Definition tab.
+In GUI mode, you can select the optimization algorithm using the dropdown menu in the Problem Definition tab. The application includes several tabs for different functionalities:
+
+- Problem Definition: Define the parameters for problem generation
+- Problem Generation: Generate a random problem instance
+- Greedy Solution: View the initial greedy schedule
+- Optimized Solution: View and compare the optimized schedule
+- Contractor Schedules: View a tabular representation of each contractor's schedule
+- Greedy Schedule Visualization: Visualize the greedy schedule
+- Visualization: Visualize the city layout and routes
+
 
 ### CLI Mode
 
@@ -184,13 +183,12 @@ This will discover and run all tests in the `tests` directory.
 
 ## Visualization
 
-The program generates two visualization files when run in CLI mode:
-- `initial_greedy_schedule.png`: Visualization of the initial greedy schedule
-- `optimized_schedule.png`: Visualization of the optimized schedule
+The program includes visualization of the city layout and route:
 
-These files show the city layout, customer and contractor locations, and the routes for each day.
-
-In GUI mode, the visualization is displayed in the "Visualization" tab.
+- In CLI mode, generates `initial_greedy_schedule.png` and `optimized_schedule.png`
+- In GUI mode, displayed in the "Visualization" tab and the "Greedy Schedule Visualization" tab
+- Shows the city layout, customer and contractor locations, and the routes for each day
+- The greedy schedule visualizer now accurately represents travel time between errands
 
 ## Optimization
 
@@ -202,28 +200,12 @@ The project uses a modular optimizer capability for schedule optimization. This 
 - Detailed logging of optimization decisions
 - Consideration of travel time between errands
 - Improved profit calculation in the objective function
+- Integration with contractor calendars to respect availability constraints
 
 Users can choose the most appropriate solver based on their specific needs and problem characteristics.
 
 ## Logging
 
-The application uses Python's built-in logging module to provide detailed information about its operations. Log messages are displayed in the console and can be useful for debugging or understanding the application's behavior.
-
-## Future Improvements
-
-- Fine-tune optimization parameters for better results
-- Implement more complex constraints and objectives in the optimization models
-- Add real-time updates and dynamic rescheduling
-- Enhance visualization with more detailed information
-- Implement more comprehensive error handling
-- Add option to save logs to a file
-- Investigate and resolve any discrepancies between initial greedy and optimized schedule profits
-- Implement static type checking using mypy as part of the development workflow
-- Conduct performance comparisons between different optimization algorithms for various problem sizes and characteristics
-- Implement a hybrid optimization approach combining multiple optimization strategies
+The application uses Python's built-in logging module to provide detailed information about its operations. Log messages are displayed in the console, which can be useful for debugging or understanding the application's behavior. The logging level and format can be configured in the `setup_logging()` function in `main.py`.
 
 For more details on the project scope and development process, please refer to `project_scope.md` and `developer_log.md`.
-
-## Contributing
-
-Contributions to this project are welcome. Please ensure that you update the `config.yaml` file if you add any new configurable parameters, and update the relevant documentation. Also, make sure to maintain the type hinting standards established in the project when making contributions.
