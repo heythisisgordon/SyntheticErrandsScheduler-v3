@@ -5,7 +5,6 @@ MasterContractorCalendar class for managing multiple contractor calendars.
 import logging
 from typing import Dict, Optional, Tuple, List
 from models.contractor_calendar import ContractorCalendar
-from models.contractor import Contractor
 from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
@@ -14,9 +13,9 @@ class MasterContractorCalendar:
     def __init__(self):
         self.contractor_calendars: Dict[str, ContractorCalendar] = {}
 
-    def add_contractor(self, contractor: Contractor) -> None:
+    def add_contractor_calendar(self, contractor_id: str, calendar: ContractorCalendar) -> None:
         """Add a contractor's calendar to the master calendar."""
-        self.contractor_calendars[contractor.id] = contractor.calendar
+        self.contractor_calendars[contractor_id] = calendar
 
     def is_contractor_available(self, contractor_id: str, start_time: datetime, end_time: datetime) -> bool:
         """Check if a specific contractor is available for a given time slot."""

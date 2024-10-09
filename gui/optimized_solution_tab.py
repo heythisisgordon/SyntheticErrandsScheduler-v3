@@ -4,9 +4,9 @@ from typing import List, Tuple, Dict
 from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
+from models.master_contractor_calendar import MasterContractorCalendar
 from algorithms.initial_greedy_scheduler import initial_greedy_schedule
 from algorithms.CP_SAT_optimizer import optimize_schedule
-from algorithms.vehicle_routing_optimizer import optimize_schedule_vrp
 from utils.schedule_analyzer import compare_schedules
 from datetime import datetime, date
 import logging
@@ -26,7 +26,7 @@ class OptimizedSolutionTab(scrolled.ScrolledPanel):
         
         # Add optimizer selection dropdown
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.optimizer_choice = wx.Choice(self, choices=["CP-SAT Solver", "Vehicle Routing Solver"])
+        self.optimizer_choice = wx.Choice(self, choices=["CP-SAT Solver"])
         self.optimizer_choice.SetSelection(0)  # Default to CP-SAT Solver
         hbox.Add(wx.StaticText(self, label="Optimizer:"), flag=wx.RIGHT|wx.ALIGN_CENTER_VERTICAL, border=8)
         hbox.Add(self.optimizer_choice)
@@ -62,14 +62,19 @@ class OptimizedSolutionTab(scrolled.ScrolledPanel):
     def UpdateContent(self, customers: List[Customer], contractors: List[Contractor], optimizer: str) -> None:
         self.content_box.Clear(True)
         
+        # Get the master calendar from the IMCS tab
+        master_calendar = self.main_frame.imcs.master_calendar
+        
+        if not master_calendar:
+            wx.MessageBox("Master calendar has not been initialized. Please initialize calendars first.", "Error", wx.OK | wx.ICON_ERROR)
+            return
+        
         # Generate initial greedy schedule
-        initial_sched: Schedule = initial_greedy_schedule(customers, contractors)
+        initial_sched: Schedule = initial_greedy_schedule(customers, contractors, master_calendar)
         
         # Optimize schedule based on selected optimizer
         if optimizer == "CP-SAT Solver":
-            initial_sched, optimized_sched = optimize_schedule(initial_sched)
-        elif optimizer == "Vehicle Routing Solver":
-            initial_sched, optimized_sched = optimize_schedule_vrp(initial_sched)
+            initial_sched, optimized_sched = optimize_schedule(initial_sched, master_calendar)
         else:
             raise ValueError(f"Unknown optimizer: {optimizer}")
         
@@ -86,9 +91,6 @@ class OptimizedSolutionTab(scrolled.ScrolledPanel):
 
         # Update the Contractor Schedule tab
         self.main_frame.update_contractor_schedule(optimized_sched)
-
-        # Update the Visualization tab
-        self.main_frame.update_visualization(customers, contractors, optimized_sched)
 
     def display_schedules_side_by_side(self, initial_sched: Schedule, optimized_sched: Schedule, optimizer: str) -> None:
         self.content_box.Add(wx.StaticText(self, label=f"Schedule Comparison ({optimizer}):"), flag=wx.ALL, border=5)

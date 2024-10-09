@@ -47,7 +47,7 @@ class ContractorCalendar:
             return False
         
         for slot in self.calendar[date_key]:
-            if slot.available and slot.start_time <= start_time and slot.end_time >= end_time:
+            if slot.available and slot.start_time <= start_time < slot.end_time:
                 logger.debug(f"Available slot found: {slot.start_time} - {slot.end_time}")
                 return True
         logger.debug(f"No available slot found for {start_time} - {end_time}")

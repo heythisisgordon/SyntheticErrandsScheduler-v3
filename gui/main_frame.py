@@ -5,6 +5,7 @@ from gui.problem_generation_tab import ProblemGenerationTab
 from gui.greedy_solution_tab import GreedySolutionTab
 from gui.optimized_solution_tab import OptimizedSolutionTab
 from gui.contractor_schedule_tab import ContractorScheduleTab
+from gui.imcs_tab import IMCSTab
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,19 +24,22 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
         self.tab3: wx.ScrolledWindow = wx.ScrolledWindow(self.notebook)
         self.tab4: wx.ScrolledWindow = wx.ScrolledWindow(self.notebook)
         self.tab5: wx.ScrolledWindow = wx.ScrolledWindow(self.notebook)
+        self.tab6: wx.ScrolledWindow = wx.ScrolledWindow(self.notebook)
 
         self.problem_definition: ProblemDefinitionTab = ProblemDefinitionTab(self.tab1, self)
         self.problem_generation: ProblemGenerationTab = ProblemGenerationTab(self.tab2, self)
-        self.greedy_solution: GreedySolutionTab = GreedySolutionTab(self.tab3, self)
-        self.optimized_solution: OptimizedSolutionTab = OptimizedSolutionTab(self.tab4, self)
-        self.contractor_schedule: ContractorScheduleTab = ContractorScheduleTab(self.tab5)
+        self.imcs: IMCSTab = IMCSTab(self.tab3, self, self.problem_generation)
+        self.greedy_solution: GreedySolutionTab = GreedySolutionTab(self.tab4, self)
+        self.optimized_solution: OptimizedSolutionTab = OptimizedSolutionTab(self.tab5, self)
+        self.contractor_schedule: ContractorScheduleTab = ContractorScheduleTab(self.tab6)
 
         tabs_and_contents: List[Tuple[wx.ScrolledWindow, wx.Window]] = [
             (self.tab1, self.problem_definition),
             (self.tab2, self.problem_generation),
-            (self.tab3, self.greedy_solution),
-            (self.tab4, self.optimized_solution),
-            (self.tab5, self.contractor_schedule)
+            (self.tab3, self.imcs),
+            (self.tab4, self.greedy_solution),
+            (self.tab5, self.optimized_solution),
+            (self.tab6, self.contractor_schedule)
         ]
 
         for tab, content in tabs_and_contents:
@@ -51,9 +55,10 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
 
         self.notebook.AddPage(self.tab1, "Problem Definition")
         self.notebook.AddPage(self.tab2, "Problem Generation")
-        self.notebook.AddPage(self.tab3, "Greedy Solution")
-        self.notebook.AddPage(self.tab4, "Optimized Solution")
-        self.notebook.AddPage(self.tab5, "Contractor Schedules")
+        self.notebook.AddPage(self.tab3, "Initial Master Contractor Schedule")
+        self.notebook.AddPage(self.tab4, "Greedy Solution")
+        self.notebook.AddPage(self.tab5, "Optimized Solution")
+        self.notebook.AddPage(self.tab6, "Contractor Schedules")
 
         sizer: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.notebook, 1, wx.EXPAND)
@@ -76,6 +81,9 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
     def enable_greedy_solution(self) -> None:
         self.greedy_solution.enable_generate_button()
 
+    def enable_generate_greedy_solution(self) -> None:
+        self.greedy_solution.enable_generate_button()
+
     def enable_optimized_solution(self) -> None:
         self.optimized_solution.enable_optimize_button()
 
@@ -87,11 +95,13 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
         event.Skip()
 
         # Provide warnings when necessary, but allow users to proceed
-        if new == 2 and not self.greedy_solution.generate_button.IsEnabled():
+        if new == 2 and not hasattr(self.problem_generation, 'contractors'):
             wx.MessageBox("Warning: A problem has not been generated yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
-        elif new == 3 and not hasattr(self.greedy_solution, 'schedule'):
-            wx.MessageBox("Warning: A greedy solution has not been generated yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
+        elif new == 3 and not self.imcs.master_calendar:
+            wx.MessageBox("Warning: Calendars have not been initialized yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
         elif new == 4 and not hasattr(self.greedy_solution, 'schedule'):
+            wx.MessageBox("Warning: A greedy solution has not been generated yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
+        elif new == 5 and not hasattr(self.greedy_solution, 'schedule'):
             wx.MessageBox("Warning: A greedy solution has not been generated yet. The contractor schedules may be incomplete.", "Warning", wx.OK | wx.ICON_WARNING)
 
 def main() -> None:

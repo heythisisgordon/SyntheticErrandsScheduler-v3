@@ -43,8 +43,11 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
         # Update the content with the generated problem
         self.UpdateContent(self.customers, self.contractors)
         
-        # Enable the "Generate Greedy Solution" button
-        self.main_frame.enable_greedy_solution()
+        # Disable the "Generate Greedy Solution" button
+        self.main_frame.greedy_solution.disable_generate_button()
+        
+        # Enable the "Initialize Calendars" button in the IMCS tab
+        self.main_frame.imcs.enable_init_button()
 
     def UpdateContent(self, customers: List[Customer], contractors: List[Contractor]) -> None:
         self.content_box.Clear(True)

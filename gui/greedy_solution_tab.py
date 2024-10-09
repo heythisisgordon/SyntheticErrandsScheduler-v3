@@ -4,7 +4,7 @@ from typing import List
 from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
-from algorithms.initial_greedy_scheduler import initial_greedy_schedule
+from algorithms.initial_greedy_scheduler import initial_greedy_schedule, InitialSchedulingError
 from datetime import datetime, date, timedelta
 from utils.travel_time import calculate_travel_time
 from constants import WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
@@ -38,6 +38,9 @@ class GreedySolutionTab(scrolled.ScrolledPanel):
      
     def enable_generate_button(self) -> None:
         self.generate_button.Enable()
+
+    def disable_generate_button(self) -> None:
+        self.generate_button.Disable()
    
     def OnGenerateGreedySolution(self, event: wx.CommandEvent) -> None:
         logger.info("Generating greedy solution")
@@ -48,18 +51,28 @@ class GreedySolutionTab(scrolled.ScrolledPanel):
         logger.debug(f"Number of customers: {len(customers)}")
         logger.debug(f"Number of contractors: {len(contractors)}")
         
-        # Generate the greedy solution
-        self.schedule = initial_greedy_schedule(customers, contractors)
-        
-        # Update the content of this tab
-        self.UpdateContent(customers, contractors, self.schedule)
-        
-        # Update the contractor schedule tab
-        self.main_frame.update_contractor_schedule(self.schedule)
-        
-        # Enable the "Optimize Greedy Solution" button
-        logger.debug("Enabling Optimize Greedy Solution button")
-        self.main_frame.enable_optimized_solution()
+        try:
+            # Get the master calendar from the IMCS tab
+            master_calendar = self.main_frame.imcs.master_calendar
+            
+            if not master_calendar:
+                raise ValueError("Master calendar has not been initialized. Please initialize calendars first.")
+            
+            # Generate the greedy solution
+            self.schedule = initial_greedy_schedule(customers, contractors, master_calendar)
+            
+            # Update the content of this tab
+            self.UpdateContent(customers, contractors, self.schedule)
+            
+            # Update the contractor schedule tab
+            self.main_frame.update_contractor_schedule(self.schedule)
+            
+            # Enable the "Optimize Greedy Solution" button
+            logger.debug("Enabling Optimize Greedy Solution button")
+            self.main_frame.enable_optimized_solution()
+        except (InitialSchedulingError, ValueError) as e:
+            logger.error(f"Failed to generate greedy solution: {str(e)}")
+            wx.MessageBox(str(e), "Scheduling Error", wx.OK | wx.ICON_ERROR)
 
     def UpdateContent(self, customers: List[Customer], contractors: List[Contractor], schedule: Schedule) -> None:
         logger.info("Updating GreedySolutionTab content")

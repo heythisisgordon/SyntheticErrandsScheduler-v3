@@ -5,13 +5,14 @@ Implements a simple greedy initial scheduling algorithm as a baseline for perfor
 
 import logging
 from typing import List, Tuple, Optional, Set
+from tkinter import messagebox
 from models.schedule import Schedule
 from models.customer import Customer
 from models.contractor import Contractor
 from models.master_contractor_calendar import MasterContractorCalendar
 from datetime import datetime, timedelta
 from constants import SCHEDULING_DAYS, WORK_START_TIME_OBJ
-from utils.scheduling_utils import calculate_total_time, is_valid_assignment, calculate_assignment_profit
+from utils.scheduling_utils import calculate_total_time, is_valid_assignment, calculate_profit
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -19,13 +20,14 @@ class InitialSchedulingError(Exception):
     """Custom exception for errors during initial scheduling."""
     pass
 
-def create_initial_schedule(customers: List[Customer], contractors: List[Contractor]) -> Schedule:
+def initial_greedy_schedule(customers: List[Customer], contractors: List[Contractor], master_calendar: MasterContractorCalendar) -> Schedule:
     """Create an initial schedule using a simple greedy algorithm."""
     if not customers or not contractors:
-        raise InitialSchedulingError("No customers or contractors provided for scheduling.")
+        error_msg = "No customers or contractors provided for scheduling."
+        messagebox.showerror("Scheduling Error", error_msg)
+        raise InitialSchedulingError(error_msg)
 
     schedule = Schedule(contractors, customers)
-    master_calendar = create_master_calendar(contractors)
     unscheduled_customers: Set[Customer] = set()
 
     logger.info(f"Starting initial greedy scheduling for {len(customers)} customers and {len(contractors)} contractors...")
@@ -39,16 +41,10 @@ def create_initial_schedule(customers: List[Customer], contractors: List[Contrac
     log_results(schedule, customers, unscheduled_customers)
 
     if not schedule.assignments:
-        raise InitialSchedulingError("Failed to create any assignments in the initial greedy schedule.")
+        error_msg = "Failed to create any assignments in the initial greedy schedule."
+        messagebox.showerror("Scheduling Error", error_msg)
 
     return schedule
-
-def create_master_calendar(contractors: List[Contractor]) -> MasterContractorCalendar:
-    """Create and populate a master calendar with all contractors."""
-    master_calendar = MasterContractorCalendar()
-    for contractor in contractors:
-        master_calendar.add_contractor(contractor)
-    return master_calendar
 
 def reset_contractor_locations(contractors: List[Contractor]) -> None:
     """Reset all contractors to their initial locations."""
@@ -106,7 +102,8 @@ def attempt_scheduling(schedule: Schedule, customer: Customer, contractor: Contr
         errand_id = f"errand_{customer.id}_{contractor.id}_{start_time.strftime('%Y%m%d%H%M')}"
         if master_calendar.reserve_time_slot(contractor.id, errand_id, start_time, end_time):
             schedule.add_assignment(start_time, customer, contractor)
-            profit = calculate_assignment_profit(customer, contractor, start_time, end_time)
+            total_time = end_time - start_time
+            profit = calculate_profit(customer, contractor, start_time, total_time)
             logger.info(f"Scheduled customer {customer.id} with contractor {contractor.id} at {start_time.time()}, profit: ${profit:.2f}")
             contractor.update_location(customer.location)
             return True
