@@ -9,8 +9,7 @@ from datetime import datetime, timedelta
 from models.customer import Customer
 from models.contractor import Contractor
 from models.errand import Errand
-from utils.travel_time import calculate_travel_time
-from utils.errand_utils import get_errand_time
+from utils.errand_utils import calculate_total_errand_time
 from constants import WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
 from utils.time_utils import is_time_within_range, calculate_time_difference
 
@@ -18,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 def calculate_total_time(contractor: Contractor, customer: Customer, errand: Errand) -> timedelta:
     """Calculate the total time for an errand, including travel time."""
-    travel_time, _ = calculate_travel_time(contractor.location, customer.location)
-    errand_time = get_errand_time(errand, contractor.location, customer.location)
-    return travel_time + errand_time
+    return calculate_total_errand_time(errand, contractor.location, customer.location)
 
 def is_within_working_hours(start_time: datetime, total_time: timedelta) -> bool:
     """Check if the errand starts and ends within working hours."""
@@ -52,16 +49,19 @@ def is_valid_assignment(contractor: Contractor, customer: Customer, start_time: 
     """Check if an assignment is valid based on contractor availability and working hours."""
     total_time = calculate_total_time(contractor, customer, customer.desired_errand)
     
+    # Check if the available time slot is at least 50% of the required total time
+    minimum_required_time = total_time / 2
+    
     return all([
-        end_time - start_time >= total_time,
-        is_within_working_hours(start_time, total_time),
+        end_time - start_time >= minimum_required_time,
+        is_within_working_hours(start_time, min(total_time, end_time - start_time)),
         contractor.calendar.is_available(start_time, end_time),
         has_sufficient_travel_time(contractor, customer, start_time)
     ])
 
 def has_sufficient_travel_time(contractor: Contractor, customer: Customer, start_time: datetime) -> bool:
     """Check if there's sufficient time for travel before the errand start time."""
-    travel_time, _ = calculate_travel_time(contractor.location, customer.location)
+    travel_time = calculate_total_errand_time(customer.desired_errand, contractor.location, customer.location) - customer.desired_errand.base_time
     work_start_datetime = datetime.combine(start_time.date(), WORK_START_TIME_OBJ)
     return start_time >= work_start_datetime + travel_time
 

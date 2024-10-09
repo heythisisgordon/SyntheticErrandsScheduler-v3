@@ -47,9 +47,13 @@ class ContractorCalendar:
             return False
         
         for slot in self.calendar[date_key]:
-            if slot.available and slot.start_time <= start_time < slot.end_time:
-                logger.debug(f"Available slot found: {slot.start_time} - {slot.end_time}")
-                return True
+            if slot.available:
+                # Check for partial overlap
+                if (slot.start_time <= start_time < slot.end_time) or \
+                   (slot.start_time < end_time <= slot.end_time) or \
+                   (start_time <= slot.start_time and end_time >= slot.end_time):
+                    logger.debug(f"Available slot found (partial overlap): {slot.start_time} - {slot.end_time}")
+                    return True
         logger.debug(f"No available slot found for {start_time} - {end_time}")
         return False
 
@@ -67,26 +71,23 @@ class ContractorCalendar:
     def _update_availability(self, date_key: datetime, start_time: datetime, end_time: datetime):
         updated_slots = []
         for slot in self.calendar[date_key]:
-            if slot.start_time < start_time and slot.end_time > end_time:
-                # Split the slot
-                updated_slots.append(ContractorAvailabilitySlot(slot.start_time, start_time))
-                updated_slots.append(ContractorAvailabilitySlot(end_time, slot.end_time))
-                logger.debug(f"Split slot: {slot.start_time} - {slot.end_time} into {slot.start_time} - {start_time} and {end_time} - {slot.end_time}")
-            elif slot.start_time >= start_time and slot.end_time <= end_time:
-                # Slot is fully covered by the new errand
-                logger.debug(f"Removed slot: {slot.start_time} - {slot.end_time}")
+            if not slot.available:
+                updated_slots.append(slot)
                 continue
-            elif slot.start_time < start_time and slot.end_time > start_time:
-                # Partial overlap at the start
-                updated_slots.append(ContractorAvailabilitySlot(slot.start_time, start_time))
-                logger.debug(f"Updated slot: {slot.start_time} - {slot.end_time} to {slot.start_time} - {start_time}")
-            elif slot.start_time < end_time and slot.end_time > end_time:
-                # Partial overlap at the end
-                updated_slots.append(ContractorAvailabilitySlot(end_time, slot.end_time))
-                logger.debug(f"Updated slot: {slot.start_time} - {slot.end_time} to {end_time} - {slot.end_time}")
-            else:
+
+            if start_time >= slot.end_time or end_time <= slot.start_time:
                 # No overlap
                 updated_slots.append(slot)
+            elif start_time <= slot.start_time and end_time >= slot.end_time:
+                # Errand fully covers the slot
+                continue
+            else:
+                # Partial overlap
+                if slot.start_time < start_time:
+                    updated_slots.append(ContractorAvailabilitySlot(slot.start_time, start_time))
+                if end_time < slot.end_time:
+                    updated_slots.append(ContractorAvailabilitySlot(end_time, slot.end_time))
+
         self.calendar[date_key] = updated_slots
         logger.debug(f"Updated availability for {date_key}: {len(updated_slots)} slots")
 

@@ -8,7 +8,7 @@ from models.contractor import Contractor
 from models.customer import Customer
 from models.errand import Errand
 from utils.travel_time import calculate_travel_time
-from utils.errand_utils import get_errand_time, calculate_errand_end_time
+from utils.errand_utils import calculate_total_errand_time
 
 class Schedule:
     def __init__(self, contractors: List[Contractor], customers: List[Customer]):
@@ -40,7 +40,7 @@ class Schedule:
         prev_location = assignments[index-1][0].location if index > 0 else contractor.location
         travel_time, _ = calculate_travel_time(prev_location, customer.location)
 
-        errand_duration: timedelta = get_errand_time(errand, contractor.location, customer.location)
+        errand_duration: timedelta = calculate_total_errand_time(errand, contractor.location, customer.location)
         contractor_cost: float = (travel_time + errand_duration).total_seconds() / 60 * contractor.rate
         final_charge: float = errand.calculate_final_charge(start_time, datetime.now())
 
@@ -48,8 +48,8 @@ class Schedule:
 
     def get_errand_end_time(self, customer: Customer, contractor: Contractor, start_time: datetime) -> datetime:
         """Calculate the end time of an errand."""
-        errand_duration: timedelta = get_errand_time(customer.desired_errand, contractor.location, customer.location)
-        return calculate_errand_end_time(start_time, errand_duration)
+        errand_duration: timedelta = calculate_total_errand_time(customer.desired_errand, contractor.location, customer.location)
+        return start_time + errand_duration
 
     def is_valid_assignment(self, customer: Customer, contractor: Contractor, start_time: datetime) -> bool:
         """Check if an assignment is valid based on contractor availability."""
