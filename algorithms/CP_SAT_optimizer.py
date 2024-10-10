@@ -9,28 +9,28 @@ from datetime import datetime, timedelta
 from models.schedule import Schedule
 from models.customer import Customer
 from models.contractor import Contractor
-from models.master_contractor_calendar import MasterContractorCalendar
+from models.contractor_calendar import ContractorCalendar
 from constants import SCHEDULING_DAYS, WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
 from utils.scheduling_utils import calculate_total_time, calculate_profit
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-def optimize_schedule(schedule: Schedule, master_calendar: MasterContractorCalendar) -> Tuple[Schedule, Schedule]:
+def optimize_schedule(schedule: Schedule, contractor_calendars: Dict[str, ContractorCalendar]) -> Tuple[Schedule, Schedule]:
     """Optimize the given schedule using Google OR-Tools CP-SAT solver."""
     logger.info("Starting schedule optimization")
     try:
-        model, x, start_times = setup_model(schedule, master_calendar)
-        optimized_schedule = solve_model(model, schedule, x, start_times, master_calendar)
+        model, x, start_times = setup_model(schedule, contractor_calendars)
+        optimized_schedule = solve_model(model, schedule, x, start_times, contractor_calendars)
         return schedule, optimized_schedule or schedule
     except Exception as e:
         logger.error(f"An error occurred during optimization: {str(e)}")
         return schedule, schedule
 
-def setup_model(schedule: Schedule, master_calendar: MasterContractorCalendar) -> Tuple[cp_model.CpModel, Dict, Dict]:
+def setup_model(schedule: Schedule, contractor_calendars: Dict[str, ContractorCalendar]) -> Tuple[cp_model.CpModel, Dict, Dict]:
     """Set up the CP model, variables, constraints, and objective."""
     model = cp_model.CpModel()
     x, start_times = create_variables(model, schedule)
-    add_constraints(model, schedule, x, start_times, master_calendar)
+    add_constraints(model, schedule, x, start_times, contractor_calendars)
     setup_objective(model, schedule, x, start_times)
     return model, x, start_times
 
@@ -52,7 +52,7 @@ def create_variables(model: cp_model.CpModel, schedule: Schedule) -> Tuple[Dict,
     
     return x, start_times
 
-def add_constraints(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_times: Dict, master_calendar: MasterContractorCalendar) -> None:
+def add_constraints(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_times: Dict, contractor_calendars: Dict[str, ContractorCalendar]) -> None:
     """Add constraints to the CP model."""
     num_contractors = len(schedule.contractors)
     num_customers = len(schedule.customers)
@@ -61,20 +61,20 @@ def add_constraints(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_
     for i in range(num_customers):
         model.Add(sum(x[i, j, k] for j in range(num_contractors) for k in range(SCHEDULING_DAYS)) == 1)
 
-    add_time_constraints(model, schedule, x, start_times, master_calendar)
+    add_time_constraints(model, schedule, x, start_times, contractor_calendars)
 
-def add_time_constraints(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_times: Dict, master_calendar: MasterContractorCalendar) -> None:
+def add_time_constraints(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_times: Dict, contractor_calendars: Dict[str, ContractorCalendar]) -> None:
     """Add time-related constraints to the model."""
     today = datetime.now().date()
     for k in range(SCHEDULING_DAYS):
         current_date = today + timedelta(days=k)
         for j, contractor in enumerate(schedule.contractors):
             for i, customer in enumerate(schedule.customers):
-                add_errand_constraints(model, x, start_times, i, j, k, contractor, customer, current_date, master_calendar)
+                add_errand_constraints(model, x, start_times, i, j, k, contractor, customer, current_date, contractor_calendars[contractor.id])
 
 def add_errand_constraints(model: cp_model.CpModel, x: Dict, start_times: Dict, 
                            i: int, j: int, k: int, contractor: Contractor, customer: Customer, 
-                           current_date: datetime, master_calendar: MasterContractorCalendar) -> None:
+                           current_date: datetime, contractor_calendar: ContractorCalendar) -> None:
     """Add constraints for a specific errand assignment."""
     total_time = calculate_total_time(contractor, customer, customer.desired_errand)
     
@@ -88,7 +88,7 @@ def add_errand_constraints(model: cp_model.CpModel, x: Dict, start_times: Dict,
     is_available = model.NewBoolVar(f'is_available[{i},{j},{k}]')
     model.Add(is_available == 1).OnlyEnforceIf(x[i, j, k])
     model.Add(is_available == 0).OnlyEnforceIf(x[i, j, k].Not())
-    model.Add(master_calendar.is_contractor_available(contractor.id, start_datetime, end_datetime) == is_available)
+    model.Add(contractor_calendar.is_available(start_datetime, end_datetime) == is_available)
 
 def setup_objective(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_times: Dict) -> None:
     """Set up the objective function for the CP model."""
@@ -103,7 +103,7 @@ def setup_objective(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_
 
     model.Maximize(sum(objective_terms))
 
-def solve_model(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_times: Dict, master_calendar: MasterContractorCalendar) -> Optional[Schedule]:
+def solve_model(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_times: Dict, contractor_calendars: Dict[str, ContractorCalendar]) -> Optional[Schedule]:
     """Solve the CP model and extract the solution."""
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = 600.0  # 10 minutes
@@ -111,12 +111,12 @@ def solve_model(model: cp_model.CpModel, schedule: Schedule, x: Dict, start_time
     status = solver.Solve(model)
 
     if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
-        return extract_solution(solver, schedule, x, start_times, master_calendar)
+        return extract_solution(solver, schedule, x, start_times, contractor_calendars)
     else:
         logger.warning('No solution found.')
         return None
 
-def extract_solution(solver: cp_model.CpSolver, schedule: Schedule, x: Dict, start_times: Dict, master_calendar: MasterContractorCalendar) -> Schedule:
+def extract_solution(solver: cp_model.CpSolver, schedule: Schedule, x: Dict, start_times: Dict, contractor_calendars: Dict[str, ContractorCalendar]) -> Schedule:
     """Extract the solution from the solved model and create a new schedule."""
     new_schedule = Schedule(schedule.contractors.copy(), schedule.customers.copy())
     today = datetime.now().date()
@@ -126,21 +126,21 @@ def extract_solution(solver: cp_model.CpSolver, schedule: Schedule, x: Dict, sta
         for j, contractor in enumerate(schedule.contractors):
             for i, customer in enumerate(schedule.customers):
                 if solver.BooleanValue(x[i, j, k]):
-                    process_assignment(new_schedule, solver, start_times, i, j, k, current_date, contractor, customer, master_calendar)
+                    process_assignment(new_schedule, solver, start_times, i, j, k, current_date, contractor, customer, contractor_calendars[contractor.id])
 
     log_total_profit(new_schedule)
     return new_schedule
 
 def process_assignment(new_schedule: Schedule, solver: cp_model.CpSolver, start_times: Dict, 
                        i: int, j: int, k: int, current_date: datetime, contractor: Contractor, 
-                       customer: Customer, master_calendar: MasterContractorCalendar) -> None:
+                       customer: Customer, contractor_calendar: ContractorCalendar) -> None:
     """Process an assigned errand and add it to the new schedule."""
     start_time = datetime.combine(current_date, datetime.min.time()) + timedelta(minutes=solver.Value(start_times[i, k]))
     total_time = calculate_total_time(contractor, customer, customer.desired_errand)
     end_time = start_time + total_time
 
     errand_id = f"errand_{customer.id}_{contractor.id}_{start_time.strftime('%Y%m%d%H%M')}"
-    if master_calendar.reserve_time_slot(contractor.id, errand_id, start_time, end_time):
+    if contractor_calendar.reserve_time_slot(errand_id, start_time, end_time):
         new_schedule.add_assignment(start_time, customer, contractor)
         profit = calculate_profit(customer, contractor, start_time, total_time)
         logger.info(f"Customer {customer.id} assigned to Contractor {contractor.id} at {start_time.time()}, profit: ${profit:.2f}")

@@ -1,22 +1,27 @@
+import logging
 from models.contractor_calendar import ContractorCalendar
-from models.master_contractor_calendar import MasterContractorCalendar
-from typing import List
+from typing import List, Dict
 from models.contractor import Contractor
 
-def initialize_calendars(contractors: List[Contractor]) -> MasterContractorCalendar:
+logger = logging.getLogger(__name__)
+
+def initialize_calendars(contractors: List[Contractor]) -> Dict[str, ContractorCalendar]:
     """
-    Initialize calendars for each contractor and create a master calendar.
+    Initialize calendars for each contractor.
 
     Args:
     contractors (List[Contractor]): A list of Contractor objects.
 
     Returns:
-    MasterContractorCalendar: The initialized master calendar containing all contractor calendars.
+    Dict[str, ContractorCalendar]: A dictionary of contractor IDs to their respective ContractorCalendar instances.
     """
-    master_calendar = MasterContractorCalendar()
+    contractor_calendars = {}
+
+    logger.info(f"Initializing calendars for {len(contractors)} contractors")
 
     for contractor in contractors:
-        contractor_calendar = ContractorCalendar()
-        master_calendar.add_contractor_calendar(contractor.id, contractor_calendar)
+        contractor_calendars[contractor.id] = ContractorCalendar()
+        logger.debug(f"Calendar initialized for contractor {contractor.id}")
 
-    return master_calendar
+    logger.info(f"Calendar initialization completed for {len(contractor_calendars)} contractors")
+    return contractor_calendars

@@ -49,6 +49,9 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
         # Enable the "Initialize Calendars" button in the IMCS tab
         self.main_frame.imcs.enable_init_button()
 
+        # Initialize the Step Through Greedy tab
+        self.main_frame.initialize_step_through_greedy()
+
     def UpdateContent(self, customers: List[Customer], contractors: List[Contractor]) -> None:
         self.content_box.Clear(True)
         

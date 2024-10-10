@@ -57,7 +57,7 @@ The centralized constants ensure that any future changes to errand types or ince
     - Clear display of assigned errands with their start and end times
     - Indication of travel times between errands
     - Easy-to-read format for quick analysis of individual contractor workloads
-    - Direct implementation of code values allows verificatin of code functions
+    - Direct implementation of code values allows verification of code functions
  
 - Greedy Schedule Visualization: Provides a detailed visualization of the greedy schedule solution.
   - Features of the visualizer include:
@@ -70,4 +70,4 @@ The centralized constants ensure that any future changes to errand types or ince
 
 - Visualization: Visualize the city layout and routes
 
-By centralizing constants, improving maintainability, implementing comprehensive type hinting, providing multiple optimization strategies, and enhancing GUI navigation and visualization options, we've created a foundation for a more robust and flexible scheduling system that can easily adapt to future requirements while providing a consistent and reliable user experience. The addition of the contractor calendar functionality and the MasterContractorCalendar further improves the system's ability to generate realistic and efficient schedules, especially for large-scale operations.
+By centralizing constants, improving maintainability, implementing comprehensive type hinting, providing multiple optimization strategies, and enhancing GUI navigation and visualization options, we've created a foundation for a more robust and flexible scheduling system that can easily adapt to future requirements while providing a consistent and reliable user experience. The addition of the contractor calendar functionality improves the system's ability to generate realistic and efficient schedules by managing individual contractor availability, especially for large-scale operations.

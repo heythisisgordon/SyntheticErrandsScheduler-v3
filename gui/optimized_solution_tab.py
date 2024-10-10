@@ -4,7 +4,7 @@ from typing import List, Tuple, Dict
 from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
-from models.master_contractor_calendar import MasterContractorCalendar
+from models.contractor_calendar import ContractorCalendar
 from algorithms.initial_greedy_scheduler import initial_greedy_schedule
 from algorithms.CP_SAT_optimizer import optimize_schedule
 from utils.schedule_analyzer import compare_schedules
@@ -62,19 +62,19 @@ class OptimizedSolutionTab(scrolled.ScrolledPanel):
     def UpdateContent(self, customers: List[Customer], contractors: List[Contractor], optimizer: str) -> None:
         self.content_box.Clear(True)
         
-        # Get the master calendar from the IMCS tab
-        master_calendar = self.main_frame.imcs.master_calendar
+        # Get the contractor calendars from the IMCS tab
+        contractor_calendars = self.main_frame.imcs.contractor_calendars
         
-        if not master_calendar:
-            wx.MessageBox("Master calendar has not been initialized. Please initialize calendars first.", "Error", wx.OK | wx.ICON_ERROR)
+        if not contractor_calendars:
+            wx.MessageBox("Contractor calendars have not been initialized. Please initialize calendars first.", "Error", wx.OK | wx.ICON_ERROR)
             return
         
         # Generate initial greedy schedule
-        initial_sched: Schedule = initial_greedy_schedule(customers, contractors, master_calendar)
+        initial_sched: Schedule = initial_greedy_schedule(customers, contractors, contractor_calendars)
         
         # Optimize schedule based on selected optimizer
         if optimizer == "CP-SAT Solver":
-            initial_sched, optimized_sched = optimize_schedule(initial_sched, master_calendar)
+            initial_sched, optimized_sched = optimize_schedule(initial_sched, contractor_calendars)
         else:
             raise ValueError(f"Unknown optimizer: {optimizer}")
         

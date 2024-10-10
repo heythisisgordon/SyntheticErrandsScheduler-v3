@@ -4,12 +4,12 @@ Implements a simple greedy initial scheduling algorithm as a baseline for perfor
 """
 
 import logging
-from typing import List, Tuple, Optional, Set
+from typing import List, Tuple, Optional, Set, Dict, Any
 from tkinter import messagebox
 from models.schedule import Schedule
 from models.customer import Customer
 from models.contractor import Contractor
-from models.master_contractor_calendar import MasterContractorCalendar
+from models.contractor_calendar import ContractorCalendar
 from datetime import datetime, timedelta
 from constants import SCHEDULING_DAYS, WORK_START_TIME_OBJ
 from utils.scheduling_utils import calculate_total_time, is_valid_assignment, calculate_profit
@@ -20,100 +20,131 @@ class InitialSchedulingError(Exception):
     """Custom exception for errors during initial scheduling."""
     pass
 
-def initial_greedy_schedule(customers: List[Customer], contractors: List[Contractor], master_calendar: MasterContractorCalendar) -> Schedule:
+def initial_greedy_schedule(customers: List[Customer], contractors: List[Contractor], contractor_calendars: Dict[str, ContractorCalendar]) -> Schedule:
     """Create an initial schedule using a simple greedy algorithm."""
-    if not customers or not contractors:
-        error_msg = "No customers or contractors provided for scheduling."
-        messagebox.showerror("Scheduling Error", error_msg)
-        raise InitialSchedulingError(error_msg)
+    scheduler = StepThroughGreedyScheduler(customers, contractors, contractor_calendars)
+    while scheduler.step():
+        pass
+    return scheduler.schedule
 
-    schedule = Schedule(contractors, customers)
-    unscheduled_customers: Set[Customer] = set()
+class StepThroughGreedyScheduler:
+    def __init__(self, customers: List[Customer], contractors: List[Contractor], contractor_calendars: Dict[str, ContractorCalendar]):
+        self.customers = customers
+        self.contractors = contractors
+        self.contractor_calendars = contractor_calendars
+        self.schedule = Schedule(contractors, customers)
+        self.unscheduled_customers: Set[Customer] = set()
+        self.current_date = datetime.now().replace(hour=WORK_START_TIME_OBJ.hour, minute=WORK_START_TIME_OBJ.minute, second=0, microsecond=0)
+        self.current_day = 0
+        self.current_customer_index = 0
+        self.scheduled_customer_ids = set()
 
-    logger.info(f"Starting initial greedy scheduling for {len(customers)} customers and {len(contractors)} contractors...")
+    def step(self) -> Optional[Dict[str, Any]]:
+        if self.current_day >= SCHEDULING_DAYS:
+            self.log_results()
+            return None
 
-    today = datetime.now().replace(hour=WORK_START_TIME_OBJ.hour, minute=WORK_START_TIME_OBJ.minute, second=0, microsecond=0)
-    for day in range(SCHEDULING_DAYS):
-        current_date = today + timedelta(days=day)
-        reset_contractor_locations(contractors)
-        schedule_day(schedule, customers, contractors, master_calendar, current_date, unscheduled_customers)
+        if self.current_customer_index == 0:
+            self.reset_contractor_locations()
 
-    log_results(schedule, customers, unscheduled_customers)
+        if self.current_customer_index >= len(self.customers):
+            self.current_day += 1
+            self.current_customer_index = 0
+            self.current_date += timedelta(days=1)
+            return self.step()
 
-    if not schedule.assignments:
-        error_msg = "Failed to create any assignments in the initial greedy schedule."
-        messagebox.showerror("Scheduling Error", error_msg)
+        customer = self.customers[self.current_customer_index]
+        self.current_customer_index += 1
 
-    return schedule
+        if customer.id not in self.scheduled_customer_ids:
+            result = self.schedule_customer(customer)
+            return {
+                'step_name': 'Schedule Customer',
+                'variables': {
+                    'current_day': self.current_day,
+                    'current_date': self.current_date,
+                    'customer_id': customer.id,
+                    'scheduled': result['scheduled'],
+                    'contractor_id': result.get('contractor_id'),
+                    'start_time': result.get('start_time'),
+                    'end_time': result.get('end_time'),
+                    'profit': result.get('profit')
+                }
+            }
+        return self.step()
 
-def reset_contractor_locations(contractors: List[Contractor]) -> None:
-    """Reset all contractors to their initial locations."""
-    for contractor in contractors:
-        contractor.reset_location()
+    def reset_contractor_locations(self) -> None:
+        """Reset all contractors to their initial locations."""
+        for contractor in self.contractors:
+            contractor.reset_location()
 
-def schedule_day(schedule: Schedule, customers: List[Customer], contractors: List[Contractor], 
-                 master_calendar: MasterContractorCalendar, current_date: datetime, 
-                 unscheduled_customers: Set[Customer]) -> None:
-    """Schedule customers for a specific day."""
-    scheduled_customer_ids = get_scheduled_customer_ids(schedule)
-    for customer in customers:
-        if customer.id not in scheduled_customer_ids:
-            schedule_customer(schedule, customer, contractors, master_calendar, current_date, unscheduled_customers)
+    def schedule_customer(self, customer: Customer) -> Dict[str, Any]:
+        """Attempt to schedule a single customer."""
+        for _ in range(SCHEDULING_DAYS):
+            valid_slot_info = self.find_earliest_valid_slot(customer)
+            if valid_slot_info:
+                selected_contractor, start_time, end_time = valid_slot_info
+                if self.attempt_scheduling(customer, selected_contractor, start_time, end_time):
+                    return {
+                        'scheduled': True,
+                        'contractor_id': selected_contractor.id,
+                        'start_time': start_time,
+                        'end_time': end_time,
+                        'profit': calculate_profit(customer, selected_contractor, start_time, end_time - start_time)
+                    }
+            self.current_date += timedelta(days=1)
 
-def get_scheduled_customer_ids(schedule: Schedule) -> Set[int]:
-    """Get the set of customer IDs that have already been scheduled."""
-    return {assignment[0].id for assignments in schedule.assignments.values() for assignment in assignments}
+        logger.warning(f"Failed to schedule customer {customer.id} after {SCHEDULING_DAYS} attempts")
+        self.unscheduled_customers.add(customer)
+        return {'scheduled': False}
 
-def schedule_customer(schedule: Schedule, customer: Customer, contractors: List[Contractor], 
-                      master_calendar: MasterContractorCalendar, current_date: datetime, 
-                      unscheduled_customers: Set[Customer]) -> None:
-    """Attempt to schedule a single customer."""
-    for _ in range(SCHEDULING_DAYS):
-        slot_info = find_earliest_slot(customer, contractors, master_calendar, current_date)
-        if slot_info:
-            selected_contractor, start_time, end_time = slot_info
-            if attempt_scheduling(schedule, customer, selected_contractor, master_calendar, start_time, end_time):
-                return
-        current_date += timedelta(days=1)
+    def find_earliest_valid_slot(self, customer: Customer) -> Optional[Tuple[Contractor, datetime, datetime]]:
+        """Find the earliest valid slot among all contractors for a given customer."""
+        earliest_valid_slot = None
+        selected_contractor = None
+        for contractor in self.contractors:
+            total_time = calculate_total_time(contractor, customer, customer.desired_errand)
+            potential_slot = self.contractor_calendars[contractor.id].get_next_available_slot(self.current_date, total_time)
+            if potential_slot:
+                start_time = potential_slot['start']
+                end_time = start_time + total_time
+                if is_valid_assignment(contractor, customer, start_time, end_time):
+                    if earliest_valid_slot is None or start_time < earliest_valid_slot['start']:
+                        earliest_valid_slot = potential_slot
+                        selected_contractor = contractor
+        
+        if selected_contractor and earliest_valid_slot:
+            logger.debug(f"Earliest valid slot found for customer {customer.id}: Contractor {selected_contractor.id}, {earliest_valid_slot['start']} - {earliest_valid_slot['end']}")
+        else:
+            logger.debug(f"No valid slot found for customer {customer.id}")
+        
+        return (selected_contractor, earliest_valid_slot['start'], earliest_valid_slot['end']) if selected_contractor and earliest_valid_slot else None
 
-    logger.warning(f"Failed to schedule customer {customer.id} after {SCHEDULING_DAYS} attempts")
-    unscheduled_customers.add(customer)
-
-def find_earliest_slot(customer: Customer, contractors: List[Contractor], 
-                       master_calendar: MasterContractorCalendar, 
-                       current_date: datetime) -> Optional[Tuple[Contractor, datetime, datetime]]:
-    """Find the earliest available slot among all contractors for a given customer."""
-    earliest_slot = None
-    selected_contractor = None
-    for contractor in contractors:
+    def attempt_scheduling(self, customer: Customer, contractor: Contractor, start_time: datetime, end_time: datetime) -> bool:
+        """Attempt to schedule a customer with a contractor at a specific time."""
         total_time = calculate_total_time(contractor, customer, customer.desired_errand)
-        slot = master_calendar.get_contractor_next_available_slot(contractor.id, current_date, total_time)
-        if slot and (earliest_slot is None or slot['start'] < earliest_slot['start']):
-            earliest_slot = slot
-            selected_contractor = contractor
-    
-    return (selected_contractor, earliest_slot['start'], earliest_slot['end']) if selected_contractor and earliest_slot else None
+        actual_end_time = start_time + total_time
+        
+        logger.debug(f"Attempting to schedule customer {customer.id} with contractor {contractor.id} from {start_time} to {actual_end_time}")
+        
+        if is_valid_assignment(contractor, customer, start_time, actual_end_time):
+            errand_id = f"errand_{customer.id}_{contractor.id}_{start_time.strftime('%Y%m%d%H%M')}"
+            if self.contractor_calendars[contractor.id].reserve_time_slot(errand_id, start_time, actual_end_time):
+                self.schedule.add_assignment(start_time, customer, contractor)
+                profit = calculate_profit(customer, contractor, start_time, total_time)
+                logger.info(f"Scheduled customer {customer.id} with contractor {contractor.id} at {start_time.time()}, profit: ${profit:.2f}")
+                contractor.update_location(customer.location)
+                self.scheduled_customer_ids.add(customer.id)
+                return True
+        else:
+            logger.debug(f"Invalid slot for customer {customer.id} with contractor {contractor.id} from {start_time} to {actual_end_time}")
+        return False
 
-def attempt_scheduling(schedule: Schedule, customer: Customer, contractor: Contractor, 
-                       master_calendar: MasterContractorCalendar, start_time: datetime, 
-                       end_time: datetime) -> bool:
-    """Attempt to schedule a customer with a contractor at a specific time."""
-    if is_valid_assignment(contractor, customer, start_time, end_time):
-        errand_id = f"errand_{customer.id}_{contractor.id}_{start_time.strftime('%Y%m%d%H%M')}"
-        if master_calendar.reserve_time_slot(contractor.id, errand_id, start_time, end_time):
-            schedule.add_assignment(start_time, customer, contractor)
-            total_time = end_time - start_time
-            profit = calculate_profit(customer, contractor, start_time, total_time)
-            logger.info(f"Scheduled customer {customer.id} with contractor {contractor.id} at {start_time.time()}, profit: ${profit:.2f}")
-            contractor.update_location(customer.location)
-            return True
-    return False
-
-def log_results(schedule: Schedule, customers: List[Customer], unscheduled_customers: Set[Customer]) -> None:
-    """Log the results of the scheduling process."""
-    total_profit = schedule.calculate_total_profit()
-    scheduled_count = len(customers) - len(unscheduled_customers)
-    logger.info(f"Initial greedy scheduling completed. Total profit: ${total_profit:.2f}")
-    logger.info(f"Scheduled customers: {scheduled_count}, Unscheduled: {len(unscheduled_customers)}")
-    if unscheduled_customers:
-        logger.warning(f"Failed to schedule {len(unscheduled_customers)} customers: {[c.id for c in unscheduled_customers]}")
+    def log_results(self) -> None:
+        """Log the results of the scheduling process."""
+        total_profit = self.schedule.calculate_total_profit()
+        scheduled_count = len(self.customers) - len(self.unscheduled_customers)
+        logger.info(f"Initial greedy scheduling completed. Total profit: ${total_profit:.2f}")
+        logger.info(f"Scheduled customers: {scheduled_count}, Unscheduled: {len(self.unscheduled_customers)}")
+        if self.unscheduled_customers:
+            logger.warning(f"Failed to schedule {len(self.unscheduled_customers)} customers: {[c.id for c in self.unscheduled_customers]}")

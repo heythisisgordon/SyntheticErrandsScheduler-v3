@@ -12,7 +12,7 @@ class ContractorAvailabilitySlot:
         self.end_time = end_time
         self.available = True
 
-class ErrandSlot:
+class ErrandAssignment:
     def __init__(self, errand_id: str, start_time: datetime, end_time: datetime):
         self.errand_id = errand_id
         self.start_time = start_time
@@ -21,7 +21,7 @@ class ErrandSlot:
 class ContractorCalendar:
     def __init__(self):
         self.calendar: Dict[datetime, List[ContractorAvailabilitySlot]] = {}
-        self.errands: Dict[datetime, List[ErrandSlot]] = {}
+        self.errands: Dict[datetime, List[ErrandAssignment]] = {}
         self.start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         self._initialize_calendar()
 
@@ -47,20 +47,16 @@ class ContractorCalendar:
             return False
         
         for slot in self.calendar[date_key]:
-            if slot.available:
-                # Check for partial overlap
-                if (slot.start_time <= start_time < slot.end_time) or \
-                   (slot.start_time < end_time <= slot.end_time) or \
-                   (start_time <= slot.start_time and end_time >= slot.end_time):
-                    logger.debug(f"Available slot found (partial overlap): {slot.start_time} - {slot.end_time}")
-                    return True
+            if slot.available and slot.start_time <= start_time and slot.end_time >= end_time:
+                logger.debug(f"Available slot found: {slot.start_time} - {slot.end_time}")
+                return True
         logger.debug(f"No available slot found for {start_time} - {end_time}")
         return False
 
     def reserve_time_slot(self, errand_id: str, start_time: datetime, end_time: datetime) -> bool:
         if self.is_available(start_time, end_time):
             date_key = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
-            new_errand = ErrandSlot(errand_id, start_time, end_time)
+            new_errand = ErrandAssignment(errand_id, start_time, end_time)
             self.errands[date_key].append(new_errand)
             self._update_availability(date_key, start_time, end_time)
             logger.info(f"Reserved time slot for errand {errand_id}: {start_time} - {end_time}")
@@ -101,8 +97,14 @@ class ContractorCalendar:
                 if slot.available:
                     start = max(slot.start_time, start_datetime)
                     if slot.end_time - start >= min_duration:
-                        logger.debug(f"Found slot: {start} - {start + min_duration}")
-                        return {'start': start, 'end': start + min_duration}
+                        end = start + min_duration
+                        if self.is_available(start, end):
+                            logger.debug(f"Found valid slot: {start} - {end}")
+                            return {'start': start, 'end': end}
+                    else:
+                        logger.debug(f"Slot {slot.start_time} - {slot.end_time} is too short for duration {min_duration}")
+                else:
+                    logger.debug(f"Slot {slot.start_time} - {slot.end_time} is not available")
             
             logger.debug(f"No available slot found for {current_date}, moving to next day")
             current_date = get_next_working_day(current_date)

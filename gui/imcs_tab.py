@@ -2,7 +2,6 @@ import wx
 import wx.grid
 from datetime import datetime, timedelta
 from utils.calendar_initialization import initialize_calendars
-from models.master_contractor_calendar import MasterContractorCalendar
 from constants import WORK_START_TIME_OBJ, WORK_END_TIME_OBJ, SCHEDULING_DAYS
 
 class IMCSTab(wx.Panel):
@@ -10,7 +9,7 @@ class IMCSTab(wx.Panel):
         super().__init__(parent)
         self.main_frame = main_frame
         self.problem_generation_tab = problem_generation_tab
-        self.master_calendar = None
+        self.contractor_calendars = None
         self.init_ui()
 
     def init_ui(self):
@@ -38,15 +37,15 @@ class IMCSTab(wx.Panel):
             return
 
         contractors = self.problem_generation_tab.contractors
-        self.master_calendar = initialize_calendars(contractors)
+        self.contractor_calendars = initialize_calendars(contractors)
         self.update_schedule()
         self.main_frame.enable_generate_greedy_solution()
 
     def update_schedule(self):
-        if not self.master_calendar:
+        if not self.contractor_calendars:
             return
 
-        contractors = list(self.master_calendar.contractor_calendars.keys())
+        contractors = list(self.contractor_calendars.keys())
         num_contractors = len(contractors)
         num_days = SCHEDULING_DAYS
         num_slots = int((WORK_END_TIME_OBJ.hour - WORK_START_TIME_OBJ.hour))
@@ -84,7 +83,7 @@ class IMCSTab(wx.Panel):
                 self.grid.SetRowLabelValue(row, f"{current_date.date()} {current_time.time()}")
 
                 for col, contractor_id in enumerate(contractors):
-                    contractor_calendar = self.master_calendar.contractor_calendars[contractor_id]
+                    contractor_calendar = self.contractor_calendars[contractor_id]
                     is_available = contractor_calendar.is_available(current_time, current_time + timedelta(hours=1))
                     cell_color = wx.GREEN if is_available else wx.RED
                     self.grid.SetCellBackgroundColour(row, col, cell_color)

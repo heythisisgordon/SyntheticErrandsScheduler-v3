@@ -18,8 +18,7 @@ SyntheticErrandsScheduler/
 │   ├── contractor.py
 │   ├── errand.py
 │   ├── schedule.py
-│   ├── contractor_calendar.py
-│   └── master_contractor_calendar.py
+│   └── contractor_calendar.py
 │
 ├── utils/                  # Utility functions
 │   ├── city_map.py
@@ -58,7 +57,7 @@ SyntheticErrandsScheduler/
 - Graphical User Interface (GUI) for easy interaction
 - Centralized configuration management for improved maintainability
 - Contractor calendar functionality for managing contractor availability and assignments
-- MasterContractorCalendar for centralized management of all contractor calendars
+- Efficient management of individual contractor calendars for scheduling
 
 ## Getting Started
 

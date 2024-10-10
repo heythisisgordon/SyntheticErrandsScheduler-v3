@@ -44,8 +44,7 @@ In-Scope:
     - Project Plan
 25. Interactive Greedy Schedule Visualizer for detailed analysis of the greedy solution
 26. Contractor calendar functionality for managing contractor availability and assignments
-27. Integration of contractor calendars with scheduling algorithms and optimizers
-28. Implementation of MasterContractorCalendar for centralized management of all contractor calendars
+27. Integration of individual contractor calendars with scheduling algorithms and optimizers for efficient management of contractor availability
 
 Out-of-Scope:
 1. Real-time traffic considerations

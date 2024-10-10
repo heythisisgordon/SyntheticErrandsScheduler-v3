@@ -6,6 +6,7 @@ from gui.greedy_solution_tab import GreedySolutionTab
 from gui.optimized_solution_tab import OptimizedSolutionTab
 from gui.contractor_schedule_tab import ContractorScheduleTab
 from gui.imcs_tab import IMCSTab
+from gui.step_through_greedy_tab import StepThroughGreedyTab
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
         self.tab4: wx.ScrolledWindow = wx.ScrolledWindow(self.notebook)
         self.tab5: wx.ScrolledWindow = wx.ScrolledWindow(self.notebook)
         self.tab6: wx.ScrolledWindow = wx.ScrolledWindow(self.notebook)
+        self.tab7: wx.ScrolledWindow = wx.ScrolledWindow(self.notebook)
 
         self.problem_definition: ProblemDefinitionTab = ProblemDefinitionTab(self.tab1, self)
         self.problem_generation: ProblemGenerationTab = ProblemGenerationTab(self.tab2, self)
@@ -32,6 +34,7 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
         self.greedy_solution: GreedySolutionTab = GreedySolutionTab(self.tab4, self)
         self.optimized_solution: OptimizedSolutionTab = OptimizedSolutionTab(self.tab5, self)
         self.contractor_schedule: ContractorScheduleTab = ContractorScheduleTab(self.tab6)
+        self.step_through_greedy: StepThroughGreedyTab = StepThroughGreedyTab(self.tab7, self)
 
         tabs_and_contents: List[Tuple[wx.ScrolledWindow, wx.Window]] = [
             (self.tab1, self.problem_definition),
@@ -39,7 +42,8 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
             (self.tab3, self.imcs),
             (self.tab4, self.greedy_solution),
             (self.tab5, self.optimized_solution),
-            (self.tab6, self.contractor_schedule)
+            (self.tab6, self.contractor_schedule),
+            (self.tab7, self.step_through_greedy)
         ]
 
         for tab, content in tabs_and_contents:
@@ -55,10 +59,11 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
 
         self.notebook.AddPage(self.tab1, "Problem Definition")
         self.notebook.AddPage(self.tab2, "Problem Generation")
-        self.notebook.AddPage(self.tab3, "Initial Master Contractor Schedule")
+        self.notebook.AddPage(self.tab3, "Initial Contractor Schedules")
         self.notebook.AddPage(self.tab4, "Greedy Solution")
         self.notebook.AddPage(self.tab5, "Optimized Solution")
         self.notebook.AddPage(self.tab6, "Contractor Schedules")
+        self.notebook.AddPage(self.tab7, "Step Through Greedy")
 
         sizer: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.notebook, 1, wx.EXPAND)
@@ -97,12 +102,18 @@ class SyntheticErrandsSchedulerGUI(wx.Frame):
         # Provide warnings when necessary, but allow users to proceed
         if new == 2 and not hasattr(self.problem_generation, 'contractors'):
             wx.MessageBox("Warning: A problem has not been generated yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
-        elif new == 3 and not self.imcs.master_calendar:
-            wx.MessageBox("Warning: Calendars have not been initialized yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
+        elif new == 3 and not self.imcs.contractor_calendars:
+            wx.MessageBox("Warning: Contractor calendars have not been initialized yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
         elif new == 4 and not hasattr(self.greedy_solution, 'schedule'):
             wx.MessageBox("Warning: A greedy solution has not been generated yet. Some features may not be available.", "Warning", wx.OK | wx.ICON_WARNING)
         elif new == 5 and not hasattr(self.greedy_solution, 'schedule'):
             wx.MessageBox("Warning: A greedy solution has not been generated yet. The contractor schedules may be incomplete.", "Warning", wx.OK | wx.ICON_WARNING)
+        elif new == 6:
+            self.step_through_greedy.on_tab_selected()
+
+    def initialize_step_through_greedy(self):
+        if hasattr(self.problem_generation, 'contractors') and self.imcs.contractor_calendars:
+            self.step_through_greedy.initialize_stepper()
 
 def main() -> None:
     app: wx.App = wx.App()

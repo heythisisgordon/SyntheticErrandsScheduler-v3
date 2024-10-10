@@ -1,9 +1,10 @@
 import wx
 import wx.lib.scrolledpanel as scrolled
-from typing import List
+from typing import List, Dict
 from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
+from models.contractor_calendar import ContractorCalendar
 from algorithms.initial_greedy_scheduler import initial_greedy_schedule, InitialSchedulingError
 from datetime import datetime, date, timedelta
 from utils.travel_time import calculate_travel_time
@@ -52,14 +53,25 @@ class GreedySolutionTab(scrolled.ScrolledPanel):
         logger.debug(f"Number of contractors: {len(contractors)}")
         
         try:
-            # Get the master calendar from the IMCS tab
-            master_calendar = self.main_frame.imcs.master_calendar
+            # Get the contractor calendars from the IMCS tab
+            contractor_calendars = self.main_frame.imcs.contractor_calendars
             
-            if not master_calendar:
-                raise ValueError("Master calendar has not been initialized. Please initialize calendars first.")
+            if not contractor_calendars:
+                raise ValueError("Contractor calendars have not been initialized. Please initialize calendars first.")
             
             # Generate the greedy solution
-            self.schedule = initial_greedy_schedule(customers, contractors, master_calendar)
+            self.schedule = initial_greedy_schedule(customers, contractors, contractor_calendars)
+            
+            # Log scheduling results
+            total_assignments = sum(len(assignments) for assignments in self.schedule.assignments.values())
+            logger.info(f"Total assignments made: {total_assignments}")
+            logger.info(f"Total customers: {len(customers)}")
+            logger.info(f"Unscheduled customers: {len(customers) - total_assignments}")
+            
+            if total_assignments == 0:
+                logger.warning("No assignments were made in the greedy solution")
+            elif total_assignments < len(customers):
+                logger.warning(f"Only {total_assignments} out of {len(customers)} customers were scheduled")
             
             # Update the content of this tab
             self.UpdateContent(customers, contractors, self.schedule)

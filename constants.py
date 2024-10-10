@@ -74,9 +74,6 @@ ERRAND_RATES: Dict[ErrandType, float] = {
     for name, rate in config.get('errand_rates').items()
 }
 
-# Additional time for specific errand types (in minutes)
-DELIVERY_ADDITIONAL_TIME: int = config.get('delivery_additional_time')
-
 # Working hours
 # These values define the start and end of the working day as datetime.time objects.
 WORK_START_TIME_OBJ: datetime.time = convert_minutes_to_time(config.get('work_start_time'))
