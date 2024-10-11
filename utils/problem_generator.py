@@ -27,7 +27,6 @@ def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors
         customers = [_generate_customer(i, start_date) for i in range(num_customers)]
         contractors = [_generate_contractor(i, contractor_rate) for i in range(num_contractors)]
         
-        logger.info(f"Generated problem with {num_customers} customers and {num_contractors} contractors")
         return customers, contractors
     except Exception as e:
         logger.error(f"Error during problem generation: {str(e)}")

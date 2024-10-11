@@ -17,11 +17,8 @@ def initialize_calendars(contractors: List[Contractor]) -> Dict[str, ContractorC
     """
     contractor_calendars = {}
 
-    logger.info(f"Initializing calendars for {len(contractors)} contractors")
-
     for contractor in contractors:
         contractor_calendars[contractor.id] = ContractorCalendar()
-        logger.debug(f"Calendar initialized for contractor {contractor.id}")
 
     logger.info(f"Calendar initialization completed for {len(contractor_calendars)} contractors")
     return contractor_calendars

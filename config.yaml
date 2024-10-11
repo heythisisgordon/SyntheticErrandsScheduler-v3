@@ -56,9 +56,6 @@ errand_types:
 max_incentive_multiplier: 1.5
 num_contractors: 2
 num_customers: 10
-optimization:
-  log_search_progress: true
-  max_time_in_seconds: 60
 scheduling_days: 14
 work_end_time: 1020
 work_start_time: 480

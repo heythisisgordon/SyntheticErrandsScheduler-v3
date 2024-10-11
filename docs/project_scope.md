@@ -1,7 +1,7 @@
 Project Scope: Synthetic Errands Scheduler v3
 
 Objective:
-Develop a modular and maintainable Synthetic Errands Scheduler that addresses the basic use case outlined in the Capstone Kickoff, incorporating advanced optimization techniques and centralized configuration for improved consistency and ease of modification. Implement a robust systems engineering framework to ensure a comprehensive and well-documented approach to the project.
+Develop a modular and maintainable Synthetic Errands Scheduler that addresses the basic case of a greedy scheduler where customers are assigned to the first available contractor. The scheduler should incorporate centralized configuration for improved consistency and ease of modification. The code should use the Single Responsibility Principle and Don't Repeat Yourself Principle, with emphasis on modularity and maintainability. Implement a robust systems engineering framework to ensure a comprehensive and well-documented approach to the project.
 
 In-Scope:
 1. Modular project structure with separate directories for models, utils, algorithms, and GUI components
@@ -10,28 +10,24 @@ In-Scope:
 4. Travel time calculation using road-based routing
 5. Generation of random problem instances with customizable number of customers and contractors
 6. Greedy algorithm for initial scheduling in a separate module
-7. (removed)
-8. User-selectable optimization algorithm in both GUI and CLI modes
-9. Console output and GUI display of the initial and optimized schedules and profits
-10. Detailed visualization of the schedule and city layout
-11. Comprehensive unit test suite for all major components
-12. User input for problem parameters via GUI
-13. Centralized constants file (constants.py) for improved maintainability, including:
+7. Console output and GUI display of the initial schedule and profits
+8. Detailed visualization of the schedule and city layout
+9. Comprehensive unit test suite for all major components
+10. User input for problem parameters via GUI
+11. Centralized constants file (constants.py) for improved maintainability, including:
     - Errand types and their characteristics
     - Working hours and scheduling period
     - Default problem generation parameters
     - Incentive and disincentive rules
-14. Consistent use of centralized constants across all modules
-15. Detailed logging of scheduling decisions and profit calculations
-16. Side-by-side comparison of initial and optimized schedules
-17. Improved travel time consideration in both initial and optimized scheduling
-18. Enhanced profit calculation in the optimization objective function
-19. Implementation of comprehensive type hints throughout the codebase for improved readability and maintainability
-20. Improved GUI navigation with informative warnings instead of restrictive error messages
-21. Ability to set longer Base Time values (up to 480 minutes) for errand types
-22. Disincentive fields added for all errand types
-23. New "Commit Changes Temporarily" button in the Problem Definition tab
-24. Implementation of a comprehensive systems engineering framework, including:
+12. Consistent use of centralized constants across all modules
+13. Detailed logging of scheduling decisions and profit calculations
+14. Improved travel time consideration in initial scheduling
+15. Implementation of comprehensive type hints throughout the codebase for improved readability and maintainability
+16. Improved GUI navigation with informative warnings instead of restrictive error messages
+17. Ability to set longer Base Time values (up to 480 minutes) for errand types
+18. Disincentive fields added for all errand types
+19. New "Commit Changes Temporarily" button in the Problem Definition tab
+20. Implementation of a comprehensive systems engineering framework, including:
     - Requirements Specification Document (RSD)
     - System Architecture Document
     - Traceability Matrix
@@ -42,16 +38,13 @@ In-Scope:
     - Sequence Diagrams
     - Risk Management Plan
     - Project Plan
-25. Interactive Greedy Schedule Visualizer for detailed analysis of the greedy solution
-26. Contractor calendar functionality for managing contractor availability and assignments
-27. Integration of individual contractor calendars with scheduling algorithms and optimizers for efficient management of contractor availability
+21. Contractor calendar functionality for managing contractor availability and assignments
 
 Out-of-Scope:
 1. Real-time traffic considerations
-2. Multiple optimization objectives (focus solely on profit)
+2. Multiple optimization objectives
 3. Persistent data storage
-4. (removed)
-5. Performance optimizations for large-scale problems (>100 customers or >10 contractors)
+4. Performance optimizations for large-scale problems (>100 customers or >10 contractors)
 
 Constraints:
 - Must complete scheduling within a 14-day period
@@ -61,8 +54,7 @@ Constraints:
 
 Deliverables:
 1. Functional Python program implementing the scheduler with a modular structure
-2. Optimization models
-3. Systems Engineering documents:
+2. Systems Engineering documents:
     a. Requirements Specification Document (RSD)
     b. System Architecture Document
     c. Traceability Matrix
@@ -74,6 +66,6 @@ Deliverables:
     i. Risk Management Plan
     j. Project Plan
 
-Note: This program emphasizes a modular approach to software design, incorporates advanced optimization techniques, and provides a user-friendly interface, allowing for easier maintenance, testing, and future enhancements. The program uses centralized constants to ensure consistency across the application and simplify future modifications to errand types, incentives, and other key parameters. This approach significantly improves the maintainability of the project by reducing the need for changes across multiple files when updating core algorithms or configuration settings. The program uses comprehensive type hints throughout the codebase to enable code readability, help catch potential type-related bugs earlier, and enhance overall maintainability.
+Note: This program emphasizes a modular approach to software design and provides a user-friendly interface, allowing for easier maintenance, testing, and future enhancements. The program uses centralized constants to ensure consistency across the application and simplify future modifications to errand types, incentives, and other key parameters. This approach significantly improves the maintainability of the project by reducing the need for changes across multiple files when updating core algorithms or configuration settings. The program uses comprehensive type hints throughout the codebase to enable code readability, help catch potential type-related bugs earlier, and enhance overall maintainability.
 
 This program is founded on a comprehensive systems engineering framework to ensure a well-documented and structured approach to the project. This framework provides a solid foundation for understanding the system requirements, architecture, and interactions, facilitating better communication among team members and stakeholders. It also supports traceability, testing, and risk management throughout the project lifecycle, contributing to the overall quality and reliability of the Synthetic Errands Scheduler system.

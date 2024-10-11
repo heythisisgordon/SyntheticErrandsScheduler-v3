@@ -8,10 +8,10 @@ import logging
 from typing import NoReturn
 
 def setup_logging():
-    """Set up logging for the application with reduced noise from third-party loggers."""
+    """Set up logging for the application with reduced noise."""
     logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO,  # Changed from DEBUG to INFO
+        format='%(asctime)s - %(levelname)s - %(message)s',  # Simplified format
         handlers=[
             logging.StreamHandler(sys.stdout)
         ]
@@ -28,16 +28,14 @@ def run_gui_mode() -> NoReturn:
     try:
         from gui.main_frame import main as gui_main
         
-        logger.info("Starting Synthetic Errands Scheduler in GUI mode")
         gui_main()
         sys.exit(0)
     except ImportError as e:
-        logger.error(f"ImportError occurred: {str(e)}")
-        logger.error("wxPython is not installed or there was an error importing GUI components.")
-        logger.info("To run the application, please ensure wxPython is installed: pip install -U wxPython")
+        logger.error(f"GUI components import error: {str(e)}")
+        logger.error("Please ensure wxPython is installed: pip install -U wxPython")
         sys.exit(1)
     except Exception as e:
-        logger.exception(f"Unexpected error occurred while starting GUI mode: {str(e)}")
+        logger.exception(f"Unexpected error in GUI mode: {str(e)}")
         sys.exit(1)
 
 def main() -> NoReturn:
@@ -49,7 +47,7 @@ def main() -> NoReturn:
         logger.info("Program terminated by user.")
         sys.exit(0)
     except Exception as e:
-        logger.exception(f"Critical error occurred: {str(e)}")
+        logger.exception(f"Critical error: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":

@@ -7,8 +7,7 @@ from datetime import datetime, timedelta
 from models.contractor import Contractor
 from models.customer import Customer
 from models.errand import Errand
-from utils.travel_time import calculate_travel_time
-from utils.errand_utils import calculate_total_errand_time
+from utils.scheduling_utils import SchedulingUtilities
 
 class Schedule:
     def __init__(self, contractors: List[Contractor], customers: List[Customer]):
@@ -28,7 +27,7 @@ class Schedule:
             self.calculate_errand_profit(customer, contractor, start_time, i, assignments)
             for day, assignments in self.assignments.items()
             for i, (customer, contractor, start_time) in enumerate(assignments)
-            if self.is_valid_assignment(customer, contractor, start_time)
+            if SchedulingUtilities.is_valid_assignment(contractor, customer, start_time, self.get_errand_end_time(customer, contractor, start_time))
         )
 
     def calculate_errand_profit(self, customer: Customer, contractor: Contractor, start_time: datetime, 
@@ -38,23 +37,22 @@ class Schedule:
         
         # Calculate travel time from previous location or contractor's initial location
         prev_location = assignments[index-1][0].location if index > 0 else contractor.location
-        travel_time, _ = calculate_travel_time(prev_location, customer.location)
-
-        errand_duration: timedelta = calculate_total_errand_time(errand, contractor.location, customer.location)
-        contractor_cost: float = (travel_time + errand_duration).total_seconds() / 60 * contractor.rate
+        total_time = SchedulingUtilities.calculate_total_time(contractor, customer, errand)
+        
+        contractor_cost: float = total_time.total_seconds() / 60 * contractor.rate
         final_charge: float = errand.calculate_final_charge(start_time, datetime.now())
 
         return final_charge - contractor_cost
 
     def get_errand_end_time(self, customer: Customer, contractor: Contractor, start_time: datetime) -> datetime:
         """Calculate the end time of an errand."""
-        errand_duration: timedelta = calculate_total_errand_time(customer.desired_errand, contractor.location, customer.location)
-        return start_time + errand_duration
+        total_time = SchedulingUtilities.calculate_total_time(contractor, customer, customer.desired_errand)
+        return start_time + total_time
 
     def is_valid_assignment(self, customer: Customer, contractor: Contractor, start_time: datetime) -> bool:
         """Check if an assignment is valid based on contractor availability."""
         end_time = self.get_errand_end_time(customer, contractor, start_time)
-        return contractor.calendar.is_available(start_time, end_time)
+        return SchedulingUtilities.is_valid_assignment(contractor, customer, start_time, end_time)
 
     def get_assignments_for_day(self, day: datetime) -> List[Tuple[Customer, Contractor, datetime]]:
         """Get all assignments for a specific day."""

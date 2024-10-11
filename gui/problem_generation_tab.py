@@ -3,14 +3,14 @@ import wx.lib.scrolledpanel as scrolled
 from typing import List
 from models.customer import Customer
 from models.contractor import Contractor
-from utils.problem_generator import generate_problem
-from utils.config_manager import ConfigManager
+from controllers.problem_generation_controller import ProblemGenerationController
 
 class ProblemGenerationTab(scrolled.ScrolledPanel):
-    def __init__(self, parent: wx.Window, main_frame) -> None:
+    def __init__(self, parent: wx.Window, main_frame, ui_manager) -> None:
         super().__init__(parent, -1, style=wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
         self.main_frame = main_frame
-        self.config_manager = ConfigManager()
+        self.ui_manager = ui_manager
+        self.controller = ProblemGenerationController()
         self.vbox: wx.BoxSizer
         self.customers: List[Customer] = []
         self.contractors: List[Contractor] = []
@@ -33,26 +33,22 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
 
     def OnGenerateProblem(self, event: wx.CommandEvent) -> None:
         # Get the problem parameters from the problem definition tab
-        num_customers = self.main_frame.problem_definition.get_num_customers()
-        num_contractors = self.main_frame.problem_definition.get_num_contractors()
-        contractor_rate = self.main_frame.problem_definition.get_contractor_rate()
+        problem_definition_tab = self.ui_manager.get_tab("Problem Definition")
+        num_customers = problem_definition_tab.get_num_customers()
+        num_contractors = problem_definition_tab.get_num_contractors()
+        contractor_rate = problem_definition_tab.get_contractor_rate()
         
-        # Generate the problem
-        self.customers, self.contractors = generate_problem(num_customers, num_contractors, contractor_rate)
+        # Generate the problem using ProblemGenerationController
+        self.customers, self.contractors = self.controller.generate_problem(num_customers, num_contractors, contractor_rate)
         
         # Update the content with the generated problem
-        self.UpdateContent(self.customers, self.contractors)
+        self.UpdateContent(self.customers, self.contractors, contractor_rate)
         
-        # Disable the "Generate Greedy Solution" button
-        self.main_frame.greedy_solution.disable_generate_button()
-        
-        # Enable the "Initialize Calendars" button in the IMCS tab
-        self.main_frame.imcs.enable_init_button()
+        # Enable the "Generate Greedy Solution" button
+        greedy_solution_tab = self.ui_manager.get_tab("Greedy Solution")
+        greedy_solution_tab.enable_generate_button()
 
-        # Initialize the Step Through Greedy tab
-        self.main_frame.initialize_step_through_greedy()
-
-    def UpdateContent(self, customers: List[Customer], contractors: List[Contractor]) -> None:
+    def UpdateContent(self, customers: List[Customer], contractors: List[Contractor], contractor_rate: float) -> None:
         self.content_box.Clear(True)
         
         # Display customer information
@@ -63,12 +59,7 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
             customer_info = wx.StaticBox(self, label=f"Customer {customer.id}")
             customer_info_sizer = wx.StaticBoxSizer(customer_info, wx.VERTICAL)
             
-            info: List[str] = [
-                f"Location: {customer.location}",
-                f"Errand: {customer.desired_errand.type.name}",
-                f"Base Time: {customer.desired_errand.base_time}",
-                f"Charge: ${customer.desired_errand.charge:.2f}"
-            ]
+            info: List[str] = self.controller.format_customer_info(customer)
             
             for line in info:
                 customer_info_sizer.Add(wx.StaticText(self, label=line), flag=wx.ALL, border=2)
@@ -82,12 +73,11 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
         contractor_sizer = wx.StaticBoxSizer(contractor_section, wx.VERTICAL)
         
         for contractor in contractors:
-            info: str = f"Contractor {contractor.id}: Location {contractor.location}"
+            info: str = self.controller.format_contractor_info(contractor)
             contractor_sizer.Add(wx.StaticText(self, label=info), flag=wx.ALL, border=2)
 
         # Display contractor rate
-        contractor_rate = self.main_frame.problem_definition.get_contractor_rate()
-        rate_info: str = f"Contractor Rate: ${contractor_rate:.2f} per minute"
+        rate_info: str = self.controller.format_contractor_rate(contractor_rate)
         contractor_sizer.Add(wx.StaticText(self, label=rate_info), flag=wx.ALL, border=2)
 
         self.content_box.Add(contractor_sizer, flag=wx.ALL|wx.EXPAND, border=10)

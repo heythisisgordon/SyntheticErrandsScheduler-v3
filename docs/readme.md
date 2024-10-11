@@ -20,24 +20,35 @@ SyntheticErrandsScheduler/
 │   ├── schedule.py
 │   └── contractor_calendar.py
 │
-├── utils/                  # Utility functions
+├── utils/                  # Utility functions and managers
 │   ├── city_map.py
 │   ├── travel_time.py
 │   ├── errand_utils.py
 │   ├── scheduling_utils.py
-│   └── config_manager.py   # Configuration management module
+│   ├── config_manager.py
+│   ├── ui_manager.py
+│   ├── event_manager.py
+│   ├── problem_manager.py
+│   ├── schedule_manager.py
+│   ├── greedy_solution_manager.py
+│   └── contractor_schedule_manager.py
 │
 ├── algorithms/             # Scheduling algorithms
-│   ├── initial_greedy_scheduler.py
-│   └── CP_SAT_optimizer.py
+│   └── initial_greedy_scheduler.py
 │
 ├── gui/                    # GUI components
 │   ├── main_frame.py
 │   ├── problem_definition_tab.py
 │   ├── problem_generation_tab.py
 │   ├── greedy_solution_tab.py
-│   ├── optimized_solution_tab.py
 │   └── contractor_schedule_tab.py
+│
+├── controllers/            # Controller components
+│   ├── main_frame_controller.py
+│   ├── problem_definition_controller.py
+│   ├── problem_generation_controller.py
+│   ├── greedy_solution_controller.py
+│   └── contractor_schedule_controller.py
 │
 └── docs/                   # Documentation
     ├── readme.md
@@ -51,13 +62,13 @@ SyntheticErrandsScheduler/
 - Representation of Busyville as a 100x100 grid
 - Generation of random problem instances with customizable number of customers and contractors
 - Initial scheduling algorithm using a simple greedy approach
-- Modular optimizer capability for advanced scheduling optimization using CP-SAT
 - Detailed logging of scheduling decisions and profit calculations
-- Side-by-side comparison of initial greedy and optimized schedules
 - Graphical User Interface (GUI) for easy interaction
 - Centralized configuration management for improved maintainability
 - Contractor calendar functionality for managing contractor availability and assignments
 - Efficient management of individual contractor calendars for scheduling
+- Modular architecture with clear separation of concerns (Model-View-Controller pattern)
+- Utility managers for various functionalities (UI, events, problem generation, scheduling, etc.)
 
 ## Getting Started
 
@@ -65,7 +76,7 @@ SyntheticErrandsScheduler/
 2. Clone this repository
 3. Install required packages:
    ```
-   pip install numpy ortools pyyaml
+   pip install numpy pyyaml
    pip install -U wxPython
    ```
    Note: If you encounter issues installing wxPython, please refer to the official wxPython installation guide for your specific operating system: https://wxpython.org/pages/downloads/
@@ -78,7 +89,6 @@ The project uses a centralized configuration system. The main configuration file
 - Working hours
 - Scheduling period
 - Default problem generation parameters
-- Optimization parameters
 
 ## Running the Application
 
@@ -93,20 +103,27 @@ The application includes several tabs for different functionalities:
 - Problem Definition: Define the parameters for problem generation
 - Problem Generation: Generate a random problem instance
 - Greedy Solution: View the initial greedy schedule
-- Optimized Solution: View and compare the optimized schedule
 - Contractor Schedules: View a tabular representation of each contractor's schedule
 
-## Optimization
+## Architecture
 
-The project uses the CP-SAT solver from Google OR-Tools for schedule optimization. This allows for sophisticated optimization techniques, potentially leading to better schedules and higher profits. The optimizer includes:
+The application follows the Model-View-Controller (MVC) architecture:
 
-- Detailed logging of optimization decisions
-- Consideration of travel time between errands
-- Improved profit calculation in the objective function
-- Integration with contractor calendars to respect availability constraints
+- Models (in `models/`) represent the data structures and business logic.
+- Views (in `gui/`) handle the presentation and user interaction.
+- Controllers (in `controllers/`) manage the flow of data between models and views.
+
+Utility managers (in `utils/`) provide additional services and functionalities to support the MVC components.
 
 ## Logging
 
 The application uses Python's built-in logging module to provide detailed information about its operations. Log messages are displayed in the console, which can be useful for debugging or understanding the application's behavior. The logging level and format can be configured in the `setup_logging()` function in `main.py`.
 
-For more details on the project scope and development process, please refer to `project_scope.md` and `developer_log.md`.
+## Recent Changes
+
+- Implemented a clear separation of concerns with the introduction of controller classes.
+- Refactored utility functions into dedicated manager classes for improved modularity.
+- Introduced SchedulingUtilities class for centralized scheduling-related operations.
+- Enhanced error handling and logging throughout the application.
+
+For more details on the project scope, development process, and recent changes, please refer to `project_scope.md` and `developer_log.md`.
