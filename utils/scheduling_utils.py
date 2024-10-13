@@ -58,15 +58,23 @@ class SchedulingUtilities:
         return all([
             SchedulingUtilities.is_within_working_hours(start_time, total_time),
             contractor.calendar.is_available(start_time, start_time + total_time),
-            SchedulingUtilities.has_sufficient_travel_time(contractor, customer, start_time)
+            SchedulingUtilities.has_sufficient_travel_time(contractor, customer, start_time, end_time)
         ])
 
     @staticmethod
-    def has_sufficient_travel_time(contractor: Contractor, customer: Customer, start_time: datetime) -> bool:
-        """Check if there's sufficient time for travel before the errand start time."""
-        travel_time = calculate_total_errand_time(customer.desired_errand, contractor.location, customer.location) - customer.desired_errand.base_time
-        work_start_datetime = datetime.combine(start_time.date(), WORK_START_TIME_OBJ)
-        return start_time >= work_start_datetime + travel_time
+    def has_sufficient_travel_time(contractor: Contractor, customer: Customer, start_time: datetime, end_time: datetime) -> bool:
+        """
+        Check if the errand base time + travel time fits within the time slot being evaluated.
+        Returns True if there is sufficient time, False otherwise.
+        """
+        total_time = SchedulingUtilities.calculate_total_time(contractor, customer, customer.desired_errand)
+        errand_end_time = start_time + total_time
+        
+        # Check if the errand (including travel time) fits within the evaluated time slot
+        if errand_end_time <= end_time:
+            return True
+        else:
+            return False
 
     @staticmethod
     def get_assignment_details(customer: Customer, contractor: Contractor, start_time: datetime) -> Tuple[datetime, timedelta, float]:

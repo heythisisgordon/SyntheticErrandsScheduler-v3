@@ -52,3 +52,7 @@ class ScheduleFormatter:
                     prev_location = customer.location
         
         return formatted_schedule
+
+    @staticmethod
+    def format_errand(customer: Customer, contractor: Contractor, start_time: datetime, end_time: datetime) -> str:
+        return f"C{customer.id}: {customer.desired_errand.type}\n{start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')}"

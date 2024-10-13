@@ -31,7 +31,7 @@ class GreedyScheduler:
         self.contractor_calendars = contractor_calendars
         self.schedule = Schedule(contractors, customers)
         self.unscheduled_customers: Set[Customer] = set(customers)
-        self.current_date = datetime.now().replace(hour=WORK_START_TIME_OBJ.hour, minute=WORK_START_TIME_OBJ.minute, second=0, microsecond=0)
+        self.current_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
     def generate_schedule(self) -> Schedule:
         """Generate the complete schedule."""
