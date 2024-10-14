@@ -19,7 +19,7 @@ class ScheduleManager:
             
             schedule = initial_greedy_schedule(customers, contractors)
             
-            total_assignments = sum(len(assignments) for assignments in schedule.assignments.values())
+            total_assignments = len(schedule.assignments)
             logger.info(f"Total assignments made: {total_assignments}")
             logger.info(f"Total customers: {len(customers)}")
             logger.info(f"Unscheduled customers: {len(customers) - total_assignments}")

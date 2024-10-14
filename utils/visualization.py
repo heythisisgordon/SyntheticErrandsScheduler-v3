@@ -10,6 +10,7 @@ from utils.city_map import GRID_SIZE, create_city_grid
 from utils.travel_time import calculate_travel_time
 from datetime import date, datetime
 import logging
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -46,23 +47,22 @@ def visualize_schedule(schedule: Schedule, ax_or_filename: Union[Axes, str, None
     # Plot routes using the exact path from calculate_travel_time
     contractor_colors: np.ndarray = plt.cm.Set1(np.linspace(0, 1, len(schedule.contractors)))
     
-    for day, assignments in schedule.assignments.items():
-        if isinstance(day, datetime):
-            day_str = day.strftime("%Y-%m-%d")
-        elif isinstance(day, date):
-            day_str = day.strftime("%Y-%m-%d")
-        elif isinstance(day, int):
-            day_str = f"Day {day}"
-        else:
-            day_str = str(day)
+    # Group assignments by day
+    assignments_by_day = defaultdict(list)
+    for start_time, customer, contractor in schedule.assignments:
+        day = start_time.date()
+        assignments_by_day[day].append((start_time, customer, contractor))
+    
+    for day, assignments in sorted(assignments_by_day.items()):
+        day_str = day.strftime("%Y-%m-%d")
         
         for contractor in schedule.contractors:
-            contractor_assignments: List[Tuple[Customer, Contractor, Union[int, datetime]]] = [a for a in assignments if a[1].id == contractor.id]
+            contractor_assignments: List[Tuple[datetime, Customer, Contractor]] = [a for a in assignments if a[2].id == contractor.id]
             if not contractor_assignments:
                 continue
             
             route: List[Tuple[int, int]] = [contractor.location]
-            for customer, _, _ in contractor_assignments:
+            for _, customer, _ in contractor_assignments:
                 route.append(customer.location)
             
             for i in range(len(route) - 1):
@@ -96,23 +96,18 @@ def print_schedule(schedule: Schedule) -> None:
     print("Synthetic Errands Schedule:")
     print("===========================")
     
-    for day, assignments in schedule.assignments.items():
-        if isinstance(day, (datetime, date)):
-            day_str = day.strftime("%Y-%m-%d")
-        elif isinstance(day, int):
-            day_str = f"Day {day}"
-        else:
-            day_str = str(day)
+    # Group assignments by day
+    assignments_by_day = defaultdict(list)
+    for start_time, customer, contractor in schedule.assignments:
+        day = start_time.date()
+        assignments_by_day[day].append((start_time, customer, contractor))
+    
+    for day, assignments in sorted(assignments_by_day.items()):
+        day_str = day.strftime("%Y-%m-%d")
         
         print(f"\n{day_str}:")
-        for customer, contractor, start_time in assignments:
-            if isinstance(start_time, datetime):
-                time_str = start_time.strftime("%H:%M")
-            elif isinstance(start_time, int):
-                hours, minutes = divmod(start_time, 60)
-                time_str = f"{hours:02d}:{minutes:02d}"
-            else:
-                time_str = str(start_time)
+        for start_time, customer, contractor in assignments:
+            time_str = start_time.strftime("%H:%M")
             
             print(f"  Contractor {contractor.id + 1} - Customer {customer.id + 1}:")
             print(f"    Errand: {customer.desired_errand.type}")

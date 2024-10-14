@@ -4,12 +4,20 @@ from models.contractor import Contractor
 from datetime import datetime, timedelta
 from constants import WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
 from utils.schedule_formatter import ScheduleFormatter
+from collections import defaultdict
 
 class ContractorScheduleFormatter:
     @staticmethod
     def format_grid(schedule: Schedule) -> Tuple[List[str], List[str], List[List[str]], List[List[str]]]:
         contractors = schedule.contractors
-        days = sorted(schedule.assignments.keys())
+        
+        # Group assignments by day
+        assignments_by_day = defaultdict(list)
+        for start_time, customer, contractor in schedule.assignments:
+            day = start_time.date()
+            assignments_by_day[day].append((start_time, customer, contractor))
+        
+        days = sorted(assignments_by_day.keys())
 
         # Column labels
         col_labels = [f"Contractor {contractor.id}" for contractor in contractors]
@@ -32,8 +40,8 @@ class ContractorScheduleFormatter:
 
         # Fill in the grid with errand information
         for day_index, day in enumerate(days):
-            assignments = schedule.assignments[day]
-            for customer, contractor, start_time in assignments:
+            assignments = assignments_by_day[day]
+            for start_time, customer, contractor in assignments:
                 col = contractors.index(contractor)
                 start_hour = (start_time - datetime.combine(day, work_start)).total_seconds() / 3600
                 start_row = day_index * int(hours_per_day) + int(start_hour)

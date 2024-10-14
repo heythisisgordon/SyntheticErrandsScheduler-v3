@@ -2,7 +2,7 @@
 Schedule class for managing assignments of errands to contractors.
 """
 
-from typing import List, Dict, Tuple
+from typing import List, Tuple
 from datetime import datetime, timedelta
 from models.contractor import Contractor
 from models.customer import Customer
@@ -13,30 +13,25 @@ class Schedule:
     def __init__(self, contractors: List[Contractor], customers: List[Customer]):
         self.contractors: List[Contractor] = contractors
         self.customers: List[Customer] = customers
-        self.assignments: Dict[datetime, List[Tuple[Customer, Contractor, datetime]]] = {}
+        self.assignments: List[Tuple[datetime, Customer, Contractor]] = []
 
     def add_assignment(self, start_time: datetime, customer: Customer, contractor: Contractor) -> None:
         """Add a new assignment to the schedule."""
-        if start_time not in self.assignments:
-            self.assignments[start_time] = []
-        self.assignments[start_time].append((customer, contractor, start_time))
+        self.assignments.append((start_time, customer, contractor))
 
     def calculate_total_profit(self) -> float:
         """Calculate the total profit for all valid assignments in the schedule."""
         return sum(
-            self.calculate_errand_profit(customer, contractor, start_time, i, assignments)
-            for day, assignments in self.assignments.items()
-            for i, (customer, contractor, start_time) in enumerate(assignments)
+            self.calculate_errand_profit(customer, contractor, start_time, i)
+            for i, (start_time, customer, contractor) in enumerate(self.assignments)
             if SchedulingUtilities.is_valid_assignment(contractor, customer, start_time, self.get_errand_end_time(customer, contractor, start_time))
         )
 
-    def calculate_errand_profit(self, customer: Customer, contractor: Contractor, start_time: datetime, 
-                                index: int, assignments: List[Tuple[Customer, Contractor, datetime]]) -> float:
+    def calculate_errand_profit(self, customer: Customer, contractor: Contractor, start_time: datetime, index: int) -> float:
         """Calculate the profit for a single errand assignment."""
         errand: Errand = customer.desired_errand
         
-        # Calculate travel time from previous location or contractor's initial location
-        prev_location = assignments[index-1][0].location if index > 0 else contractor.location
+        prev_location = self.assignments[index-1][1].location if index > 0 else contractor.location
         total_time = SchedulingUtilities.calculate_total_time(contractor, customer, errand)
         
         contractor_cost: float = total_time.total_seconds() / 60 * contractor.rate

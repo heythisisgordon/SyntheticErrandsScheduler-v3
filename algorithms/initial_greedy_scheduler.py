@@ -40,6 +40,7 @@ class GreedyScheduler:
             self.schedule_day(day)
             self.current_date += timedelta(days=1)
         
+        self.schedule.assignments.sort(key=lambda x: x[0])  # Sort assignments by start time
         self.log_results()
         return self.schedule
 

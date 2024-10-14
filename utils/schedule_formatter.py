@@ -5,24 +5,28 @@ from models.schedule import Schedule
 from datetime import datetime, date
 from utils.travel_time import calculate_travel_time
 from constants import WORK_START_TIME_OBJ
+from collections import defaultdict
 
 class ScheduleFormatter:
     @staticmethod
     def format_schedule(customers: List[Customer], contractors: List[Contractor], schedule: Schedule) -> List[str]:
         formatted_schedule = []
         
-        for day, assignments in schedule.assignments.items():
-            if isinstance(day, (date, datetime)):
-                day_str = day.strftime("%Y-%m-%d")
-            else:
-                day_str = f"Day {day + 1}"
+        # Group assignments by day
+        assignments_by_day = defaultdict(list)
+        for start_time, customer, contractor in schedule.assignments:
+            day = start_time.date()
+            assignments_by_day[day].append((start_time, customer, contractor))
+        
+        for day, assignments in sorted(assignments_by_day.items()):
+            day_str = day.strftime("%Y-%m-%d")
             formatted_schedule.append(f"\n{day_str}:")
             
             for contractor in contractors:
                 prev_location = contractor.initial_location
-                contractor_assignments = [a for a in assignments if a[1].id == contractor.id]
+                contractor_assignments = [a for a in assignments if a[2].id == contractor.id]
                 
-                for customer, _, start_time in contractor_assignments:
+                for start_time, customer, _ in contractor_assignments:
                     formatted_schedule.append("----------------------------------------")
                     
                     travel_time, _ = calculate_travel_time(prev_location, customer.location)
