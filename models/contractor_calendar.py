@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Tuple, Optional
 from constants import SCHEDULING_DAYS, WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
 from utils.time_utils import is_time_within_range, get_next_working_day
 import logging
@@ -20,8 +20,8 @@ class ErrandAssignment:
 
 class ContractorCalendar:
     def __init__(self):
-        self.calendar: Dict[datetime, List[ContractorAvailabilitySlot]] = {}
-        self.errands: Dict[datetime, List[ErrandAssignment]] = {}
+        self.calendar: List[Tuple[datetime, List[ContractorAvailabilitySlot]]] = []
+        self.errands: List[Tuple[datetime, List[ErrandAssignment]]] = []
         self.start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         self._initialize_calendar()
 
@@ -30,14 +30,15 @@ class ContractorCalendar:
             current_date = self.start_date + timedelta(days=day)
             work_start = current_date.replace(hour=WORK_START_TIME_OBJ.hour, minute=WORK_START_TIME_OBJ.minute)
             work_end = current_date.replace(hour=WORK_END_TIME_OBJ.hour, minute=WORK_END_TIME_OBJ.minute)
-            self.calendar[current_date] = [ContractorAvailabilitySlot(work_start, work_end)]
-            self.errands[current_date] = []
+            self.calendar.append((current_date, [ContractorAvailabilitySlot(work_start, work_end)]))
+            self.errands.append((current_date, []))
         logger.debug(f"Calendar initialized for {SCHEDULING_DAYS} days starting from {self.start_date}")
 
     def is_available(self, start_time: datetime, end_time: datetime) -> bool:
         date_key = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
         
-        if date_key not in self.calendar:
+        calendar_entry = next((entry for entry in self.calendar if entry[0] == date_key), None)
+        if not calendar_entry:
             logger.debug(f"Date {date_key} is outside the initialized range")
             return False
         
@@ -46,7 +47,7 @@ class ContractorCalendar:
             logger.debug(f"Time slot {start_time} - {end_time} is outside working hours")
             return False
         
-        for slot in self.calendar[date_key]:
+        for slot in calendar_entry[1]:
             if slot.available and slot.start_time <= start_time and slot.end_time >= end_time:
                 logger.debug(f"Available slot found: {slot.start_time} - {slot.end_time}")
                 return True
@@ -57,7 +58,8 @@ class ContractorCalendar:
         if self.is_available(start_time, end_time):
             date_key = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
             new_errand = ErrandAssignment(errand_id, start_time, end_time)
-            self.errands[date_key].append(new_errand)
+            errand_entry = next(entry for entry in self.errands if entry[0] == date_key)
+            errand_entry[1].append(new_errand)
             self._update_availability(date_key, start_time, end_time)
             logger.info(f"Reserved time slot for errand {errand_id}: {start_time} - {end_time}")
             return True
@@ -65,8 +67,9 @@ class ContractorCalendar:
         return False
 
     def _update_availability(self, date_key: datetime, start_time: datetime, end_time: datetime):
+        calendar_entry = next(entry for entry in self.calendar if entry[0] == date_key)
         updated_slots = []
-        for slot in self.calendar[date_key]:
+        for slot in calendar_entry[1]:
             if not slot.available:
                 updated_slots.append(slot)
                 continue
@@ -84,31 +87,34 @@ class ContractorCalendar:
                 if end_time < slot.end_time:
                     updated_slots.append(ContractorAvailabilitySlot(end_time, slot.end_time))
 
-        self.calendar[date_key] = updated_slots
+        # Update thecalendar entry with the new list of slots
+        calendar_index = next(i for i, entry in enumerate(self.calendar) if entry[0] == date_key)
+        self.calendar[calendar_index] = (date_key, updated_slots)
         logger.debug(f"Updated availability for {date_key}: {len(updated_slots)} slots")
 
-    def get_next_available_slot(self, start_datetime: datetime, min_duration: timedelta) -> Optional[Dict[str, datetime]]:
+    def get_next_available_slot(self, start_datetime: datetime, min_duration: timedelta) -> Optional[dict]:
         current_date = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
         logger.debug(f"Searching for next available slot from {start_datetime} with duration {min_duration}")
         
-        while current_date in self.calendar:
-            logger.debug(f"Checking date: {current_date}")
-            for slot in self.calendar[current_date]:
-                if slot.available:
-                    start = max(slot.start_time, start_datetime)
-                    if slot.end_time - start >= min_duration:
-                        end = start + min_duration
-                        if self.is_available(start, end):
-                            logger.debug(f"Found valid slot: {start} - {end}")
-                            return {'start': start, 'end': end}
+        for calendar_entry in self.calendar:
+            if calendar_entry[0] >= current_date:
+                logger.debug(f"Checking date: {calendar_entry[0]}")
+                for slot in calendar_entry[1]:
+                    if slot.available:
+                        start = max(slot.start_time, start_datetime)
+                        if slot.end_time - start >= min_duration:
+                            end = start + min_duration
+                            if self.is_available(start, end):
+                                logger.debug(f"Found valid slot: {start} - {end}")
+                                return {'start': start, 'end': end}
+                        else:
+                            logger.debug(f"Slot {slot.start_time} - {slot.end_time} is too short for duration {min_duration}")
                     else:
-                        logger.debug(f"Slot {slot.start_time} - {slot.end_time} is too short for duration {min_duration}")
-                else:
-                    logger.debug(f"Slot {slot.start_time} - {slot.end_time} is not available")
-            
-            logger.debug(f"No available slot found for {current_date}, moving to next day")
-            current_date = get_next_working_day(current_date)
-            start_datetime = current_date.replace(hour=WORK_START_TIME_OBJ.hour, minute=WORK_START_TIME_OBJ.minute)
+                        logger.debug(f"Slot {slot.start_time} - {slot.end_time} is not available")
+                
+                logger.debug(f"No available slot found for {calendar_entry[0]}, moving to next day")
+                current_date = get_next_working_day(calendar_entry[0])
+                start_datetime = current_date.replace(hour=WORK_START_TIME_OBJ.hour, minute=WORK_START_TIME_OBJ.minute)
 
         logger.debug("No available slot found within scheduling period")
         return None

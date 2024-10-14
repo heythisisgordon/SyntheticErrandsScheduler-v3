@@ -14,7 +14,7 @@ update the config.yaml file instead.
 
 from utils.config_manager import config
 from utils.time_utils import convert_minutes_to_time
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Union, Dict
 from enum import Enum, auto
 import datetime
 

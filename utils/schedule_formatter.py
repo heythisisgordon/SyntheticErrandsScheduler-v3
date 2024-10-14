@@ -5,7 +5,6 @@ from models.schedule import Schedule
 from datetime import datetime, date
 from utils.travel_time import calculate_travel_time
 from constants import WORK_START_TIME_OBJ
-from collections import defaultdict
 
 class ScheduleFormatter:
     @staticmethod
@@ -13,12 +12,18 @@ class ScheduleFormatter:
         formatted_schedule = []
         
         # Group assignments by day
-        assignments_by_day = defaultdict(list)
+        assignments_by_day: List[Tuple[date, List[Tuple[datetime, Customer, Contractor]]]] = []
         for start_time, customer, contractor in schedule.assignments:
             day = start_time.date()
-            assignments_by_day[day].append((start_time, customer, contractor))
+            day_assignments = next((d for d in assignments_by_day if d[0] == day), None)
+            if day_assignments is None:
+                assignments_by_day.append((day, [(start_time, customer, contractor)]))
+            else:
+                day_assignments[1].append((start_time, customer, contractor))
         
-        for day, assignments in sorted(assignments_by_day.items()):
+        assignments_by_day.sort(key=lambda x: x[0])
+        
+        for day, assignments in assignments_by_day:
             day_str = day.strftime("%Y-%m-%d")
             formatted_schedule.append(f"\n{day_str}:")
             

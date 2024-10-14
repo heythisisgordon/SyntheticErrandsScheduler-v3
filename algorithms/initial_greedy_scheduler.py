@@ -4,7 +4,7 @@ Implements a simple greedy initial scheduling algorithm as a baseline for perfor
 """
 
 import logging
-from typing import List, Tuple, Optional, Dict, Set
+from typing import List, Tuple, Optional
 from models.schedule import Schedule
 from models.customer import Customer
 from models.contractor import Contractor
@@ -28,9 +28,9 @@ class GreedyScheduler:
     def __init__(self, customers: List[Customer], contractors: List[Contractor]):
         self.customers = customers
         self.contractors = contractors
-        self.contractor_calendars = {contractor.id: contractor.calendar for contractor in contractors}
+        self.contractor_calendars: List[Tuple[int, ContractorCalendar]] = [(contractor.id, contractor.calendar) for contractor in contractors]
         self.schedule = Schedule(contractors, customers)
-        self.unscheduled_customers: Set[Customer] = set(customers)
+        self.unscheduled_customers: List[Customer] = list(customers)
         self.current_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
     def generate_schedule(self) -> Schedule:
@@ -51,7 +51,7 @@ class GreedyScheduler:
 
     def schedule_day(self, day: int) -> None:
         """Schedule all customers for a single day."""
-        for customer in list(self.unscheduled_customers):  # Create a copy of the set to iterate over
+        for customer in self.unscheduled_customers[:]:  # Create a copy of the list to iterate over
             self.schedule_customer(customer)
 
     def schedule_customer(self, customer: Customer) -> None:
@@ -69,7 +69,8 @@ class GreedyScheduler:
         selected_contractor = None
         for contractor in self.contractors:
             total_time = SchedulingUtilities.calculate_total_time(contractor, customer, customer.desired_errand)
-            potential_slot = self.contractor_calendars[contractor.id].get_next_available_slot(self.current_date, total_time)
+            calendar = next(calendar for id, calendar in self.contractor_calendars if id == contractor.id)
+            potential_slot = calendar.get_next_available_slot(self.current_date, total_time)
             if potential_slot:
                 start_time = potential_slot['start']
                 end_time = start_time + total_time
@@ -87,7 +88,8 @@ class GreedyScheduler:
         
         if SchedulingUtilities.is_valid_assignment(contractor, customer, start_time, actual_end_time):
             errand_id = f"errand_{customer.id}_{contractor.id}_{start_time.strftime('%Y%m%d%H%M')}"
-            if self.contractor_calendars[contractor.id].reserve_time_slot(errand_id, start_time, actual_end_time):
+            calendar = next(calendar for id, calendar in self.contractor_calendars if id == contractor.id)
+            if calendar.reserve_time_slot(errand_id, start_time, actual_end_time):
                 self.schedule.add_assignment(start_time, customer, contractor)
                 contractor.update_location(customer.location)
                 return True
