@@ -1,3 +1,5 @@
+# Mediates contractor_schedule_tab and contractor_schedule_manager
+
 from typing import List, Tuple
 from models.schedule import Schedule
 from utils.contractor_schedule_manager import ContractorScheduleManager

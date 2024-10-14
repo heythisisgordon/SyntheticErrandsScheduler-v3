@@ -1,3 +1,5 @@
+# Used in conjunction with main_frame_controller.MainFrameController
+
 import wx
 
 class EventManager:

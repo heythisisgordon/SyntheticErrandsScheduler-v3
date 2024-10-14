@@ -115,11 +115,3 @@ class ContractorCalendar:
 
 def is_overlapping(start1: datetime, end1: datetime, start2: datetime, end2: datetime) -> bool:
     return start1 < end2 and end1 > start2
-
-def split_availability_slot(slot: ContractorAvailabilitySlot, errand_start: datetime, errand_end: datetime) -> List[ContractorAvailabilitySlot]:
-    new_slots = []
-    if slot.start_time < errand_start:  # Slot before the errand
-        new_slots.append(ContractorAvailabilitySlot(slot.start_time, errand_start))
-    if errand_end < slot.end_time:  # Slot after the errand
-        new_slots.append(ContractorAvailabilitySlot(errand_end, slot.end_time))
-    return new_slots

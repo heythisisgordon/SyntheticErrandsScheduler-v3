@@ -49,25 +49,6 @@ class Schedule:
         total_time = SchedulingUtilities.calculate_total_time(contractor, customer, customer.desired_errand)
         return start_time + total_time
 
-    def is_valid_assignment(self, customer: Customer, contractor: Contractor, start_time: datetime) -> bool:
-        """Check if an assignment is valid based on contractor availability."""
-        end_time = self.get_errand_end_time(customer, contractor, start_time)
-        return SchedulingUtilities.is_valid_assignment(contractor, customer, start_time, end_time)
-
-    def get_assignments_for_day(self, day: datetime) -> List[Tuple[Customer, Contractor, datetime]]:
-        """Get all assignments for a specific day."""
-        return self.assignments.get(day, [])
-
-    def get_all_assignments(self) -> List[Tuple[Customer, Contractor, datetime]]:
-        """Get all assignments across all days."""
-        return [assignment for day_assignments in self.assignments.values() for assignment in day_assignments]
-
-    def get_contractor_assignments(self, contractor: Contractor) -> List[Tuple[Customer, datetime]]:
-        """Get all assignments for a specific contractor."""
-        return [(customer, start_time) for assignments in self.assignments.values() 
-                for customer, assigned_contractor, start_time in assignments 
-                if assigned_contractor == contractor]
-
     def __str__(self) -> str:
         return f"Schedule with {len(self.contractors)} contractors and {len(self.customers)} customers"
 

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class GreedySolutionManager:
     @staticmethod
-    def generate_solution(customers: List[Customer], contractors: List[Contractor]) -> Tuple[Schedule, str]:
+    def generate_solution(customers: List[Customer], contractors: List[Contractor]) -> Schedule:
         logger.info("Generating greedy solution")
         logger.debug(f"Number of customers: {len(customers)}")
         logger.debug(f"Number of contractors: {len(contractors)}")

@@ -10,7 +10,7 @@ from typing import NoReturn
 def setup_logging():
     """Set up logging for the application with reduced noise."""
     logging.basicConfig(
-        level=logging.INFO,  # Changed from DEBUG to INFO
+        level=logging.DEBUG,  # Changed from INFO to DEBUG
         format='%(asctime)s - %(levelname)s - %(message)s',  # Simplified format
         handlers=[
             logging.StreamHandler(sys.stdout)
