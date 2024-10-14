@@ -8,7 +8,7 @@ import logging
 from typing import NoReturn
 
 def setup_logging():
-    """Set up logging for the application with reduced noise."""
+    """Set up logging for the application"""
     logging.basicConfig(
         level=logging.DEBUG,  # Changed from INFO to DEBUG
         format='%(asctime)s - %(levelname)s - %(message)s',  # Simplified format
@@ -26,9 +26,10 @@ logger: logging.Logger = logging.getLogger(__name__)
 def run_gui_mode() -> NoReturn:
     """Run the application in GUI mode."""
     try:
-        from gui.main_frame import main as gui_main
+        from controllers.application_controller import ApplicationController
         
-        gui_main()
+        app_controller = ApplicationController()
+        app_controller.run()
         sys.exit(0)
     except ImportError as e:
         logger.error(f"GUI components import error: {str(e)}")

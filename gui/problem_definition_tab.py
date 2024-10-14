@@ -1,14 +1,15 @@
+"""
+ProblemDefinitionTab: Provides the UI for defining problem parameters and calculating costs.
+"""
+
 import wx
 from typing import List, Tuple
 from models.schedule import Schedule
 from constants import ERRAND_TYPES, MAX_INCENTIVE_MULTIPLIER, ErrandType
-from controllers.problem_definition_controller import ProblemDefinitionController
 
 class ProblemDefinitionTab(wx.Panel):
-    def __init__(self, parent: wx.Window, main_frame) -> None:
+    def __init__(self, parent: wx.Window):
         super().__init__(parent)
-        self.main_frame = main_frame
-        self.controller = ProblemDefinitionController()
         self.num_customers: wx.SpinCtrl
         self.num_contractors: wx.SpinCtrl
         self.contractor_rate: wx.SpinCtrlDouble
@@ -30,16 +31,15 @@ class ProblemDefinitionTab(wx.Panel):
         grid_sizer = wx.FlexGridSizer(3, 2, 10, 10)
         grid_sizer.AddGrowableCol(1, 1)
 
-        problem_params = self.controller.get_problem_params()
-        self.num_customers = wx.SpinCtrl(self, value=str(next(param[1] for param in problem_params if param[0] == 'num_customers')), min=1, max=100, size=(60, -1))
+        self.num_customers = wx.SpinCtrl(self, value="10", min=1, max=100, size=(60, -1))
         grid_sizer.Add(wx.StaticText(self, label="Number of Customers:"), flag=wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.num_customers)
 
-        self.num_contractors = wx.SpinCtrl(self, value=str(next(param[1] for param in problem_params if param[0] == 'num_contractors')), min=1, max=10, size=(60, -1))
+        self.num_contractors = wx.SpinCtrl(self, value="3", min=1, max=10, size=(60, -1))
         grid_sizer.Add(wx.StaticText(self, label="Number of Contractors:"), flag=wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.num_contractors)
 
-        self.contractor_rate = wx.SpinCtrlDouble(self, value=str(next(param[1] for param in problem_params if param[0] == 'contractor_rate')), min=0.01, max=10.00, inc=0.01, size=(60, -1))
+        self.contractor_rate = wx.SpinCtrlDouble(self, value="0.50", min=0.01, max=10.00, inc=0.01, size=(60, -1))
         self.contractor_rate.SetDigits(2)
         grid_sizer.Add(wx.StaticText(self, label="Contractor Labor Rate ($/minute):"), flag=wx.ALIGN_CENTER_VERTICAL)
         grid_sizer.Add(self.contractor_rate)
@@ -51,9 +51,9 @@ class ProblemDefinitionTab(wx.Panel):
         errand_types_box = wx.StaticBox(self, label="Errand Types")
         errand_types_sizer = wx.StaticBoxSizer(errand_types_box, wx.VERTICAL)
 
-        errand_params = self.controller.get_errand_params()
-        for errand_type, params in errand_params:
-            errand_box = wx.StaticBox(self, label=errand_type.replace('_', ' ').title())
+        for errand_type, base_time, incentive, disincentive in ERRAND_TYPES:
+            errand_name = errand_type.name
+            errand_box = wx.StaticBox(self, label=errand_name.replace('_', ' ').title())
             errand_sizer = wx.StaticBoxSizer(errand_box, wx.VERTICAL)
             
             param_grid = wx.FlexGridSizer(5, 3, 5, 5)
@@ -62,33 +62,34 @@ class ProblemDefinitionTab(wx.Panel):
             cost_texts_list = []
 
             # Base Time
-            base_time = wx.SpinCtrl(self, value=str(next(param[1] for param in params if param[0] == 'base_time')), min=1, max=480, size=(60, -1))
-            errand_params_list.append(('base_time', base_time))
+            base_time_ctrl = wx.SpinCtrl(self, value=str(base_time), min=1, max=480, size=(60, -1))
+            errand_params_list.append(('base_time', base_time_ctrl))
             param_grid.Add(wx.StaticText(self, label="Base Time:"), flag=wx.ALIGN_CENTER_VERTICAL)
             base_time_sizer = wx.BoxSizer(wx.HORIZONTAL)
-            base_time_sizer.Add(base_time, flag=wx.RIGHT, border=5)
+            base_time_sizer.Add(base_time_ctrl, flag=wx.RIGHT, border=5)
             base_time_sizer.Add(wx.StaticText(self, label="minutes"), flag=wx.ALIGN_CENTER_VERTICAL)
             param_grid.Add(base_time_sizer, flag=wx.EXPAND)
             param_grid.Add(wx.StaticText(self, label=""))
 
             # Same-Day Incentive
-            incentive = wx.SpinCtrlDouble(self, value=str(next(param[1] for param in params if param[0] == 'incentive')), min=1.0, max=1.5, inc=0.1, size=(60, -1))
-            incentive.SetDigits(1)
-            errand_params_list.append(('incentive', incentive))
+            incentive_ctrl = wx.SpinCtrlDouble(self, value=str(incentive), min=1.0, max=1.5, inc=0.1, size=(60, -1))
+            incentive_ctrl.SetDigits(1)
+            errand_params_list.append(('incentive', incentive_ctrl))
             param_grid.Add(wx.StaticText(self, label="Same-Day Incentive:"), flag=wx.ALIGN_CENTER_VERTICAL)
             incentive_sizer = wx.BoxSizer(wx.HORIZONTAL)
-            incentive_sizer.Add(incentive, flag=wx.RIGHT, border=5)
+            incentive_sizer.Add(incentive_ctrl, flag=wx.RIGHT, border=5)
             incentive_sizer.Add(wx.StaticText(self, label="multiplier"), flag=wx.ALIGN_CENTER_VERTICAL)
             param_grid.Add(incentive_sizer, flag=wx.EXPAND)
             param_grid.Add(wx.StaticText(self, label=""))
 
             # Disincentive
-            disincentive = wx.SpinCtrlDouble(self, value=str(next(param[1] for param in params if param[0] == 'disincentive')), min=0.0, max=100.0, inc=1.0, size=(60, -1))
-            disincentive.SetDigits(1)
-            errand_params_list.append(('disincentive', disincentive))
+            disincentive_value = disincentive['value'] if isinstance(disincentive, dict) else 0.0
+            disincentive_ctrl = wx.SpinCtrlDouble(self, value=str(disincentive_value), min=0.0, max=100.0, inc=1.0, size=(60, -1))
+            disincentive_ctrl.SetDigits(1)
+            errand_params_list.append(('disincentive', disincentive_ctrl))
             param_grid.Add(wx.StaticText(self, label="Disincentive:"), flag=wx.ALIGN_CENTER_VERTICAL)
             disincentive_sizer = wx.BoxSizer(wx.HORIZONTAL)
-            disincentive_sizer.Add(disincentive, flag=wx.RIGHT, border=5)
+            disincentive_sizer.Add(disincentive_ctrl, flag=wx.RIGHT, border=5)
             disincentive_sizer.Add(wx.StaticText(self, label="% per day"), flag=wx.ALIGN_CENTER_VERTICAL)
             param_grid.Add(disincentive_sizer, flag=wx.EXPAND)
             param_grid.Add(wx.StaticText(self, label=""))
@@ -111,12 +112,12 @@ class ProblemDefinitionTab(wx.Panel):
             errand_types_sizer.Add(errand_sizer, flag=wx.EXPAND|wx.ALL, border=5)
 
             # Bind events to update costs
-            base_time.Bind(wx.EVT_SPINCTRL, self.OnParamChange)
-            incentive.Bind(wx.EVT_SPINCTRLDOUBLE, self.OnParamChange)
-            disincentive.Bind(wx.EVT_SPINCTRLDOUBLE, self.OnParamChange)
+            base_time_ctrl.Bind(wx.EVT_SPINCTRL, self.OnParamChange)
+            incentive_ctrl.Bind(wx.EVT_SPINCTRLDOUBLE, self.OnParamChange)
+            disincentive_ctrl.Bind(wx.EVT_SPINCTRLDOUBLE, self.OnParamChange)
 
-            self.errand_params.append((errand_type, errand_params_list))
-            self.cost_texts.append((errand_type, cost_texts_list))
+            self.errand_params.append((errand_name, errand_params_list))
+            self.cost_texts.append((errand_name, cost_texts_list))
 
         main_sizer.Add(errand_types_sizer, flag=wx.EXPAND|wx.ALL, border=10)
 
@@ -157,18 +158,21 @@ class ProblemDefinitionTab(wx.Panel):
 
         self.SetSizer(main_sizer)
 
-        # Initial cost calculation
-        self.UpdateAllCosts()
-
     def OnParamChange(self, event: wx.Event) -> None:
-        self.UpdateAllCosts()
+        wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.commit_temp_button.GetId()))
 
-    def UpdateAllCosts(self) -> None:
-        errand_params = self.get_errand_params()
-        contractor_rate = self.contractor_rate.GetValue()
-        
-        costs, total_costs = self.controller.calculate_costs(errand_params, contractor_rate)
+    def populate_fields(self, problem_params, errand_params):
+        self.num_customers.SetValue(next(param[1] for param in problem_params if param[0] == 'num_customers'))
+        self.num_contractors.SetValue(next(param[1] for param in problem_params if param[0] == 'num_contractors'))
+        self.contractor_rate.SetValue(next(param[1] for param in problem_params if param[0] == 'contractor_rate'))
 
+        for errand_type, params in errand_params:
+            errand_params_list = next(ep for et, ep in self.errand_params if et == errand_type)
+            for param_name, value in params:
+                param_control = next(p[1] for p in errand_params_list if p[0] == param_name)
+                param_control.SetValue(value)
+
+    def update_cost_display(self, costs, total_costs):
         for errand_type, cost in costs:
             base_cost_text = next(text for name, text in next(ct for et, ct in self.cost_texts if et == errand_type) if name == 'base_cost')
             max_cost_text = next(text for name, text in next(ct for et, ct in self.cost_texts if et == errand_type) if name == 'max_cost')
@@ -179,20 +183,10 @@ class ProblemDefinitionTab(wx.Panel):
         self.total_max_cost_text.SetLabel(f"${next(c[1] for c in total_costs if c[0] == 'total_max_cost'):.2f}")
 
     def OnCommitTemporary(self, event: wx.CommandEvent) -> None:
-        self.UpdateConfig(save_to_file=False)
-        wx.MessageBox("Changes have been committed for the current session.", "Success", wx.OK | wx.ICON_INFORMATION)
+        wx.PostEvent(self.GetParent(), wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.commit_temp_button.GetId()))
 
     def OnCommitPermanent(self, event: wx.CommandEvent) -> None:
-        self.UpdateConfig(save_to_file=True)
-        wx.MessageBox("Changes have been committed and saved for future runs.", "Success", wx.OK | wx.ICON_INFORMATION)
-
-    def UpdateConfig(self, save_to_file: bool) -> None:
-        num_customers = self.num_customers.GetValue()
-        num_contractors = self.num_contractors.GetValue()
-        contractor_rate = self.contractor_rate.GetValue()
-        errand_params = self.get_errand_params()
-
-        self.controller.update_config(num_customers, num_contractors, contractor_rate, errand_params, save_to_file)
+        wx.PostEvent(self.GetParent(), wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.commit_perm_button.GetId()))
 
     def get_num_customers(self) -> int:
         return self.num_customers.GetValue()
@@ -206,3 +200,6 @@ class ProblemDefinitionTab(wx.Panel):
     def get_errand_params(self) -> List[Tuple[str, List[Tuple[str, float]]]]:
         return [(errand_type, [(param, value.GetValue()) for param, value in params])
                 for errand_type, params in self.errand_params]
+
+    def show_error(self, message: str):
+        wx.MessageBox(message, "Error", wx.OK | wx.ICON_ERROR)

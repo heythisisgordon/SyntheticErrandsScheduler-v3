@@ -1,7 +1,13 @@
-from typing import List, Tuple
+from typing import List, Tuple, Any
 from utils.config_manager import ConfigManager
 
 class ProblemDefinitionManager:
+    """
+    Manages problem definition parameters and calculations.
+    This class handles retrieving and updating problem parameters,
+    calculating costs, and preparing configuration updates.
+    """
+
     def __init__(self):
         self.config_manager = ConfigManager()
 
@@ -45,13 +51,13 @@ class ProblemDefinitionManager:
             ('total_max_cost', total_max_cost)
         ]
 
-    def update_config(self, updated_config: List[Tuple[str, any]], save_to_file: bool) -> None:
+    def apply_config_update(self, updated_config: List[Tuple[str, Any]], save_to_file: bool) -> None:
         config_dict = dict(updated_config)
         self.config_manager.update(config_dict)
         if save_to_file:
             self.config_manager.save()
 
-    def prepare_config_update(self, num_customers: int, num_contractors: int, contractor_rate: float, errand_params: List[Tuple[str, List[Tuple[str, float]]]]) -> List[Tuple[str, any]]:
+    def prepare_config_update(self, num_customers: int, num_contractors: int, contractor_rate: float, errand_params: List[Tuple[str, List[Tuple[str, float]]]]) -> List[Tuple[str, Any]]:
         updated_config = [
             ('num_customers', num_customers),
             ('num_contractors', num_contractors),

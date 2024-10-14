@@ -1,21 +1,18 @@
+"""
+GreedySolutionTab: Displays the generated greedy solution and provides options for solution visualization.
+"""
+
 import wx
 import wx.lib.scrolledpanel as scrolled
 from typing import List
-from models.customer import Customer
-from models.contractor import Contractor
-from models.schedule import Schedule
-from controllers.greedy_solution_controller import GreedySolutionController
 import logging
 
 logger = logging.getLogger(__name__)
 
 class GreedySolutionTab(scrolled.ScrolledPanel):
-    def __init__(self, parent: wx.Window, main_frame) -> None:
+    def __init__(self, parent: wx.Window):
         super().__init__(parent, -1, style=wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
-        self.main_frame = main_frame
-        self.controller = GreedySolutionController()
         self.vbox: wx.BoxSizer
-        self.schedule: Schedule = None
         self.InitUI()
        
     def InitUI(self) -> None:
@@ -40,30 +37,17 @@ class GreedySolutionTab(scrolled.ScrolledPanel):
         self.generate_button.Disable()
    
     def OnGenerateGreedySolution(self, event: wx.CommandEvent) -> None:
-        customers = self.main_frame.problem_generation.customers
-        contractors = self.main_frame.problem_generation.contractors
-        
-        self.schedule, message = self.controller.generate_solution(customers, contractors)
-        
-        if self.schedule:
-            self.UpdateContent(customers, contractors, self.schedule)
-            self.main_frame.update_contractor_schedule(self.schedule)
-            if message:
-                wx.MessageBox(message, "Scheduling Information", wx.OK | wx.ICON_INFORMATION)
-        else:
-            wx.MessageBox(message, "Scheduling Error", wx.OK | wx.ICON_ERROR)
+        wx.PostEvent(self.GetParent(), wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.generate_button.GetId()))
 
-    def UpdateContent(self, customers: List[Customer], contractors: List[Contractor], schedule: Schedule) -> None:
+    def display_solution(self, formatted_schedule: List[str], profit: float) -> None:
         logger.info("Updating GreedySolutionTab content")
         self.content_box.Clear(True)
         
         self.content_box.Add(wx.StaticText(self, label="Initial Greedy Schedule:"), flag=wx.ALL, border=5)
         
-        formatted_schedule = self.controller.format_schedule(customers, contractors, schedule)
         for line in formatted_schedule:
             self.content_box.Add(wx.StaticText(self, label=line), flag=wx.ALL, border=2)
 
-        profit: float = self.controller.calculate_profit(schedule)
         self.content_box.Add(wx.StaticText(self, label=f"\nTotal Profit: ${profit:.2f}"), flag=wx.ALL, border=5)
 
         self.Layout()
@@ -75,3 +59,14 @@ class GreedySolutionTab(scrolled.ScrolledPanel):
     def OnSize(self, event: wx.SizeEvent) -> None:
         self.SetupScrolling(scroll_x=False, scroll_y=True, rate_y=20)
         event.Skip()
+
+    def visualize_solution(self, customers, contractors, schedule):
+        # This method should be implemented to visualize the solution
+        # It will be called by the controller when needed
+        pass
+
+    def show_error(self, message: str):
+        wx.MessageBox(message, "Error", wx.OK | wx.ICON_ERROR)
+
+    def show_warning(self, message: str):
+        wx.MessageBox(message, "Warning", wx.OK | wx.ICON_WARNING)
