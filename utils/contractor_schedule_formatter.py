@@ -2,6 +2,7 @@ from typing import List, Tuple
 from models.schedule import Schedule
 from models.contractor import Contractor
 from models.customer import Customer
+from models.contractor_calendar import ErrandAssignment
 from datetime import datetime, timedelta, date
 from constants import WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
 from utils.schedule_formatter import ScheduleFormatter
@@ -10,22 +11,20 @@ class ContractorScheduleFormatter:
     @staticmethod
     def format_grid(schedule: Schedule) -> Tuple[List[str], List[str], List[List[str]], List[List[str]]]:
         contractors = schedule.contractors
+        assignments = schedule.get_assignments()
         
         # Group assignments by day
-        assignments_by_day: List[Tuple[date, List[Tuple[datetime, Customer, Contractor]]]] = []
-        for start_time, customer, contractor in schedule.assignments:
-            day = start_time.date()
-            day_assignments = next((d for d in assignments_by_day if d[0] == day), None)
-            if day_assignments is None:
-                assignments_by_day.append((day, [(start_time, customer, contractor)]))
-            else:
-                day_assignments[1].append((start_time, customer, contractor))
+        assignments_by_day = {}
+        for errand, customer, contractor in assignments:
+            day = errand.travel_start_time.date()
+            if day not in assignments_by_day:
+                assignments_by_day[day] = []
+            assignments_by_day[day].append((errand, customer, contractor))
         
-        assignments_by_day.sort(key=lambda x: x[0])
-        days = [day for day, _ in assignments_by_day]
+        days = sorted(assignments_by_day.keys())
 
         # Column labels
-        col_labels = [f"Contractor {contractor.id}" for contractor in contractors]
+        col_labels = ["Day"] + [f"Contractor {contractor.id}" for contractor in contractors]
 
         # Calculate work hours
         work_start = WORK_START_TIME_OBJ
@@ -37,28 +36,35 @@ class ContractorScheduleFormatter:
         for day in days:
             for hour in range(int(hours_per_day)):
                 current_time = datetime.combine(day, work_start) + timedelta(hours=hour)
-                row_labels.append(f"{day.strftime('%Y-%m-%d')} {current_time.strftime('%I:%M %p')}")
+                row_labels.append(f"{current_time.strftime('%I:%M %p')}")
 
         # Initialize grid data and colors
-        grid_data = [['' for _ in range(len(contractors))] for _ in range(len(row_labels))]
-        grid_colors = [[None for _ in range(len(contractors))] for _ in range(len(row_labels))]
+        grid_data = [['' for _ in range(len(col_labels))] for _ in range(len(row_labels))]
+        grid_colors = [['WHITE' for _ in range(len(col_labels))] for _ in range(len(row_labels))]
+
+        # Fill in the day column
+        for day_index, day in enumerate(days):
+            start_row = day_index * int(hours_per_day)
+            grid_data[start_row][0] = day.strftime('%Y-%m-%d')
+            for row in range(start_row, start_row + int(hours_per_day)):
+                grid_colors[row][0] = 'LIGHT_BLUE'
 
         # Fill in the grid with errand information
-        for day_index, (day, assignments) in enumerate(assignments_by_day):
-            for start_time, customer, contractor in assignments:
-                col = contractors.index(contractor)
-                start_hour = (start_time - datetime.combine(day, work_start)).total_seconds() / 3600
+        for day_index, (day, day_assignments) in enumerate(assignments_by_day.items()):
+            # Sort day_assignments by travel_start_time
+            for errand, customer, contractor in sorted(day_assignments, key=lambda x: x[0].travel_start_time):
+                col = next(i for i, c in enumerate(contractors) if c.id == contractor.id) + 1  # +1 for day column
+                start_hour = (errand.travel_start_time - datetime.combine(day, work_start)).total_seconds() / 3600
                 start_row = day_index * int(hours_per_day) + int(start_hour)
                 
-                end_time = schedule.get_errand_end_time(customer, contractor, start_time)
-                duration_hours = (end_time - start_time).total_seconds() / 3600
+                duration_hours = errand.total_duration.total_seconds() / 3600
                 end_row = start_row + int(duration_hours)
                 
                 # Set the errand information in the first cell
-                grid_data[start_row][col] = ScheduleFormatter.format_errand(customer, contractor, start_time, end_time)
+                grid_data[start_row][col] = ScheduleFormatter.format_errand(errand, customer, contractor)
                 
                 # Color all cells for the duration of the errand
                 for row in range(start_row, min(end_row + 1, len(row_labels))):
-                    grid_colors[row][col] = 'LIGHT_GREY'
+                    grid_colors[row][col] = 'LIGHT_GREEN'
 
         return col_labels, row_labels, grid_data, grid_colors

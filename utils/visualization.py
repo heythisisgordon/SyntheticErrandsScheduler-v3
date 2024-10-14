@@ -6,6 +6,7 @@ import numpy as np
 from models.schedule import Schedule
 from models.customer import Customer
 from models.contractor import Contractor
+from models.contractor_calendar import ErrandAssignment
 from utils.city_map import GRID_SIZE, create_city_grid
 from utils.travel_time import calculate_travel_time
 from datetime import date, datetime
@@ -47,22 +48,22 @@ def visualize_schedule(schedule: Schedule, ax_or_filename: Union[Axes, str, None
     contractor_colors: np.ndarray = plt.cm.Set1(np.linspace(0, 1, len(schedule.contractors)))
     
     # Group assignments by day
-    assignments_by_day: List[Tuple[date, List[Tuple[datetime, Customer, Contractor]]]] = []
-    for start_time, customer, contractor in schedule.assignments:
-        day = start_time.date()
-        day_assignments = next((d for d in assignments_by_day if d[0] == day), None)
-        if day_assignments is None:
-            assignments_by_day.append((day, [(start_time, customer, contractor)]))
-        else:
-            day_assignments[1].append((start_time, customer, contractor))
+    assignments = schedule.get_assignments()
+    assignments_by_day = {}
+    for errand, customer, contractor in assignments:
+        day = errand.travel_start_time.date()
+        if day not in assignments_by_day:
+            assignments_by_day[day] = []
+        assignments_by_day[day].append((errand, customer, contractor))
     
-    assignments_by_day.sort(key=lambda x: x[0])
-    
-    for day, assignments in assignments_by_day:
+    for day, day_assignments in sorted(assignments_by_day.items()):
         day_str = day.strftime("%Y-%m-%d")
         
+        # Sort day_assignments by travel_start_time
+        sorted_day_assignments = sorted(day_assignments, key=lambda x: x[0].travel_start_time)
+        
         for contractor in schedule.contractors:
-            contractor_assignments: List[Tuple[datetime, Customer, Contractor]] = [a for a in assignments if a[2].id == contractor.id]
+            contractor_assignments = [a for a in sorted_day_assignments if a[2].id == contractor.id]
             if not contractor_assignments:
                 continue
             
@@ -101,28 +102,32 @@ def print_schedule(schedule: Schedule) -> None:
     print("Synthetic Errands Schedule:")
     print("===========================")
     
+    assignments = schedule.get_assignments()
     # Group assignments by day
-    assignments_by_day: List[Tuple[date, List[Tuple[datetime, Customer, Contractor]]]] = []
-    for start_time, customer, contractor in schedule.assignments:
-        day = start_time.date()
-        day_assignments = next((d for d in assignments_by_day if d[0] == day), None)
-        if day_assignments is None:
-            assignments_by_day.append((day, [(start_time, customer, contractor)]))
-        else:
-            day_assignments[1].append((start_time, customer, contractor))
+    assignments_by_day = {}
+    for errand, customer, contractor in assignments:
+        day = errand.travel_start_time.date()
+        if day not in assignments_by_day:
+            assignments_by_day[day] = []
+        assignments_by_day[day].append((errand, customer, contractor))
     
-    assignments_by_day.sort(key=lambda x: x[0])
-    
-    for day, assignments in assignments_by_day:
+    for day, day_assignments in sorted(assignments_by_day.items()):
         day_str = day.strftime("%Y-%m-%d")
         
         print(f"\n{day_str}:")
-        for start_time, customer, contractor in assignments:
-            time_str = start_time.strftime("%H:%M")
+        # Sort day_assignments by travel_start_time
+        for errand, customer, contractor in sorted(day_assignments, key=lambda x: x[0].travel_start_time):
+            travel_start_str = errand.travel_start_time.strftime("%H:%M")
+            travel_end_str = errand.travel_end_time.strftime("%H:%M")
+            task_start_str = errand.task_start_time.strftime("%H:%M")
+            task_end_str = errand.task_end_time.strftime("%H:%M")
             
             print(f"  Contractor {contractor.id + 1} - Customer {customer.id + 1}:")
-            print(f"    Errand: {customer.desired_errand.type}")
-            print(f"    Start Time: {time_str}")
+            print(f"    Errand: {errand.errand_type}")
+            print(f"    Travel Time: {travel_start_str} - {travel_end_str}")
+            print(f"    Task Time: {task_start_str} - {task_end_str}")
             print(f"    Location: ({customer.location[0]}, {customer.location[1]})")
+            print(f"    Travel Duration: {errand.travel_duration}")
+            print(f"    Total Duration: {errand.total_duration}")
     
     print(f"\nTotal Profit: ${schedule.calculate_total_profit():.2f}")

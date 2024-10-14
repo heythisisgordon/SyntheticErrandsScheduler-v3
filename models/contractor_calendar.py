@@ -13,10 +13,16 @@ class ContractorAvailabilitySlot:
         self.available = True
 
 class ErrandAssignment:
-    def __init__(self, errand_id: str, start_time: datetime, end_time: datetime):
+    def __init__(self, errand_id: str, errand_type: str, travel_start_time: datetime, travel_end_time: datetime, 
+                 task_start_time: datetime, task_end_time: datetime, travel_duration: timedelta, total_duration: timedelta):
         self.errand_id = errand_id
-        self.start_time = start_time
-        self.end_time = end_time
+        self.errand_type = errand_type
+        self.travel_start_time = travel_start_time
+        self.travel_end_time = travel_end_time
+        self.task_start_time = task_start_time
+        self.task_end_time = task_end_time
+        self.travel_duration = travel_duration
+        self.total_duration = total_duration
 
 class ContractorCalendar:
     def __init__(self):
@@ -54,16 +60,20 @@ class ContractorCalendar:
         logger.debug(f"No available slot found for {start_time} - {end_time}")
         return False
 
-    def reserve_time_slot(self, errand_id: str, start_time: datetime, end_time: datetime) -> bool:
-        if self.is_available(start_time, end_time):
-            date_key = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
-            new_errand = ErrandAssignment(errand_id, start_time, end_time)
+    def reserve_time_slot(self, errand_id: str, errand_type: str, travel_start_time: datetime, travel_end_time: datetime, 
+                          task_start_time: datetime, task_end_time: datetime) -> bool:
+        if self.is_available(travel_start_time, task_end_time):
+            date_key = travel_start_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            travel_duration = travel_end_time - travel_start_time
+            total_duration = task_end_time - travel_start_time
+            new_errand = ErrandAssignment(errand_id, errand_type, travel_start_time, travel_end_time, 
+                                          task_start_time, task_end_time, travel_duration, total_duration)
             errand_entry = next(entry for entry in self.errands if entry[0] == date_key)
             errand_entry[1].append(new_errand)
-            self._update_availability(date_key, start_time, end_time)
-            logger.info(f"Reserved time slot for errand {errand_id}: {start_time} - {end_time}")
+            self._update_availability(date_key, travel_start_time, task_end_time)
+            logger.info(f"Reserved time slot for errand {errand_id}: {travel_start_time} - {task_end_time}")
             return True
-        logger.warning(f"Failed to reserve time slot for errand {errand_id}: {start_time} - {end_time}")
+        logger.warning(f"Failed to reserve time slot for errand {errand_id}: {travel_start_time} - {task_end_time}")
         return False
 
     def _update_availability(self, date_key: datetime, start_time: datetime, end_time: datetime):
@@ -87,7 +97,7 @@ class ContractorCalendar:
                 if end_time < slot.end_time:
                     updated_slots.append(ContractorAvailabilitySlot(end_time, slot.end_time))
 
-        # Update thecalendar entry with the new list of slots
+        # Update the calendar entry with the new list of slots
         calendar_index = next(i for i, entry in enumerate(self.calendar) if entry[0] == date_key)
         self.calendar[calendar_index] = (date_key, updated_slots)
         logger.debug(f"Updated availability for {date_key}: {len(updated_slots)} slots")

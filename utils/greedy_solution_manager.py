@@ -14,8 +14,21 @@ class GreedySolutionManager:
         logger.debug(f"Number of customers: {len(customers)}")
         logger.debug(f"Number of contractors: {len(contractors)}")
         
-        return ScheduleManager.generate_greedy_schedule(customers, contractors)
+        schedule, message = ScheduleManager.generate_greedy_schedule(customers, contractors)
+        
+        if schedule:
+            total_assignments = len(schedule.get_assignments())
+            logger.info(f"Total assignments made: {total_assignments}")
+            logger.info(f"Total customers: {len(customers)}")
+            logger.info(f"Unscheduled customers: {len(customers) - total_assignments}")
+            
+            if total_assignments == 0:
+                message = "No assignments were made in the greedy solution"
+            elif total_assignments < len(customers):
+                message = f"Only {total_assignments} out of {len(customers)} customers were scheduled"
+        
+        return schedule, message
 
     @staticmethod
     def calculate_profit(schedule: Schedule) -> float:
-        return ScheduleManager.calculate_total_profit(schedule)
+        return schedule.calculate_total_profit()

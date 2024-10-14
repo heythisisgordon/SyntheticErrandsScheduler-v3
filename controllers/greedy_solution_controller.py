@@ -22,7 +22,7 @@ class GreedySolutionController:
             schedule, message = self.greedy_solution_manager.generate_solution(customers, contractors)
             if schedule:
                 profit = self.greedy_solution_manager.calculate_profit(schedule)
-                formatted_schedule = self.schedule_formatter.format_schedule(customers, contractors, schedule)
+                formatted_schedule = self.schedule_formatter.format_schedule(schedule)
                 
                 self.greedy_solution_tab.display_solution(formatted_schedule, profit)
                 self.event_manager.emit(EventManager.SOLUTION_GENERATED, {'schedule': schedule, 'profit': profit})

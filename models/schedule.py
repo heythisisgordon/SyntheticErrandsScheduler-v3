@@ -2,46 +2,61 @@
 Schedule class for managing assignments of errands to contractors.
 """
 
-from typing import List, Tuple
+from typing import List, Dict, Tuple
 from datetime import datetime, timedelta
 from models.contractor import Contractor
 from models.customer import Customer
-from models.errand import Errand
+from models.contractor_calendar import ContractorCalendar, ErrandAssignment
 from utils.scheduling_utils import SchedulingUtilities
+from utils.travel_time import calculate_travel_time
 
 class Schedule:
     def __init__(self, contractors: List[Contractor], customers: List[Customer]):
         self.contractors: List[Contractor] = contractors
         self.customers: List[Customer] = customers
-        self.assignments: List[Tuple[datetime, Customer, Contractor]] = []
+        self.contractor_calendars: Dict[int, ContractorCalendar] = {
+            contractor.id: contractor.calendar for contractor in contractors
+        }
 
-    def add_assignment(self, start_time: datetime, customer: Customer, contractor: Contractor) -> None:
-        """Add a new assignment to the schedule."""
-        self.assignments.append((start_time, customer, contractor))
+    def add_assignment(self, start_time: datetime, customer: Customer, contractor: Contractor) -> bool:
+        calendar = self.contractor_calendars[contractor.id]
+        errand_id = f"errand_{customer.id}_{contractor.id}_{start_time.strftime('%Y%m%d%H%M')}"
+        travel_duration, _ = calculate_travel_time(contractor.location, customer.location)
+        task_duration = customer.desired_errand.base_time
+        total_duration = travel_duration + task_duration
+
+        travel_start_time = start_time
+        travel_end_time = start_time + travel_duration
+        task_start_time = travel_end_time
+        task_end_time = task_start_time + task_duration
+
+        if calendar.reserve_time_slot(errand_id, customer.desired_errand.type, travel_start_time, travel_end_time, 
+                                      task_start_time, task_end_time):
+            contractor.update_location(customer.location)
+            return True
+        return False
+
+    def get_assignments(self) -> List[Tuple[ErrandAssignment, Customer, Contractor]]:
+        assignments = []
+        for contractor_id, calendar in self.contractor_calendars.items():
+            contractor = next(c for c in self.contractors if c.id == contractor_id)
+            for _, errand_list in calendar.errands:
+                for errand in errand_list:
+                    customer_id = int(errand.errand_id.split('_')[1])
+                    customer = next(c for c in self.customers if c.id == customer_id)
+                    assignments.append((errand, customer, contractor))
+        return sorted(assignments, key=lambda x: x[0].travel_start_time)
 
     def calculate_total_profit(self) -> float:
-        """Calculate the total profit for all valid assignments in the schedule."""
-        return sum(
-            self.calculate_errand_profit(customer, contractor, start_time, i)
-            for i, (start_time, customer, contractor) in enumerate(self.assignments)
-            if SchedulingUtilities.is_valid_assignment(contractor, customer, start_time, self.get_errand_end_time(customer, contractor, start_time))
-        )
-
-    def calculate_errand_profit(self, customer: Customer, contractor: Contractor, start_time: datetime, index: int) -> float:
-        """Calculate the profit for a single errand assignment."""
-        errand: Errand = customer.desired_errand
-        
-        prev_location = self.assignments[index-1][1].location if index > 0 else contractor.location
-        total_time = SchedulingUtilities.calculate_total_time(contractor, customer, errand)
-        
-        contractor_cost: float = total_time.total_seconds() / 60 * contractor.rate
-        final_charge: float = errand.calculate_final_charge(start_time, datetime.now())
-
-        return final_charge - contractor_cost
+        total_profit = 0
+        for errand, customer, contractor in self.get_assignments():
+            if SchedulingUtilities.is_valid_assignment(contractor, customer, errand.travel_start_time, errand.task_end_time):
+                total_profit += SchedulingUtilities.calculate_profit(customer, contractor, errand.travel_start_time, errand.total_duration)
+        return total_profit
 
     def get_errand_end_time(self, customer: Customer, contractor: Contractor, start_time: datetime) -> datetime:
-        """Calculate the end time of an errand."""
-        total_time = SchedulingUtilities.calculate_total_time(contractor, customer, customer.desired_errand)
+        travel_duration, _ = calculate_travel_time(contractor.location, customer.location)
+        total_time = travel_duration + customer.desired_errand.base_time
         return start_time + total_time
 
     def __str__(self) -> str:
