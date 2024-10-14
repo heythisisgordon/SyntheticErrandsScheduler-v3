@@ -19,16 +19,16 @@ class InitialSchedulingError(Exception):
     """Custom exception for errors during initial scheduling."""
     pass
 
-def initial_greedy_schedule(customers: List[Customer], contractors: List[Contractor], contractor_calendars: Dict[str, ContractorCalendar]) -> Schedule:
+def initial_greedy_schedule(customers: List[Customer], contractors: List[Contractor]) -> Schedule:
     """Create an initial schedule using a simple greedy algorithm."""
-    scheduler = GreedyScheduler(customers, contractors, contractor_calendars)
+    scheduler = GreedyScheduler(customers, contractors)
     return scheduler.generate_schedule()
 
 class GreedyScheduler:
-    def __init__(self, customers: List[Customer], contractors: List[Contractor], contractor_calendars: Dict[str, ContractorCalendar]):
+    def __init__(self, customers: List[Customer], contractors: List[Contractor]):
         self.customers = customers
         self.contractors = contractors
-        self.contractor_calendars = contractor_calendars
+        self.contractor_calendars = {contractor.id: contractor.calendar for contractor in contractors}
         self.schedule = Schedule(contractors, customers)
         self.unscheduled_customers: Set[Customer] = set(customers)
         self.current_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)

@@ -30,3 +30,5 @@ Update this Developer Log with SHORT summaries of new work as changes are made t
     Refactoring SchedulingUtilities: Created SchedulingUtilities class in scheduling_utils.py, encapsulating scheduling utility functions for better organization and potential state management.
 
     Refactoring for Consistent Use of SchedulingUtilities: Updated algorithms/initial_greedy_scheduler.py and models/schedule.py to use SchedulingUtilities class consistently. Confirmed other files are using SchedulingUtilities correctly or don't require changes.
+
+    Removed Redundant Calendar Initialization: Deleted utils/calendar_initialization.py and updated related code in utils/schedule_manager.py and algorithms/initial_greedy_scheduler.py to use contractor calendars directly from Contractor objects.

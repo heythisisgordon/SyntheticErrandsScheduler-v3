@@ -4,7 +4,6 @@ from models.contractor import Contractor
 from models.schedule import Schedule
 from models.contractor_calendar import ContractorCalendar
 from algorithms.initial_greedy_scheduler import initial_greedy_schedule, InitialSchedulingError
-from utils.calendar_initialization import initialize_calendars
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,12 +12,12 @@ class ScheduleManager:
     @staticmethod
     def generate_greedy_schedule(customers: List[Customer], contractors: List[Contractor]) -> Tuple[Schedule, str]:
         try:
-            contractor_calendars = initialize_calendars(contractors)
+            contractor_calendars = {contractor.id: contractor.calendar for contractor in contractors}
             
             if not contractor_calendars:
                 raise ValueError("Failed to initialize contractor calendars.")
             
-            schedule = initial_greedy_schedule(customers, contractors, contractor_calendars)
+            schedule = initial_greedy_schedule(customers, contractors)
             
             total_assignments = sum(len(assignments) for assignments in schedule.assignments.values())
             logger.info(f"Total assignments made: {total_assignments}")
