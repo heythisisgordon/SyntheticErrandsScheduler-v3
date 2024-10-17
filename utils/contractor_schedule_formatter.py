@@ -13,15 +13,15 @@ class ContractorScheduleFormatter:
         contractors = schedule.contractors
         assignments = schedule.get_assignments()
         
-        # Group assignments by day
-        assignments_by_day = {}
+        # Group assignments by day and contractor
+        assignments_by_day_contractor = {}
         for errand, customer, contractor in assignments:
             day = errand.travel_start_time.date()
-            if day not in assignments_by_day:
-                assignments_by_day[day] = []
-            assignments_by_day[day].append((errand, customer, contractor))
+            if day not in assignments_by_day_contractor:
+                assignments_by_day_contractor[day] = {c.id: [] for c in contractors}
+            assignments_by_day_contractor[day][contractor.id].append((errand, customer, contractor))
         
-        days = sorted(assignments_by_day.keys())
+        days = sorted(assignments_by_day_contractor.keys())
 
         # Column labels
         col_labels = ["Day"] + [f"Contractor {contractor.id}" for contractor in contractors]
@@ -50,21 +50,30 @@ class ContractorScheduleFormatter:
                 grid_colors[row][0] = 'LIGHT_BLUE'
 
         # Fill in the grid with errand information
-        for day_index, (day, day_assignments) in enumerate(assignments_by_day.items()):
-            # Sort day_assignments by travel_start_time
-            for errand, customer, contractor in sorted(day_assignments, key=lambda x: x[0].travel_start_time):
-                col = next(i for i, c in enumerate(contractors) if c.id == contractor.id) + 1  # +1 for day column
-                start_hour = (errand.travel_start_time - datetime.combine(day, work_start)).total_seconds() / 3600
-                start_row = day_index * int(hours_per_day) + int(start_hour)
+        for day_index, day in enumerate(days):
+            for contractor in contractors:
+                col = contractor.id + 1  # +1 for day column
+                day_assignments = assignments_by_day_contractor[day][contractor.id]
                 
-                duration_hours = errand.total_duration.total_seconds() / 3600
-                end_row = start_row + int(duration_hours)
-                
-                # Set the errand information in the first cell
-                grid_data[start_row][col] = ScheduleFormatter.format_errand(errand, customer, contractor)
-                
-                # Color all cells for the duration of the errand
-                for row in range(start_row, min(end_row + 1, len(row_labels))):
-                    grid_colors[row][col] = 'LIGHT_GREEN'
+                # Sort day_assignments by travel_start_time
+                for errand, customer, _ in sorted(day_assignments, key=lambda x: x[0].travel_start_time):
+                    start_hour = (errand.travel_start_time - datetime.combine(day, work_start)).total_seconds() / 3600
+                    start_row = day_index * int(hours_per_day) + int(start_hour)
+                    
+                    duration_hours = errand.total_duration.total_seconds() / 3600
+                    end_row = start_row + int(duration_hours)
+                    
+                    # Format errand information
+                    errand_info = ScheduleFormatter.format_errand(errand, customer, contractor)
+                    
+                    # Add errand information only to the first cell
+                    if not grid_data[start_row][col]:
+                        grid_data[start_row][col] = errand_info
+                    else:
+                        grid_data[start_row][col] += "\n" + errand_info
+                    
+                    # Color all cells for the duration of the errand
+                    for row in range(start_row, min(end_row + 1, len(row_labels))):
+                        grid_colors[row][col] = 'LIGHT_GREEN'
 
         return col_labels, row_labels, grid_data, grid_colors

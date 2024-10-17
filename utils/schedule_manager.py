@@ -2,7 +2,6 @@ from typing import List, Tuple
 from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
-from models.contractor_calendar import ContractorCalendar
 from algorithms.initial_greedy_scheduler import initial_greedy_schedule, InitialSchedulingError
 import logging
 

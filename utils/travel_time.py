@@ -1,6 +1,5 @@
-from typing import Tuple, List
+from typing import Tuple
 from datetime import timedelta
-from utils.city_map import is_valid_road_location, GRID_SIZE
 from functools import lru_cache
 
 @lru_cache(maxsize=1000)
@@ -15,7 +14,7 @@ def get_nearest_road_point(point: Tuple[int, int]) -> Tuple[int, int]:
     return (round(x / 10) * 10, round(y / 10) * 10)
 
 @lru_cache(maxsize=10000)
-def calculate_road_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> Tuple[timedelta, Tuple[Tuple[int, int], ...]]:
+def calculate_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> Tuple[timedelta, Tuple[Tuple[int, int], ...]]:
     """
     Calculate the travel time between two points along the city roads.
     Assume 1 grid unit = 1 minute.
@@ -27,7 +26,7 @@ def calculate_road_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> 
     if start == end:
         return timedelta(), (start,)
     
-    route: List[Tuple[int, int]] = [start]
+    route = [start]
     
     # Find nearest road points
     start_road = get_nearest_road_point(start)
@@ -54,17 +53,3 @@ def calculate_road_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> 
     
     return timedelta(minutes=travel_time_minutes), tuple(route)
 
-def calculate_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> Tuple[timedelta, List[Tuple[int, int]]]:
-    """
-    Calculate the travel time between two points using the road network.
-    
-    :param start: Tuple[int, int] representing the starting point
-    :param end: Tuple[int, int] representing the ending point
-    :return: Tuple[timedelta, List[Tuple[int, int]]] representing (travel_time, route)
-    """
-    travel_time, route_tuple = calculate_road_travel_time(start, end)
-    return travel_time, list(route_tuple)
-
-# Clear the cache when the module is reloaded (useful for testing and development)
-calculate_road_travel_time.cache_clear()
-get_nearest_road_point.cache_clear()
