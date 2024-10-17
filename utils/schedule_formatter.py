@@ -3,8 +3,8 @@ from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
 from models.contractor_calendar import ErrandAssignment
-from datetime import datetime
 from constants import WORK_START_TIME_OBJ
+import pandas as pd
 
 class ScheduleFormatter:
     @staticmethod
@@ -12,20 +12,31 @@ class ScheduleFormatter:
         formatted_schedule = []
         
         assignments = schedule.get_assignments()
-        # Group assignments by day
-        assignments_by_day = {}
-        for errand, customer, contractor in assignments:
-            day = errand.travel_start_time.date()
-            if day not in assignments_by_day:
-                assignments_by_day[day] = []
-            assignments_by_day[day].append((errand, customer, contractor))
+        # Convert assignments to a DataFrame for easier manipulation
+        df = pd.DataFrame([
+            {
+                'day': errand.travel_start_time.floor('D'),
+                'errand': errand,
+                'customer': customer,
+                'contractor': contractor,
+                'travel_start_time': errand.travel_start_time
+            }
+            for errand, customer, contractor in assignments
+        ])
         
-        for day, day_assignments in sorted(assignments_by_day.items()):
+        if df.empty:
+            return ["No assignments scheduled."]
+
+        # Group assignments by day
+        assignments_by_day = df.groupby('day')
+        
+        for day, day_group in assignments_by_day:
             day_str = day.strftime("%Y-%m-%d")
             formatted_schedule.append(f"\n{day_str}:")
             
             # Sort day_assignments by travel_start_time
-            for errand, customer, contractor in sorted(day_assignments, key=lambda x: x[0].travel_start_time):
+            for _, row in day_group.sort_values('travel_start_time').iterrows():
+                errand, customer, contractor = row['errand'], row['customer'], row['contractor']
                 formatted_schedule.extend([
                     f"  Contractor {contractor.id} - Customer {customer.id}:",
                     f"    Errand: {errand.errand_type}",

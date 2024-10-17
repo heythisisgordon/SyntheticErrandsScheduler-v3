@@ -4,8 +4,8 @@ Defines the Contractor class representing a contractor in the scheduling system.
 """
 
 from typing import Tuple, Optional, Dict, List
-from datetime import datetime, timedelta
-from .contractor_calendar import ContractorCalendar
+import pandas as pd
+from constants import WORK_START_TIME_OBJ, WORK_END_TIME_OBJ, TIME_BLOCKS
 
 class Contractor:
     """Represents a contractor in the scheduling system."""
@@ -15,8 +15,27 @@ class Contractor:
         self.location: Tuple[int, int] = location
         self.initial_location: Tuple[int, int] = location  # Starting location for each day
         self.rate: float = rate
-        self.calendar: ContractorCalendar = ContractorCalendar()
+        self.schedule = None  # Initialize as None
     
+    def initialize_schedule(self, schedule_manager):
+        """Initialize the schedule using ScheduleManager"""
+        if self.schedule is None or self.schedule.empty:
+            self.schedule = schedule_manager.generate_empty_schedule()
+
+    def expand_schedule(self, new_date: pd.Timestamp):
+        if self.schedule is not None and new_date not in self.schedule.index.get_level_values('Date'):
+            date_range = pd.date_range(start=new_date, end=new_date, freq='D')
+            time_range = pd.date_range(
+                start=pd.Timestamp.combine(new_date, WORK_START_TIME_OBJ.time()),
+                end=pd.Timestamp.combine(new_date, WORK_END_TIME_OBJ.time()),
+                freq=f'{TIME_BLOCKS}min'
+            ).time
+            
+            new_index = pd.MultiIndex.from_product([date_range, time_range], names=['Date', 'Time'])
+            new_schedule = pd.DataFrame(index=new_index, columns=['Client_ID'])
+            new_schedule['Client_ID'] = None
+            self.schedule = pd.concat([self.schedule, new_schedule]).sort_index()
+
     def reset_location(self) -> None:
         """Reset the contractor's location to the initial location."""
         self.location = self.initial_location

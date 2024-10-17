@@ -3,9 +3,9 @@ from models.schedule import Schedule
 from models.contractor import Contractor
 from models.customer import Customer
 from models.contractor_calendar import ErrandAssignment
-from datetime import datetime, timedelta, date
 from constants import WORK_START_TIME_OBJ, WORK_END_TIME_OBJ
 from utils.schedule_formatter import ScheduleFormatter
+import pandas as pd
 
 class ContractorScheduleFormatter:
     @staticmethod
@@ -13,67 +13,61 @@ class ContractorScheduleFormatter:
         contractors = schedule.contractors
         assignments = schedule.get_assignments()
         
-        # Group assignments by day and contractor
-        assignments_by_day_contractor = {}
-        for errand, customer, contractor in assignments:
-            day = errand.travel_start_time.date()
-            if day not in assignments_by_day_contractor:
-                assignments_by_day_contractor[day] = {c.id: [] for c in contractors}
-            assignments_by_day_contractor[day][contractor.id].append((errand, customer, contractor))
+        # Convert assignments to a DataFrame
+        df = pd.DataFrame([
+            {
+                'day': errand.travel_start_time.floor('D'),
+                'contractor_id': contractor.id,
+                'errand': errand,
+                'customer': customer,
+                'contractor': contractor,
+                'start_time': errand.travel_start_time,
+                'end_time': errand.task_end_time
+            }
+            for errand, customer, contractor in assignments
+        ])
         
-        days = sorted(assignments_by_day_contractor.keys())
-
-        # Column labels
-        col_labels = ["Day"] + [f"Contractor {contractor.id}" for contractor in contractors]
+        if df.empty:
+            return [], [], [], []
 
         # Calculate work hours
         work_start = WORK_START_TIME_OBJ
         work_end = WORK_END_TIME_OBJ
-        hours_per_day = work_end.hour - work_start.hour + (work_end.minute - work_start.minute) / 60
+        hours_per_day = int((work_end - work_start).total_seconds() / 3600)
 
-        # Row labels
-        row_labels = []
-        for day in days:
-            for hour in range(int(hours_per_day)):
-                current_time = datetime.combine(day, work_start) + timedelta(hours=hour)
-                row_labels.append(f"{current_time.strftime('%I:%M %p')}")
+        # Create a date range for all days
+        date_range = pd.date_range(df['day'].min(), df['day'].max())
 
-        # Initialize grid data and colors
-        grid_data = [['' for _ in range(len(col_labels))] for _ in range(len(row_labels))]
-        grid_colors = [['WHITE' for _ in range(len(col_labels))] for _ in range(len(row_labels))]
+        # Create a time range for work hours
+        time_range = pd.date_range(work_start, work_end, freq='H').time
 
-        # Fill in the day column
-        for day_index, day in enumerate(days):
-            start_row = day_index * int(hours_per_day)
-            grid_data[start_row][0] = day.strftime('%Y-%m-%d')
-            for row in range(start_row, start_row + int(hours_per_day)):
-                grid_colors[row][0] = 'LIGHT_BLUE'
+        # Create a MultiIndex for the grid
+        multi_index = pd.MultiIndex.from_product([date_range, time_range], names=['date', 'time'])
 
-        # Fill in the grid with errand information
-        for day_index, day in enumerate(days):
-            for contractor in contractors:
-                col = contractor.id + 1  # +1 for day column
-                day_assignments = assignments_by_day_contractor[day][contractor.id]
-                
-                # Sort day_assignments by travel_start_time
-                for errand, customer, _ in sorted(day_assignments, key=lambda x: x[0].travel_start_time):
-                    start_hour = (errand.travel_start_time - datetime.combine(day, work_start)).total_seconds() / 3600
-                    start_row = day_index * int(hours_per_day) + int(start_hour)
-                    
-                    duration_hours = errand.total_duration.total_seconds() / 3600
-                    end_row = start_row + int(duration_hours)
-                    
-                    # Format errand information
-                    errand_info = ScheduleFormatter.format_errand(errand, customer, contractor)
-                    
-                    # Add errand information only to the first cell
-                    if not grid_data[start_row][col]:
-                        grid_data[start_row][col] = errand_info
-                    else:
-                        grid_data[start_row][col] += "\n" + errand_info
-                    
-                    # Color all cells for the duration of the errand
-                    for row in range(start_row, min(end_row + 1, len(row_labels))):
-                        grid_colors[row][col] = 'LIGHT_GREEN'
+        # Create an empty DataFrame for the grid
+        grid = pd.DataFrame(index=multi_index, columns=[f"Contractor {c.id}" for c in contractors])
+
+        # Fill the grid with errand information
+        for _, row in df.iterrows():
+            errand_info = ScheduleFormatter.format_errand(row['errand'], row['customer'], row['contractor'])
+            mask = (grid.index.get_level_values('date') == row['day']) & \
+                   (grid.index.get_level_values('time') >= row['start_time'].time()) & \
+                   (grid.index.get_level_values('time') < row['end_time'].time())
+            grid.loc[mask, f"Contractor {row['contractor_id']}"] = errand_info
+
+        # Prepare the output format
+        col_labels = ["Day"] + list(grid.columns)
+        row_labels = [f"{date.strftime('%Y-%m-%d')} {time.strftime('%I:%M %p')}" 
+                      for date, time in grid.index]
+        
+        grid_data = [[date.strftime('%Y-%m-%d') if time == grid.index.get_level_values('time')[0] else ''] + 
+                     [str(grid.loc[(date, time), col]) if pd.notna(grid.loc[(date, time), col]) else '' 
+                      for col in grid.columns]
+                     for date, time in grid.index]
+        
+        grid_colors = [['LIGHT_BLUE' if time == grid.index.get_level_values('time')[0] else 'WHITE'] + 
+                       ['LIGHT_GREEN' if pd.notna(grid.loc[(date, time), col]) else 'WHITE' 
+                        for col in grid.columns]
+                       for date, time in grid.index]
 
         return col_labels, row_labels, grid_data, grid_colors

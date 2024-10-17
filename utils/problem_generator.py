@@ -5,8 +5,8 @@ Generates random problem instances with customers and contractors.
 
 import random
 import logging
-from typing import List, Tuple, Dict
-from datetime import datetime, timedelta
+from typing import List, Tuple
+import pandas as pd
 
 from models.customer import Customer
 from models.contractor import Contractor
@@ -23,7 +23,7 @@ class ProblemGenerationError(Exception):
 def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors: int = DEFAULT_NUM_CONTRACTORS, contractor_rate: float = 0.5) -> Tuple[List[Customer], List[Contractor]]:
     """Generate a random problem instance with customers and contractors."""
     try:
-        start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        start_date = pd.Timestamp.now().floor('D')
         customers = [_generate_customer(i, start_date) for i in range(num_customers)]
         contractors = [_generate_contractor(i, contractor_rate) for i in range(num_contractors)]
         
@@ -32,7 +32,7 @@ def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors
         logger.error(f"Error during problem generation: {str(e)}")
         raise ProblemGenerationError(f"Failed to generate problem: {str(e)}")
 
-def _generate_customer(customer_id: int, start_date: datetime) -> Customer:
+def _generate_customer(customer_id: int, start_date: pd.Timestamp) -> Customer:
     """Generate a single customer with random attributes."""
     return Customer(
         customer_id,
@@ -56,16 +56,19 @@ def _generate_valid_location() -> Tuple[int, int]:
 def _generate_random_errand(errand_id: int) -> Errand:
     """Generate a random errand."""
     errand_type, base_time, incentive, disincentive = random.choice(ERRAND_TYPES)
-    return Errand(errand_id, errand_type, timedelta(minutes=base_time), incentive, disincentive)
+    return Errand(errand_id, errand_type, pd.Timedelta(minutes=base_time), incentive, disincentive)
 
-def _generate_full_day_availability(start_date: datetime) -> Dict[datetime, List[Tuple[datetime, datetime]]]:
+def _generate_full_day_availability(start_date: pd.Timestamp) -> List[Tuple[pd.Timestamp, List[Tuple[pd.Timestamp, pd.Timestamp]]]]:
     """Generate full-day availability for all scheduling days."""
-    return {
-        start_date + timedelta(days=day): [
-            (
-                datetime.combine(start_date + timedelta(days=day), WORK_START_TIME_OBJ),
-                datetime.combine(start_date + timedelta(days=day), WORK_END_TIME_OBJ)
-            )
-        ]
+    return [
+        (
+            start_date + pd.Timedelta(days=day),
+            [
+                (
+                    pd.Timestamp.combine(start_date + pd.Timedelta(days=day), WORK_START_TIME_OBJ.time()),
+                    pd.Timestamp.combine(start_date + pd.Timedelta(days=day), WORK_END_TIME_OBJ.time())
+                )
+            ]
+        )
         for day in range(SCHEDULING_DAYS)
-    }
+    ]

@@ -1,5 +1,5 @@
 from typing import Tuple
-from datetime import timedelta
+import pandas as pd
 from functools import lru_cache
 
 @lru_cache(maxsize=1000)
@@ -14,17 +14,17 @@ def get_nearest_road_point(point: Tuple[int, int]) -> Tuple[int, int]:
     return (round(x / 10) * 10, round(y / 10) * 10)
 
 @lru_cache(maxsize=10000)
-def calculate_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> Tuple[timedelta, Tuple[Tuple[int, int], ...]]:
+def calculate_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> Tuple[pd.Timedelta, Tuple[Tuple[int, int], ...]]:
     """
     Calculate the travel time between two points along the city roads.
     Assume 1 grid unit = 1 minute.
     
     :param start: Tuple[int, int] representing the starting point
     :param end: Tuple[int, int] representing the ending point
-    :return: Tuple[timedelta, Tuple[Tuple[int, int], ...]] representing (travel_time, route)
+    :return: Tuple[pd.Timedelta, Tuple[Tuple[int, int], ...]] representing (travel_time, route)
     """
     if start == end:
-        return timedelta(), (start,)
+        return pd.Timedelta(minutes=0), (start,)
     
     route = [start]
     
@@ -51,5 +51,4 @@ def calculate_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> Tuple
     # Calculate total travel time
     travel_time_minutes = sum(abs(p2[0] - p1[0]) + abs(p2[1] - p1[1]) for p1, p2 in zip(route, route[1:]))
     
-    return timedelta(minutes=travel_time_minutes), tuple(route)
-
+    return pd.Timedelta(minutes=travel_time_minutes), tuple(route)

@@ -5,7 +5,7 @@ This module defines the Errand class, which represents an errand in the scheduli
 It includes methods for calculating charges, applying incentives and disincentives.
 """
 
-from datetime import datetime, timedelta, date
+import pandas as pd
 from constants import MAX_INCENTIVE_MULTIPLIER, ERRAND_RATES, SCHEDULING_DAYS, ErrandType
 from typing import Dict, Union
 
@@ -16,16 +16,16 @@ class Errand:
     Attributes:
         id (int): Unique identifier for the errand.
         type (ErrandType): Type of the errand.
-        base_time (timedelta): Base time required to complete the errand.
+        base_time (pd.Timedelta): Base time required to complete the errand.
         incentive (float): Incentive multiplier for same-day service.
         disincentive (Dict[str, Union[str, int, float]] or None): Disincentive rules for late completion.
         charge (float): Base charge for the errand.
     """
 
-    def __init__(self, id: int, type: ErrandType, base_time: timedelta, incentive: float, disincentive: Union[Dict[str, Union[str, int, float]], None]):
+    def __init__(self, id: int, type: ErrandType, base_time: pd.Timedelta, incentive: float, disincentive: Union[Dict[str, Union[str, int, float]], None]):
         self.id: int = id
         self.type: ErrandType = type
-        self.base_time: timedelta = base_time
+        self.base_time: pd.Timedelta = base_time
         self.incentive: float = incentive
         self.disincentive: Union[Dict[str, Union[str, int, float]], None] = disincentive
         self.charge: float = self.calculate_base_charge()
@@ -39,32 +39,29 @@ class Errand:
         """
         return self.base_time.total_seconds() / 60 * ERRAND_RATES.get(self.type, 1)  # Default to $1 per minute if type not found
 
-    def apply_incentive(self, scheduled_date: Union[datetime, date], request_date: Union[datetime, date]) -> float:
+    def apply_incentive(self, scheduled_date: pd.Timestamp, request_date: pd.Timestamp) -> float:
         """
         Apply the incentive for same-day service.
 
         Args:
-            scheduled_date (Union[datetime, date]): The date or datetime the errand is scheduled for.
-            request_date (Union[datetime, date]): The date or datetime the errand was requested.
+            scheduled_date (pd.Timestamp): The date or datetime the errand is scheduled for.
+            request_date (pd.Timestamp): The date or datetime the errand was requested.
 
         Returns:
             float: The charge after applying the incentive.
         """
-        scheduled_date_only = scheduled_date.date() if isinstance(scheduled_date, datetime) else scheduled_date
-        request_date_only = request_date.date() if isinstance(request_date, datetime) else request_date
-
-        if scheduled_date_only == request_date_only:
+        if scheduled_date.date() == request_date.date():
             incentive_charge = self.charge * self.incentive
             return min(incentive_charge, self.charge * MAX_INCENTIVE_MULTIPLIER)
         return self.charge
 
-    def apply_disincentive(self, scheduled_date: Union[datetime, date], request_date: Union[datetime, date]) -> float:
+    def apply_disincentive(self, scheduled_date: pd.Timestamp, request_date: pd.Timestamp) -> float:
         """
         Apply the disincentive for late completion.
 
         Args:
-            scheduled_date (Union[datetime, date]): The date or datetime the errand is scheduled for.
-            request_date (Union[datetime, date]): The date or datetime the errand was requested.
+            scheduled_date (pd.Timestamp): The date or datetime the errand is scheduled for.
+            request_date (pd.Timestamp): The date or datetime the errand was requested.
 
         Returns:
             float: The charge after applying the disincentive.
@@ -72,10 +69,7 @@ class Errand:
         if self.disincentive is None:
             return self.charge
 
-        scheduled_date_only = scheduled_date.date() if isinstance(scheduled_date, datetime) else scheduled_date
-        request_date_only = request_date.date() if isinstance(request_date, datetime) else request_date
-
-        days_difference = (scheduled_date_only - request_date_only).days
+        days_difference = (scheduled_date.date() - request_date.date()).days
 
         # Apply gradual disincentive within SLA window
         if days_difference <= SCHEDULING_DAYS:
@@ -91,13 +85,13 @@ class Errand:
             return max(0, self.charge - (self.disincentive['value'] * days_past))
         return self.charge
 
-    def calculate_final_charge(self, scheduled_date: Union[datetime, date], request_date: Union[datetime, date]) -> float:
+    def calculate_final_charge(self, scheduled_date: pd.Timestamp, request_date: pd.Timestamp) -> float:
         """
         Calculate the final charge for the errand, considering incentives and disincentives.
 
         Args:
-            scheduled_date (Union[datetime, date]): The date or datetime the errand is scheduled for.
-            request_date (Union[datetime, date]): The date or datetime the errand was requested.
+            scheduled_date (pd.Timestamp): The date or datetime the errand is scheduled for.
+            request_date (pd.Timestamp): The date or datetime the errand was requested.
 
         Returns:
             float: The final charge for the errand.

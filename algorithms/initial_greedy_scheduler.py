@@ -9,10 +9,10 @@ from models.schedule import Schedule
 from models.customer import Customer
 from models.contractor import Contractor
 from models.contractor_calendar import ContractorCalendar
-from datetime import datetime, timedelta
-from constants import SCHEDULING_DAYS, WORK_START_TIME_OBJ
+from constants import WORK_START_TIME_OBJ, WORK_END_TIME_OBJ, TIME_BLOCKS
 from utils.scheduling_utils import SchedulingUtilities
 from utils.travel_time import calculate_travel_time
+import pandas as pd
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -31,14 +31,15 @@ class GreedyScheduler:
         self.contractors = contractors
         self.schedule = Schedule(contractors, customers)
         self.unscheduled_customers: List[Customer] = list(customers)
-        self.current_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        self.current_date = pd.Timestamp.now().floor('D')
+        logger.info(f"GreedyScheduler initialized with current_date: {self.current_date}")
 
     def generate_schedule(self) -> Schedule:
         """Generate the complete schedule."""
-        for day in range(SCHEDULING_DAYS):
+        while self.unscheduled_customers:
             self.reset_contractor_locations()
-            self.schedule_day(day)
-            self.current_date += timedelta(days=1)
+            self.schedule_day()
+            self.current_date += pd.Timedelta(days=1)
         
         self.log_results()
         return self.schedule
@@ -48,8 +49,9 @@ class GreedyScheduler:
         for contractor in self.contractors:
             contractor.reset_location()
 
-    def schedule_day(self, day: int) -> None:
+    def schedule_day(self) -> None:
         """Schedule all customers for a single day."""
+        logger.info(f"Scheduling day: {self.current_date}")
         for customer in self.unscheduled_customers[:]:  # Create a copy of the list to iterate over
             self.schedule_customer(customer)
 
@@ -60,31 +62,43 @@ class GreedyScheduler:
             selected_contractor, travel_start_time, task_end_time = valid_slot_info
             if self.attempt_scheduling(customer, selected_contractor, travel_start_time, task_end_time):
                 self.unscheduled_customers.remove(customer)
+                logger.info(f"Scheduled customer {customer.id} from {travel_start_time} to {task_end_time}")
                 return
+        logger.warning(f"Failed to schedule customer {customer.id}")
 
-    def find_earliest_valid_slot(self, customer: Customer) -> Optional[Tuple[Contractor, datetime, datetime]]:
+    def find_earliest_valid_slot(self, customer: Customer) -> Optional[Tuple[Contractor, pd.Timestamp, pd.Timestamp]]:
         """Find the earliest valid slot among all contractors for a given customer."""
         earliest_valid_slot = None
         selected_contractor = None
+        earliest_task_end_time = None
+
         for contractor in self.contractors:
             travel_duration, _ = calculate_travel_time(contractor.location, customer.location)
-            task_duration = customer.desired_errand.base_time
-            total_duration = travel_duration + task_duration
-            calendar = self.schedule.contractor_calendars[contractor.id]
-            potential_slot = calendar.get_next_available_slot(self.current_date, total_duration)
-            if potential_slot:
-                travel_start_time = potential_slot['start']
-                travel_end_time = travel_start_time + travel_duration
-                task_start_time = travel_end_time
-                task_end_time = task_start_time + task_duration
-                if SchedulingUtilities.is_valid_assignment(contractor, customer, travel_start_time, task_end_time):
-                    if earliest_valid_slot is None or travel_start_time < earliest_valid_slot['start']:
-                        earliest_valid_slot = potential_slot
-                        selected_contractor = contractor
-        
-        return (selected_contractor, earliest_valid_slot['start'], earliest_valid_slot['start'] + total_duration) if selected_contractor and earliest_valid_slot else None
+            total_duration = travel_duration + customer.desired_errand.base_time
 
-    def attempt_scheduling(self, customer: Customer, contractor: Contractor, travel_start_time: datetime, task_end_time: datetime) -> bool:
+            current_datetime = max(self.current_date, contractor.schedule.index.get_level_values('Date').min())
+            logger.debug(f"Searching for slot from {current_datetime} for customer {customer.id}")
+
+            next_available_time = SchedulingUtilities.calculate_next_available_time(contractor, customer, current_datetime)
+            
+            if next_available_time:
+                travel_start_time = next_available_time
+                task_end_time = travel_start_time + total_duration
+
+                if earliest_valid_slot is None or travel_start_time < earliest_valid_slot:
+                    earliest_valid_slot = travel_start_time
+                    earliest_task_end_time = task_end_time
+                    selected_contractor = contractor
+                logger.debug(f"Found valid slot for customer {customer.id} with contractor {contractor.id}: {travel_start_time} to {task_end_time}")
+
+        if earliest_valid_slot:
+            logger.debug(f"Selected earliest slot for customer {customer.id}: {earliest_valid_slot} to {earliest_task_end_time} with contractor {selected_contractor.id}")
+            return selected_contractor, earliest_valid_slot, earliest_task_end_time
+
+        logger.warning(f"No valid slot found for customer {customer.id}")
+        return None
+
+    def attempt_scheduling(self, customer: Customer, contractor: Contractor, travel_start_time: pd.Timestamp, task_end_time: pd.Timestamp) -> bool:
         """Attempt to schedule a customer with a contractor at a specific time."""
         if SchedulingUtilities.is_valid_assignment(contractor, customer, travel_start_time, task_end_time):
             if self.schedule.add_assignment(travel_start_time, customer, contractor):

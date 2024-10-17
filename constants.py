@@ -16,7 +16,7 @@ from utils.config_manager import config
 from utils.time_utils import convert_minutes_to_time
 from typing import List, Tuple, Union, Dict
 from enum import Enum, auto
-import datetime
+import pandas as pd
 
 class ErrandType(Enum):
     """
@@ -75,9 +75,9 @@ ERRAND_RATES: Dict[ErrandType, float] = {
 }
 
 # Working hours
-# These values define the start and end of the working day as datetime.time objects.
-WORK_START_TIME_OBJ: datetime.time = convert_minutes_to_time(config.get('work_start_time'))
-WORK_END_TIME_OBJ: datetime.time = convert_minutes_to_time(config.get('work_end_time'))
+# These values define the start and end of the working day as pd.Timestamp objects.
+WORK_START_TIME_OBJ: pd.Timestamp = convert_minutes_to_time(config.get('work_start_time'))
+WORK_END_TIME_OBJ: pd.Timestamp = convert_minutes_to_time(config.get('work_end_time'))
 
 # Default problem generation parameters
 # These values are used when generating random problem instances.
@@ -93,7 +93,14 @@ SCHEDULING_DAYS: int = config.get('scheduling_days')
 OPTIMIZATION_MAX_TIME: int = config.get('optimization', {}).get('max_time_in_seconds', 60)
 OPTIMIZATION_LOG_PROGRESS: bool = config.get('optimization', {}).get('log_search_progress', True)
 
+# Time blocks for Pandas DataFrame-based schedule
+TIME_BLOCKS: int = config.get('time_blocks', 30)  # Default to 30-minute blocks if not specified in config
+
 # For backwards compatibility, define individual incentive constants
 # Note: It's recommended to use ERRAND_TYPES instead of these individual constants
 for errand in config.get('errand_types'):
     globals()[f"{errand['name'].upper().replace(' ', '_')}_INCENTIVE"] = errand['incentive']
+
+# String representations of working hours for easier use
+WORK_START_TIME: str = WORK_START_TIME_OBJ.strftime("%H:%M")
+WORK_END_TIME: str = WORK_END_TIME_OBJ.strftime("%H:%M")

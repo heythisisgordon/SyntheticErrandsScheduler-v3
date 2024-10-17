@@ -3,6 +3,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from typing import Union, List, Tuple
 import numpy as np
+import pandas as pd
 from models.schedule import Schedule
 from models.customer import Customer
 from models.contractor import Contractor
@@ -104,19 +105,18 @@ def print_schedule(schedule: Schedule) -> None:
     
     assignments = schedule.get_assignments()
     # Group assignments by day
-    assignments_by_day = {}
-    for errand, customer, contractor in assignments:
-        day = errand.travel_start_time.date()
-        if day not in assignments_by_day:
-            assignments_by_day[day] = []
-        assignments_by_day[day].append((errand, customer, contractor))
+    assignments_by_day = pd.DataFrame(
+        [(errand.travel_start_time.date(), errand, customer, contractor) for errand, customer, contractor in assignments],
+        columns=['day', 'errand', 'customer', 'contractor']
+    ).sort_values('day')
     
-    for day, day_assignments in sorted(assignments_by_day.items()):
+    for day, day_group in assignments_by_day.groupby('day'):
         day_str = day.strftime("%Y-%m-%d")
-        
         print(f"\n{day_str}:")
+        
         # Sort day_assignments by travel_start_time
-        for errand, customer, contractor in sorted(day_assignments, key=lambda x: x[0].travel_start_time):
+        for _, row in day_group.sort_values(by=lambda x: day_group['errand'].apply(lambda e: e.travel_start_time)).iterrows():
+            errand, customer, contractor = row['errand'], row['customer'], row['contractor']
             travel_start_str = errand.travel_start_time.strftime("%H:%M")
             travel_end_str = errand.travel_end_time.strftime("%H:%M")
             task_start_str = errand.task_start_time.strftime("%H:%M")
