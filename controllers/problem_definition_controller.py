@@ -3,8 +3,8 @@ ProblemDefinitionController: Manages the problem definition process, including p
 """
 
 from typing import List, Tuple
-from utils.problem_definition_manager import ProblemDefinitionManager
-from utils.event_manager import EventManager
+from managers.problem_definition_manager import ProblemDefinitionManager
+from managers.event_manager import EventManager
 
 class ProblemDefinitionController:
     def __init__(self, problem_definition_tab, event_manager: EventManager):
@@ -12,16 +12,7 @@ class ProblemDefinitionController:
         self.event_manager = event_manager
         self.problem_definition_manager = ProblemDefinitionManager()
 
-    def initialize(self):
-        problem_params = self.problem_definition_manager.get_problem_params()
-        errand_params = self.problem_definition_manager.get_errand_params()
-        self.problem_definition_tab.populate_fields(problem_params, errand_params)
-
-    def on_calculate_costs(self, errand_params: List[Tuple[str, List[Tuple[str, float]]]], contractor_rate: float):
-        costs = self.problem_definition_manager.calculate_costs(errand_params, contractor_rate)
-        total_costs = self.problem_definition_manager.calculate_total_costs(costs)
-        self.problem_definition_tab.update_cost_display(costs, total_costs)
-
+# Need to update these to so that problem definition buttons work properly
     def on_update_config(self, num_customers: int, num_contractors: int, contractor_rate: float, errand_params: List[Tuple[str, List[Tuple[str, float]]]], save_to_file: bool):
         try:
             updated_config = self.problem_definition_manager.prepare_config_update(

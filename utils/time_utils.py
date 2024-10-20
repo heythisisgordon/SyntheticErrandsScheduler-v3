@@ -16,16 +16,3 @@ def is_time_within_range(time: pd.Timestamp, start: pd.Timestamp, end: pd.Timest
         return start <= time <= end
     else:  # Range spans midnight
         return time >= start or time <= end
-
-def get_next_working_day(current_date: pd.Timestamp) -> pd.Timestamp:
-    # Get the next working day (Monday to Friday) from the given date.
-    next_day = current_date + pd.Timedelta(days=1)
-    while next_day.dayofweek >= 5:  # Saturday is 5, Sunday is 6
-        next_day += pd.Timedelta(days=1)
-    return next_day
-
-def calculate_time_difference(start: pd.Timestamp, end: pd.Timestamp) -> pd.Timedelta:
-    # Calculate the time difference between two Pandas Timestamp objects.
-    if end < start:
-        raise ValueError("End time cannot be earlier than start time")
-    return end - start

@@ -73,11 +73,6 @@ class ProblemGenerationTab(scrolled.ScrolledPanel):
         self.SetupScrolling(scroll_x=False, scroll_y=True, rate_y=20)
         event.Skip()
 
-    def visualize_problem(self, customers: List[Customer], contractors: List[Contractor]):
-        # This method should be implemented to visualize the problem
-        # It will be called by the controller when needed
-        pass
-
     def show_error(self, message: str):
         wx.MessageBox(message, "Error", wx.OK | wx.ICON_ERROR)
 

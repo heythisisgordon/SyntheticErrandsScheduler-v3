@@ -3,50 +3,31 @@
 Update this Developer Log with SHORT summaries of new work as changes are made to the code. New entries must be appended to the end of the log. Do not edit or delete previous entries without specific instructions.
 
 ## 
-    GUI Refactorization - Single Responsibility Principle: Created ProblemManager, moved problem generation out of ProblemGenerationTab.
+Here’s the developer log enumerated for clarity:
 
-    Further SRP Application: Created ScheduleManager and ScheduleFormatter, moved scheduling logic out of GreedySolutionTab.
+1. Refactored **ProblemManager**: Moved problem generation out of `ProblemGenerationTab`.
+2. Created **ScheduleManager** and **ScheduleFormatter**: Moved scheduling logic out of `GreedySolutionTab`.
+3. Created **ContractorScheduleFormatter**: Moved formatting logic out of `ContractorScheduleTab`.
+4. Created **ProblemDefinitionManager**: Moved cost calculation and config logic.
+5. Created **GreedySolutionManager**: Moved greedy solution logic out of `GreedySolutionTab`.
+6. Created **ContractorScheduleManager**: Moved grid management logic from `ContractorScheduleTab`.
+7. Created **UIManager** and **EventManager**: Refactored `MainFrame` and GUI operations.
+8. Created **ProblemDefinitionController**: Separated controller and view logic.
+9. Created **GreedySolutionController**: Separated controller and view logic.
+10. Created **ContractorScheduleController**: Separated controller and view logic.
+11. Created **ProblemGenerationController**: Separated controller and view logic.
+12. Created **MainFrameController**: Moved UI management logic from GUI.
+13. Created **SchedulingUtilities** class: Centralized scheduling utilities.
+14. Unified **SchedulingUtilities** usage: Applied in `initial_greedy_scheduler.py` and `models/schedule.py`.
+15. Removed redundant **Calendar Initialization**: Deleted `calendar_initialization.py`, used contractor calendars directly.
+16. Created **ApplicationController**: Managed application flow; consolidated controller functions.
+17. Simplified **ProblemGenerationController**: Removed `ProblemManager` abstraction.
+18. Integrated **Schedule** with **ContractorCalendar**: Enhanced schedule class to use `ContractorCalendar` instances.
+19. Direct **Travel Time Calculation**: Removed `errand_utils.py`, used `calculate_travel_time` directly.
+20. Updated **ErrandAssignment**: Added detailed time attributes; modified related components.
+21. Revised **ScheduleFormatter**: Adapted to the new `ErrandAssignment` structure.
+22. Improved **Contractor Schedule Display**: Enhanced display for multiple errands in a time block.
+23. Implemented **Pandas DataFrame-based Schedules**: Enhanced data manipulation and scheduling structure.
+24. Refactored **Scheduler DateTime Handling**: Switched to continuous datetime-based scheduling.
 
-    SRP in ContractorScheduleTab: Created ContractorScheduleFormatter, moved formatting logic out of ContractorScheduleTab.
-
-    Refactoring ProblemDefinitionTab: Created ProblemDefinitionManager, moved cost calculation and config logic.
-
-    Refactoring GreedySolutionTab: Created GreedySolutionManager, moved greedy solution logic.
-
-    Further Refactoring ContractorScheduleTab: Created ContractorScheduleManager, moved grid management logic.
-
-    Refactoring MainFrame and GUI Structure: Created UIManager and EventManager for UI operations and event handling.
-
-    Refactoring ProblemDefinitionTab - Controller-View Separation: Created ProblemDefinitionController, moved business logic out of ProblemDefinitionTab.
-
-    Refactoring GreedySolutionTab - Controller-View Separation: Created GreedySolutionController, moved business logic out of GreedySolutionTab.
-
-    Refactoring ContractorScheduleTab - Controller-View Separation: Created ContractorScheduleController, moved business logic out of ContractorScheduleTab.
-
-    Refactoring ProblemGenerationTab - Controller-View Separation: Created ProblemGenerationController, moved business logic out of ProblemGenerationTab.
-
-    Refactoring MainFrame - Controller-View Separation: Created MainFrameController, moved UI initialization and management logic from SyntheticErrandsSchedulerGUI to MainFrameController.
-
-    Refactoring SchedulingUtilities: Created SchedulingUtilities class in scheduling_utils.py, encapsulating scheduling utility functions for better organization and potential state management.
-
-    Refactoring for Consistent Use of SchedulingUtilities: Updated algorithms/initial_greedy_scheduler.py and models/schedule.py to use SchedulingUtilities class consistently. Confirmed other files are using SchedulingUtilities correctly or don't require changes.
-
-    Removed Redundant Calendar Initialization: Deleted utils/calendar_initialization.py and updated related code in utils/schedule_manager.py and algorithms/initial_greedy_scheduler.py to use contractor calendars directly from Contractor objects.
-
-    Major Controller Cleanup: Created ApplicationController to manage overall application flow. Updated all controllers (ProblemDefinitionController, ProblemGenerationController, GreedySolutionController) to focus on coordinating between UI and business logic. Removed ContractorScheduleController and integrated its functionality into ApplicationController. Updated main.py to use new ApplicationController. Refactored GUI components to remove direct controller dependencies, making them pure view components. Implemented dependency injection for services/managers in controllers. Ensured consistent naming conventions and improved type hinting across the codebase. Updated ProblemDefinitionManager for consistency with new structure.
-
-    Removed ProblemManager: Deleted utils/problem_manager.py and updated ProblemGenerationController to use generate_problem function directly from utils/problem_generator.py. This simplifies the code structure by removing an unnecessary abstraction layer.
-
-    Integrated Schedule and ContractorCalendar: Updated Schedule class to use ContractorCalendar instances internally. Modified GreedySolutionManager, ContractorScheduleFormatter, ScheduleFormatter, and visualization module to work with the updated Schedule class. This integration improves the management of assignments and contractor availability.
-
-    Refactoring for Direct Travel Time Calculation: Removed utils/errand_utils.py and its calculate_total_errand_time function. Updated SchedulingUtilities, Schedule, and InitialGreedyScheduler to use calculate_travel_time directly from utils/travel_time.py. This simplifies the code structure and removes unnecessary abstraction. Modified relevant parts of the code to calculate total time by adding travel time and errand base time directly.
-
-    Enhanced ErrandAssignment Structure: Updated ErrandAssignment class in ContractorCalendar to include more detailed time attributes (errand type, travel start/end time, task start/end time, travel duration, total duration). Modified Schedule, InitialGreedyScheduler, SchedulingUtilities, and visualization modules to work with the new ErrandAssignment structure. This change provides more granular information about each assigned errand and improves the overall scheduling process.
-
-    Updated ScheduleFormatter: Modified the ScheduleFormatter class to work with the new ErrandAssignment structure. Updated the format_schedule and format_errand methods to use the new time attributes (travel start/end time, task start/end time, travel duration, total duration) from ErrandAssignment. This change ensures that the schedule formatting correctly reflects the more detailed errand assignment information.
-
-    Improved Contractor Schedule Display: Updated ContractorScheduleFormatter to group assignments by both day and contractor, allowing multiple errands to be displayed in the same time block. Modified ContractorScheduleTab to support word wrapping, dynamic row height adjustment, and tooltips for better readability of multiple errands in a single cell. These changes improve the visibility and comprehension of the contractor schedules, especially when multiple errands are assigned to the same time slot.
-
-    Implemented Pandas DataFrame-based Schedules: Updated the scheduler to use Pandas DataFrames for storing and manipulating calendar information. Modified Contractor, ContractorCalendar, Schedule, SchedulingUtilities, InitialGreedyScheduler, visualization, ContractorScheduleFormatter, ScheduleManager, and ScheduleFormatter classes to work with the new Pandas DataFrame-based schedules. Added TIME_BLOCKS constant to constants.py. These changes improve data manipulation efficiency and provide a more robust structure for handling complex scheduling operations.
-
-    Refactored Schedule Structure and DateTime Usage: Updated the scheduler to use a continuous datetime-based schedule structure instead of fixed scheduling days. Modified Contractor, ContractorCalendar, Schedule, SchedulingUtilities, and InitialGreedyScheduler classes to work with the new structure. Removed SIMTIME and SCHEDULING_DAYS constants. Ensured all time-related data is handled and passed as datetime objects. Implemented dynamic schedule expansion in ContractorCalendar. These changes allow for more flexible scheduling and improved handling of time-based operations.
+This enumeration maintains brevity while covering the major updates.

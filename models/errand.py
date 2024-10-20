@@ -28,9 +28,9 @@ class Errand:
         self.base_time: pd.Timedelta = base_time
         self.incentive: float = incentive
         self.disincentive: Union[Dict[str, Union[str, int, float]], None] = disincentive
-        self.charge: float = self.calculate_base_charge()
+        self.charge: float = self._calculate_base_charge()
 
-    def calculate_base_charge(self) -> float:
+    def _calculate_base_charge(self) -> float:
         """
         Calculate the base charge for the errand.
 
@@ -39,7 +39,7 @@ class Errand:
         """
         return self.base_time.total_seconds() / 60 * ERRAND_RATES.get(self.type, 1)  # Default to $1 per minute if type not found
 
-    def apply_incentive(self, scheduled_date: pd.Timestamp, request_date: pd.Timestamp) -> float:
+    def _apply_incentive(self, scheduled_date: pd.Timestamp, request_date: pd.Timestamp) -> float:
         """
         Apply the incentive for same-day service.
 
@@ -55,7 +55,7 @@ class Errand:
             return min(incentive_charge, self.charge * MAX_INCENTIVE_MULTIPLIER)
         return self.charge
 
-    def apply_disincentive(self, scheduled_date: pd.Timestamp, request_date: pd.Timestamp) -> float:
+    def _apply_disincentive(self, scheduled_date: pd.Timestamp, request_date: pd.Timestamp) -> float:
         """
         Apply the disincentive for late completion.
 
@@ -96,8 +96,8 @@ class Errand:
         Returns:
             float: The final charge for the errand.
         """
-        incentive_charge = self.apply_incentive(scheduled_date, request_date)
-        final_charge = self.apply_disincentive(scheduled_date, request_date)
+        incentive_charge = self._apply_incentive(scheduled_date, request_date)
+        final_charge = self._apply_disincentive(scheduled_date, request_date)
         return max(incentive_charge, final_charge)
 
     def __str__(self) -> str:

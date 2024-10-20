@@ -59,15 +59,7 @@ class UIManager:
         tab.FitInside()
         event.Skip()
 
-    def get_tab(self, tab_name):
-        return self.tabs.get(tab_name)
-
     def enable_tab(self, tab):
         index = self.notebook.FindPage(tab)
         if index != wx.NOT_FOUND:
             self.notebook.EnablePage(index, True)
-
-    def disable_tab(self, tab):
-        index = self.notebook.FindPage(tab)
-        if index != wx.NOT_FOUND:
-            self.notebook.EnablePage(index, False)

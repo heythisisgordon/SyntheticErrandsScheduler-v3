@@ -6,31 +6,33 @@ Serves as the entry point for the application in GUI mode.
 import sys
 import logging
 from typing import NoReturn
+from profile_visualization import run_with_profile
 
-def setup_logging():
+def _setup_logging():
     """Set up logging for the application"""
     logging.basicConfig(
-        level=logging.DEBUG,  # Changed from INFO to DEBUG
-        format='%(asctime)s - %(levelname)s - %(message)s',  # Simplified format
+        level=logging.DEBUG,
+        format='%(asctime)s - %(levelname)s - %(message)s',
         handlers=[
             logging.StreamHandler(sys.stdout)
         ]
     )
 
-    # Set third-party loggers to a higher level to reduce noise
     logging.getLogger("matplotlib").setLevel(logging.WARNING)
     logging.getLogger("wx").setLevel(logging.WARNING)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-def run_gui_mode() -> NoReturn:
+def _run_gui_mode() -> NoReturn:
     """Run the application in GUI mode."""
     try:
         from controllers.application_controller import ApplicationController
         
+        logger.info("Starting ApplicationController...")
         app_controller = ApplicationController()
         app_controller.run()
-        sys.exit(0)
+        
+        logger.info("ApplicationController finished running.")
     except ImportError as e:
         logger.error(f"GUI components import error: {str(e)}")
         logger.error("Please ensure wxPython is installed: pip install -U wxPython")
@@ -39,17 +41,19 @@ def run_gui_mode() -> NoReturn:
         logger.exception(f"Unexpected error in GUI mode: {str(e)}")
         sys.exit(1)
 
-def main() -> NoReturn:
+def _main() -> NoReturn:
     """Main function to run the application in GUI mode."""
-    setup_logging()
+    _setup_logging()
+    logger.info("Starting main function...")
     try:
-        run_gui_mode()
+        run_with_profile(_run_gui_mode)
     except KeyboardInterrupt:
         logger.info("Program terminated by user.")
-        sys.exit(0)
     except Exception as e:
         logger.exception(f"Critical error: {str(e)}")
-        sys.exit(1)
+    finally:
+        logger.info("Program finished.")
+        sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    _main()

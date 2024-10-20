@@ -39,7 +39,7 @@ class ContractorScheduleFormatter:
         date_range = pd.date_range(df['day'].min(), df['day'].max())
 
         # Create a time range for work hours
-        time_range = pd.date_range(work_start, work_end, freq='H').time
+        time_range = pd.date_range(work_start, work_end, freq='h').time
 
         # Create a MultiIndex for the grid
         multi_index = pd.MultiIndex.from_product([date_range, time_range], names=['date', 'time'])

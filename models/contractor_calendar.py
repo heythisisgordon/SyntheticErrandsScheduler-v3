@@ -22,13 +22,23 @@ class ContractorCalendar:
     def __init__(self, schedule: pd.DataFrame):
         self.schedule = schedule
 
-    def is_available(self, start_time: pd.Timestamp, end_time: pd.Timestamp) -> bool:
+    def _is_available(self, start_time: pd.Timestamp, end_time: pd.Timestamp) -> bool:
         return SchedulingUtilities.is_valid_assignment(self, None, start_time, end_time)
+
+    def _expand_schedule(self, new_datetime: pd.Timestamp):
+        if new_datetime > self.schedule.index.get_level_values('Date').max():
+            new_end = pd.Timestamp.combine(new_datetime.date(), WORK_END_TIME_OBJ)
+            new_range = pd.date_range(start=self.schedule.index.get_level_values('Date').max() + pd.Timedelta(days=1), 
+                                      end=new_end, 
+                                      freq=f'{TIME_BLOCKS}min')
+            new_schedule = pd.DataFrame(index=pd.MultiIndex.from_product([new_range.date, new_range.time], names=['Date', 'Time']), columns=['Client_ID'])
+            new_schedule['Client_ID'] = None
+            self.schedule = pd.concat([self.schedule, new_schedule]).sort_index()
 
     def reserve_time_slot(self, errand_id: str, errand_type: str, travel_start_time: pd.Timestamp, travel_end_time: pd.Timestamp, 
                           task_start_time: pd.Timestamp, task_end_time: pd.Timestamp) -> bool:
-        self.expand_schedule(task_end_time)
-        if self.is_available(travel_start_time, task_end_time):
+        self._expand_schedule(task_end_time)
+        if self._is_available(travel_start_time, task_end_time):
             mask = (self.schedule.index.get_level_values('Date') >= travel_start_time.floor('D')) & \
                    (self.schedule.index.get_level_values('Date') <= task_end_time.floor('D')) & \
                    (
@@ -42,31 +52,3 @@ class ContractorCalendar:
         logger.warning(f"Failed to reserve time slot for errand {errand_id}: {travel_start_time} - {task_end_time}")
         return False
 
-    def get_next_available_slot(self, start_datetime: pd.Timestamp, min_duration: pd.Timedelta) -> Optional[Dict[str, pd.Timestamp]]:
-        logger.debug(f"Searching for next available slot from {start_datetime} with duration {min_duration}")
-        
-        end_datetime = self.schedule.index.get_level_values('Date').max()
-        current_datetime = max(start_datetime, self.schedule.index.get_level_values('Date').min())
-        
-        while current_datetime < end_datetime:
-            if self.is_available(current_datetime, current_datetime + min_duration):
-                logger.debug(f"Found valid slot: {current_datetime} - {current_datetime + min_duration}")
-                return {'start': current_datetime, 'end': current_datetime + min_duration}
-            
-            current_datetime += pd.Timedelta(minutes=TIME_BLOCKS)
-        
-        logger.debug("No available slot found within scheduling period")
-        return None
-
-    def expand_schedule(self, new_datetime: pd.Timestamp):
-        if new_datetime > self.schedule.index.get_level_values('Date').max():
-            new_end = pd.Timestamp.combine(new_datetime.date(), WORK_END_TIME_OBJ)
-            new_range = pd.date_range(start=self.schedule.index.get_level_values('Date').max() + pd.Timedelta(days=1), 
-                                      end=new_end, 
-                                      freq=f'{TIME_BLOCKS}min')
-            new_schedule = pd.DataFrame(index=pd.MultiIndex.from_product([new_range.date, new_range.time], names=['Date', 'Time']), columns=['Client_ID'])
-            new_schedule['Client_ID'] = None
-            self.schedule = pd.concat([self.schedule, new_schedule]).sort_index()
-
-def is_overlapping(start1: pd.Timestamp, end1: pd.Timestamp, start2: pd.Timestamp, end2: pd.Timestamp) -> bool:
-    return start1 < end2 and end1 > start2

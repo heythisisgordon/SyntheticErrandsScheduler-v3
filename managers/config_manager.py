@@ -68,23 +68,6 @@ class ConfigManager:
             Any: The value associated with the key, or the default value if not found.
         """
         return self._config.get(key, default)
-    
-    def get_errand_type(self, errand_name: str) -> Dict[str, Any]:
-        """
-        Get the configuration for a specific errand type.
-        
-        Args:
-            errand_name (str): The name of the errand type to look up.
-        
-        Returns:
-            Dict[str, Any]: A dictionary containing the configuration for the specified errand type.
-                            Returns an empty dictionary if the errand type is not found.
-        """
-        errand_types = self.get('errand_types', [])
-        for errand_type in errand_types:
-            if errand_type['name'] == errand_name:
-                return errand_type
-        return {}
 
     def update(self, updates: Dict[str, Any]) -> None:
         """

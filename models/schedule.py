@@ -9,7 +9,6 @@ from models.customer import Customer
 from models.contractor_calendar import ContractorCalendar, ErrandAssignment
 from utils.scheduling_utils import SchedulingUtilities
 from utils.travel_time import calculate_travel_time
-from constants import WORK_START_TIME_OBJ
 
 class Schedule:
     def __init__(self, contractors: List[Contractor], customers: List[Customer]):
@@ -65,11 +64,6 @@ class Schedule:
             if SchedulingUtilities.is_valid_assignment(contractor, customer, errand.travel_start_time, errand.task_end_time):
                 total_profit += SchedulingUtilities.calculate_profit(customer, contractor, errand.travel_start_time, errand.task_end_time)
         return total_profit
-
-    def get_errand_end_time(self, customer: Customer, contractor: Contractor, start_time: pd.Timestamp) -> pd.Timestamp:
-        travel_duration, _ = calculate_travel_time(contractor.location, customer.location)
-        total_time = travel_duration + customer.desired_errand.base_time
-        return start_time + total_time
 
     def __str__(self) -> str:
         return f"Schedule with {len(self.contractors)} contractors and {len(self.customers)} customers"

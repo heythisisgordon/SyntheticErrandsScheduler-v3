@@ -2,7 +2,7 @@ from typing import List, Tuple
 from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
-from utils.schedule_manager import ScheduleManager
+from managers.schedule_manager import ScheduleManager
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,8 +14,10 @@ class GreedySolutionManager:
         logger.debug(f"Number of customers: {len(customers)}")
         logger.debug(f"Number of contractors: {len(contractors)}")
         
+        # make this next lin call initial_greedy_schedule method in initial_greedy_scheduler.py instead
         schedule, message = ScheduleManager.generate_greedy_schedule(customers, contractors)
         
+        # update the rest of this function to use initial_greedy_schedule workflow
         if schedule:
             total_assignments = len(schedule.get_assignments())
             logger.info(f"Total assignments made: {total_assignments}")

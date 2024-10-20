@@ -6,9 +6,9 @@ from typing import List
 from models.customer import Customer
 from models.contractor import Contractor
 from models.schedule import Schedule
-from utils.greedy_solution_manager import GreedySolutionManager
+from managers.greedy_solution_manager import GreedySolutionManager
 from utils.schedule_formatter import ScheduleFormatter
-from utils.event_manager import EventManager
+from managers.event_manager import EventManager
 
 class GreedySolutionController:
     def __init__(self, greedy_solution_tab, event_manager: EventManager):
@@ -31,11 +31,5 @@ class GreedySolutionController:
                     self.greedy_solution_tab.show_warning(message)
             else:
                 self.greedy_solution_tab.show_error(f"Failed to generate solution: {message}")
-        except Exception as e:
-            self.greedy_solution_tab.show_error(str(e))
-
-    def on_visualize_solution(self, customers: List[Customer], contractors: List[Contractor], schedule: Schedule):
-        try:
-            self.greedy_solution_tab.visualize_solution(customers, contractors, schedule)
         except Exception as e:
             self.greedy_solution_tab.show_error(str(e))

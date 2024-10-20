@@ -46,9 +46,3 @@ class EventManager:
     def on_page_changed(self, event):
         new = event.GetSelection()
         event.Skip()
-
-    def enable_greedy_solution(self):
-        self.ui_manager.get_tab("Greedy Solution").enable_generate_button()
-
-    def update_contractor_schedule(self, schedule):
-        self.ui_manager.get_tab("Contractor Schedules").update_schedule(schedule)

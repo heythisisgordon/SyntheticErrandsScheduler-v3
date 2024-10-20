@@ -20,18 +20,6 @@ class ProblemGenerationError(Exception):
     """Custom exception for errors during problem generation."""
     pass
 
-def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors: int = DEFAULT_NUM_CONTRACTORS, contractor_rate: float = 0.5) -> Tuple[List[Customer], List[Contractor]]:
-    """Generate a random problem instance with customers and contractors."""
-    try:
-        start_date = pd.Timestamp.now().floor('D')
-        customers = [_generate_customer(i, start_date) for i in range(num_customers)]
-        contractors = [_generate_contractor(i, contractor_rate) for i in range(num_contractors)]
-        
-        return customers, contractors
-    except Exception as e:
-        logger.error(f"Error during problem generation: {str(e)}")
-        raise ProblemGenerationError(f"Failed to generate problem: {str(e)}")
-
 def _generate_customer(customer_id: int, start_date: pd.Timestamp) -> Customer:
     """Generate a single customer with random attributes."""
     return Customer(
@@ -72,3 +60,15 @@ def _generate_full_day_availability(start_date: pd.Timestamp) -> List[Tuple[pd.T
         )
         for day in range(SCHEDULING_DAYS)
     ]
+
+def generate_problem(num_customers: int = DEFAULT_NUM_CUSTOMERS, num_contractors: int = DEFAULT_NUM_CONTRACTORS, contractor_rate: float = 0.5) -> Tuple[List[Customer], List[Contractor]]:
+    """Generate a random problem instance with customers and contractors."""
+    try:
+        start_date = pd.Timestamp.now().floor('D')
+        customers = [_generate_customer(i, start_date) for i in range(num_customers)]
+        contractors = [_generate_contractor(i, contractor_rate) for i in range(num_contractors)]
+        
+        return customers, contractors
+    except Exception as e:
+        logger.error(f"Error during problem generation: {str(e)}")
+        raise ProblemGenerationError(f"Failed to generate problem: {str(e)}")

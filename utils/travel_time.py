@@ -3,7 +3,7 @@ import pandas as pd
 from functools import lru_cache
 
 @lru_cache(maxsize=1000)
-def get_nearest_road_point(point: Tuple[int, int]) -> Tuple[int, int]:
+def _get_nearest_road_point(point: Tuple[int, int]) -> Tuple[int, int]:
     """
     Find the nearest road point for a given point.
     
@@ -29,8 +29,8 @@ def calculate_travel_time(start: Tuple[int, int], end: Tuple[int, int]) -> Tuple
     route = [start]
     
     # Find nearest road points
-    start_road = get_nearest_road_point(start)
-    end_road = get_nearest_road_point(end)
+    start_road = _get_nearest_road_point(start)
+    end_road = _get_nearest_road_point(end)
     
     # Add start road point if it's different from start
     if start != start_road:

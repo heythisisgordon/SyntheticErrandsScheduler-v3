@@ -6,8 +6,8 @@ import wx
 import wx.grid
 from typing import List, Dict, Any
 from models.schedule import Schedule
-from utils.config_manager import ConfigManager
-from utils.contractor_schedule_manager import ContractorScheduleManager
+from managers.config_manager import ConfigManager
+from managers.contractor_schedule_manager import ContractorScheduleManager
 import logging
 
 logger = logging.getLogger(__name__)

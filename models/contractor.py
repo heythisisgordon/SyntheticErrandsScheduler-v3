@@ -20,25 +20,7 @@ class Contractor:
     def initialize_schedule(self, schedule_manager):
         """Initialize the schedule using ScheduleManager"""
         if self.schedule is None or self.schedule.empty:
-            self.schedule = schedule_manager.generate_empty_schedule()
-
-    def expand_schedule(self, new_date: pd.Timestamp):
-        if self.schedule is not None and new_date not in self.schedule.index.get_level_values('Date'):
-            date_range = pd.date_range(start=new_date, end=new_date, freq='D')
-            time_range = pd.date_range(
-                start=pd.Timestamp.combine(new_date, WORK_START_TIME_OBJ.time()),
-                end=pd.Timestamp.combine(new_date, WORK_END_TIME_OBJ.time()),
-                freq=f'{TIME_BLOCKS}min'
-            ).time
-            
-            new_index = pd.MultiIndex.from_product([date_range, time_range], names=['Date', 'Time'])
-            new_schedule = pd.DataFrame(index=new_index, columns=['Client_ID'])
-            new_schedule['Client_ID'] = None
-            self.schedule = pd.concat([self.schedule, new_schedule]).sort_index()
-
-    def reset_location(self) -> None:
-        """Reset the contractor's location to the initial location."""
-        self.location = self.initial_location
+            self.schedule = schedule_manager._generate_empty_schedule()
 
     def update_location(self, new_location: Tuple[int, int]) -> None:
         """Update the contractor's current location."""

@@ -1,7 +1,6 @@
 contractor_rate: 0.5
-default_num_contractors: 2
-default_num_customers: 10
-delivery_additional_time: 10
+default_num_contractors: 1
+default_num_customers: 2
 errand_rates:
   Cut Grass: 2
   Delivery: 2

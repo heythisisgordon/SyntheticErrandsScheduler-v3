@@ -12,7 +12,7 @@ Note: This file should not be modified directly. To change any values,
 update the config.yaml file instead.
 """
 
-from utils.config_manager import config
+from managers.config_manager import config
 from utils.time_utils import convert_minutes_to_time
 from typing import List, Tuple, Union, Dict
 from enum import Enum, auto
